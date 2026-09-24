@@ -10,7 +10,10 @@ email-validator==2.2.0
 
 # --- Database ---
 # Default: SQLite (built-in, tanpa driver tambahan).
-# Kalau mau PostgreSQL lagi, install psycopg2-binary dan set DATABASE_URL_OVERRIDE.
+# Di Vercel (serverless, filesystem read-only) WAJIB PostgreSQL + set
+# env DATABASE_URL_OVERRIDE (mis. Vercel Postgres/Neon):
+#   postgresql+psycopg2://USER:PASS@host:5432/db
+psycopg2-binary==2.9.10
 sqlalchemy==2.0.36
 alembic==1.14.0
 
