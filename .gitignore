@@ -1,6 +1,8 @@
 # Environment / secrets
 backend/.env
 electron/credentials.json
+vercel.env
+.vercel/
 
 # Python
 backend/venv/
