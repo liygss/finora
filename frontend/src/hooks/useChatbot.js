@@ -2,16 +2,17 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import client from '../api/client'
 import { notifyDataChanged } from '../utils/dashboardStore'
+import { useAuth } from '../context/AuthContext'
 
 const PAGE_LABELS = {
   '/dashboard': 'Dashboard',
   '/akun': 'Akun (COA)',
   '/jurnal': 'Jurnal Umum',
   '/laporan': 'Laporan Keuangan',
+  '/tutup-buku': 'Tutup Buku',
   '/upload': 'Upload File',
   '/pajak': 'Kalkulator Pajak',
   '/spt': 'SPT Tahunan',
-  '/chatbot': 'Asisten Finora',
   '/knowledge': 'Knowledge Base',
   '/notif-admin': 'Kirim Notifikasi',
   '/admin': 'Dashboard Admin',
@@ -48,6 +49,51 @@ function formatTime() {
   return new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
 }
 
+const HISTORY_KEY_PREFIX = 'ask_finora_history_'
+const ACTIVE_KEY_PREFIX = 'ask_finora_active_'
+const HISTORY_LIMIT = 30
+
+function readJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : fallback
+  } catch {
+    return fallback
+  }
+}
+
+function writeJSON(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* ignore */ }
+}
+
+function readHistory(key) {
+  const list = readJSON(key, [])
+  return Array.isArray(list) ? list : []
+}
+
+function makeId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+}
+
+function cleanText(raw) {
+  return (raw || '').replace(/\s+/g, ' ').trim()
+}
+
+function titleFor(messages) {
+  const firstUser = messages.find(m => m.role === 'user' && m.content && m.content.trim())
+  const raw = cleanText(firstUser?.content) || 'Percakapan baru'
+  return raw.length > 44 ? `${raw.slice(0, 44)}…` : raw
+}
+
+function previewFor(messages) {
+  const last = [...messages].reverse().find(m => m.content && m.content.trim())
+  const raw = cleanText(last?.content)
+  return raw.length > 64 ? `${raw.slice(0, 64)}…` : raw
+}
+
 export default function useChatbot() {
   const location = useLocation()
   const [messages, setMessages] = useState([])
@@ -60,11 +106,58 @@ export default function useChatbot() {
   const sessionRef = useRef(null)
   const lastUploadIdRef = useRef(null)
   const pendingFileRef = useRef(null)
+  const { user } = useAuth()
+  const userId = user?.id || 'guest'
+  const ACTIVE_KEY = `${ACTIVE_KEY_PREFIX}${userId}`
+  const HISTORY_KEY = `${HISTORY_KEY_PREFIX}${userId}`
+  const [conversations, setConversations] = useState(() => readHistory(HISTORY_KEY))
+  const messagesRef = useRef(null)
+  const conversationsRef = useRef([])
+  const activeConversationRef = useRef(null)
 
   // Keep pendingFileRef in sync
   useEffect(() => {
     pendingFileRef.current = pendingFile
   }, [pendingFile])
+
+  // Keep latest conversations list in sync for stable callbacks.
+  useEffect(() => {
+    conversationsRef.current = conversations
+  }, [conversations])
+
+  // Keep latest messages in sync for stable callbacks.
+  useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
+
+  // Restore active conversation for this user + refresh history list.
+  useEffect(() => {
+    activeConversationRef.current = null
+    setConversations(readHistory(HISTORY_KEY))
+    const active = readJSON(ACTIVE_KEY, null)
+    if (active && Array.isArray(active.messages) && active.messages.length > 0) {
+      setMessages(active.messages)
+      if (active.sessionId) {
+        setSessionId(active.sessionId)
+        sessionRef.current = active.sessionId
+      }
+      activeConversationRef.current = active.conversationId || null
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, ACTIVE_KEY, HISTORY_KEY])
+
+  // Autosave current conversation (debounced) so reload picks it up again.
+  useEffect(() => {
+    if (messages.length === 0) return
+    const t = setTimeout(() => {
+      writeJSON(ACTIVE_KEY, {
+        messages,
+        sessionId: sessionRef.current,
+        conversationId: activeConversationRef.current,
+      })
+    }, 1500)
+    return () => clearTimeout(t)
+  }, [messages, ACTIVE_KEY])
 
   // --- Send text message (with smart transaction detection + pending file) ---
   const send = useCallback(async (text = input, overrideUploadId = null) => {
@@ -501,7 +594,36 @@ export default function useChatbot() {
     }
   }, [])
 
+  // Move the current conversation into the saved history list.
+  const saveCurrentToHistory = useCallback(() => {
+    const current = messagesRef.current
+    if (!current || current.length === 0) return
+    const conversationId = activeConversationRef.current
+    const updatedAt = Date.now()
+    const entry = {
+      id: conversationId || makeId(),
+      title: titleFor(current),
+      preview: previewFor(current),
+      createdAt: updatedAt,
+      updatedAt,
+      messages: current,
+      sessionId: sessionRef.current,
+    }
+    setConversations(prev => {
+      const exists = conversationId ? prev.some(c => c.id === conversationId) : false
+      const next = exists
+        ? prev.map(c => (c.id === conversationId ? entry : c))
+        : [entry, ...prev]
+      const trimmed = next.slice(0, HISTORY_LIMIT)
+      writeJSON(HISTORY_KEY, trimmed)
+      return trimmed
+    })
+    activeConversationRef.current = entry.id
+  }, [HISTORY_KEY])
+
   const reset = useCallback(() => {
+    saveCurrentToHistory()
+    activeConversationRef.current = null
     setMessages([])
     setSessionId(null)
     setLastUploadId(null)
@@ -510,7 +632,35 @@ export default function useChatbot() {
     sessionRef.current = null
     lastUploadIdRef.current = null
     pendingFileRef.current = null
-  }, [])
+    try { localStorage.removeItem(ACTIVE_KEY) } catch { /* ignore */ }
+  }, [saveCurrentToHistory, ACTIVE_KEY])
+
+  // --- Load a saved conversation into the active chat ---
+  const loadConversation = useCallback((id) => {
+    const target = conversationsRef.current.find(c => c.id === id)
+    if (!target) return
+    activeConversationRef.current = id
+    setMessages(target.messages)
+    setSessionId(target.sessionId || null)
+    sessionRef.current = target.sessionId || null
+    setFollowUpSuggestions([])
+    setInput('')
+    writeJSON(ACTIVE_KEY, {
+      messages: target.messages,
+      sessionId: target.sessionId || null,
+      conversationId: id,
+    })
+  }, [ACTIVE_KEY])
+
+  // --- Delete a saved conversation from history ---
+  const deleteConversation = useCallback((id) => {
+    if (activeConversationRef.current === id) activeConversationRef.current = null
+    setConversations(prev => {
+      const next = prev.filter(c => c.id !== id)
+      writeJSON(HISTORY_KEY, next)
+      return next
+    })
+  }, [HISTORY_KEY])
 
   // --- Commit staged upload → jurnal ---
   const commitUpload = useCallback(async (uploadId) => {
@@ -574,6 +724,9 @@ export default function useChatbot() {
     parseDataset,
     createDataset,
     commitUpload,
+    conversations,
+    loadConversation,
+    deleteConversation,
     reset,
     setSuggestion,
   }

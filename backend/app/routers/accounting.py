@@ -26,13 +26,14 @@ from app.accounting import laporan_laba_rugi as laba_rugi_engine
 from app.accounting import laporan_posisi_keuangan as posisi_keuangan_engine
 from app.accounting import neraca_saldo as neraca_saldo_engine
 from app.accounting import tax_engine
+from app.accounting import tutup_buku as tutup_buku_engine
 from app.accounting.buku_besar import get_buku_besar
 from app.accounting.jurnal_umum import JurnalDetailInputDTO, JurnalError
 from app.accounting.jurnal_umum import buat_jurnal as service_buat_jurnal
 from app.accounting.jurnal_umum import list_jurnal as service_list_jurnal
 from app.config.logging import get_logger
 from app.database.database import get_db
-from app.database.models import Akun, JenisJurnal, JurnalUmum, User
+from app.database.models import Akun, JenisJurnal, JurnalUmum, TutupBuku, User
 from app.middleware.auth import create_download_token, require_active_user
 from app.schemas.report_schema import (
     BukuBesarResponse,
@@ -46,6 +47,10 @@ from app.schemas.report_schema import (
     PPhFinalUMKMResponse,
     PPNRequest,
     PPNResponse,
+    TutupBukuRequest,
+    TutupBukuResultResponse,
+    TutupBukuReviewResponse,
+    TutupBukuStatusRow,
 )
 from app.schemas.transaction_schema import (
     AkunCreate,
@@ -323,6 +328,48 @@ def laporan_calk(
         rincian_beban=hasil.rincian_beban,
         catatan_tambahan=hasil.catatan_tambahan,
     )
+
+
+# ---------------------------------------------------------------------------
+# Tutup Buku (penutupan buku tahunan)
+# ---------------------------------------------------------------------------
+@router.get("/tutup-buku/status", response_model=list[TutupBukuStatusRow])
+def tutup_buku_status(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_active_user),
+):
+    return tutup_buku_engine.get_status(db, current_user.id)
+
+
+@router.get("/tutup-buku/{tahun}/review", response_model=TutupBukuReviewResponse)
+def tutup_buku_review(
+    tahun: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_active_user),
+):
+    return tutup_buku_engine.review_tutup_buku(db, current_user.id, tahun)
+
+
+@router.post("/tutup-buku", response_model=TutupBukuResultResponse, status_code=status.HTTP_201_CREATED)
+def create_tutup_buku(
+    payload: TutupBukuRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_active_user),
+):
+    existing = (
+        db.query(TutupBuku)
+        .filter(TutupBuku.user_id == current_user.id, TutupBuku.tahun == payload.tahun)
+        .first()
+    )
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Tahun {payload.tahun} sudah ditutup.",
+        )
+    try:
+        return tutup_buku_engine.tutup_buku(db, current_user.id, payload.tahun)
+    except JurnalError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 
 # ---------------------------------------------------------------------------

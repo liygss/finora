@@ -9,6 +9,7 @@ from datetime import date
 from sqlalchemy.orm import Session, joinedload
 
 from app.accounting.akun import get_akun_by_kode
+from app.accounting.periode import ensure_periode_belum_ditutup
 from app.config.logging import get_logger
 from app.database.models import JenisJurnal, JurnalDetail, JurnalUmum
 
@@ -53,8 +54,10 @@ def buat_jurnal(
     - no_bukti sudah dipakai
     - salah satu kode akun tidak ditemukan
     - jurnal tidak balance
+    - tanggal berada di tahun yang sudah ditutup (tutup buku)
     """
     validasi_balance(detail)
+    ensure_periode_belum_ditutup(db, tanggal, created_by_id)
 
     existing = db.query(JurnalUmum).filter(JurnalUmum.no_bukti == no_bukti).first()
     if existing:

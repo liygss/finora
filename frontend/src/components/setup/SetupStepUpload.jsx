@@ -101,7 +101,7 @@ export default function SetupStepUpload({ onBack, onFinish }) {
       const { data } = await client.post('/upload/file', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       toast.success(`${file.name} terupload! Siap dianalisis.`)
       load()
-      navigate(`/chatbot?upload_id=${data.id}`)
+      navigate(`/dashboard?upload_id=${data.id}`)
     } catch (err) {
       toast.error(extractError(err, `Gagal upload ${file.name}`))
     } finally {
@@ -134,7 +134,7 @@ export default function SetupStepUpload({ onBack, onFinish }) {
 
   const handleSuggestion = (text) => {
     if (stagedFile) {
-      navigate(`/chatbot?upload_id=${stagedFile.id}`)
+      navigate(`/dashboard?upload_id=${stagedFile.id}`)
     } else {
       toast('Upload file dulu ya, nanti aku bantu analisis! 💡', { icon: '📎' })
     }
@@ -307,7 +307,7 @@ export default function SetupStepUpload({ onBack, onFinish }) {
           <MessageCircle size={14} />
           <span>{stagedCount} file siap dianalisis. <strong>Buka chat</strong> untuk mengeksplorasi datanya sebelum masuk jurnal.</span>
           {stagedFile && (
-            <a href={`/chatbot?upload_id=${stagedFile.id}`} className="ml-auto shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:scale-105" style={{ color: '#fff', background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}>
+            <a href={`/dashboard?upload_id=${stagedFile.id}`} className="ml-auto shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:scale-105" style={{ color: '#fff', background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}>
               💬 Chat
             </a>
           )}
@@ -360,7 +360,7 @@ export default function SetupStepUpload({ onBack, onFinish }) {
               </div>
               {STAGED_STATUS.includes(f.status) && (
                 <a
-                  href={`/chatbot?upload_id=${f.id}`}
+                  href={`/dashboard?upload_id=${f.id}`}
                   className="shrink-0 flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition-all hover:scale-105"
                   style={{ color: '#fff', background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}
                 >

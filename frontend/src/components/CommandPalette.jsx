@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, FileText, BarChart3, Upload, Calculator, FileSpreadsheet, PlayCircle, Database, Send, ShieldCheck, Search, CornerDownLeft, Bot } from 'lucide-react'
+import { LayoutDashboard, BookOpen, FileText, BarChart3, Upload, Calculator, FileSpreadsheet, PlayCircle, Database, Send, ShieldCheck, Search, CornerDownLeft, Bot, BookMarked } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const COMMANDS = [
   { key: 'dashboard', label: 'Dashboard', category: 'Menu Utama', to: '/dashboard', icon: LayoutDashboard, keywords: 'ringkasan beranda home overview', adminOnly: false },
-  { key: 'chatbot', label: 'Asisten Finora', category: 'Menu Utama', to: '/chatbot', icon: Bot, keywords: 'chatbot tanya ai asisten bantuan', adminOnly: false },
+  { key: 'chatbot', label: 'Asisten Finora', category: 'Menu Utama', to: '/dashboard', action: 'open-chatbot', icon: Bot, keywords: 'chatbot tanya ai asisten bantuan panel', adminOnly: false },
   { key: 'akun', label: 'Akun (COA)', category: 'Akuntansi', to: '/akun', icon: BookOpen, keywords: 'chart of accounts akun kode coa neraca saldo', adminOnly: false },
   { key: 'jurnal', label: 'Jurnal Umum', category: 'Akuntansi', to: '/jurnal', icon: FileText, keywords: 'transaksi debit kredit jurnal umum', adminOnly: false },
   { key: 'laporan', label: 'Laporan Keuangan', category: 'Akuntansi', to: '/laporan', icon: BarChart3, keywords: 'neraca laba rugi arus kas laporan keuangan', adminOnly: false },
+  { key: 'tutup-buku', label: 'Tutup Buku', category: 'Akuntansi', to: '/tutup-buku', icon: BookMarked, keywords: 'tutup buku penutupan periode akhir tahun pembukuan laba ditahan', adminOnly: false },
   { key: 'upload', label: 'Upload File', category: 'Lainnya', to: '/upload', icon: Upload, keywords: 'import excel xlsx xls transaksi', adminOnly: false },
   { key: 'pajak', label: 'Kalkulator Pajak', category: 'Pajak', to: '/pajak', icon: Calculator, keywords: 'pph ppn umkm pajak hitung', adminOnly: false },
   { key: 'spt', label: 'SPT Tahunan (1770 / 1770S)', category: 'Pajak', to: '/spt', icon: FileSpreadsheet, keywords: 'spt pph orang pribadi tahunan pajak surat', adminOnly: false },
@@ -45,6 +46,9 @@ export default function CommandPalette({ open, onClose }) {
   const pick = useCallback((cmd) => {
     onClose()
     navigate(cmd.to)
+    if (cmd.action === 'open-chatbot') {
+      setTimeout(() => window.dispatchEvent(new Event('open-chatbot')), 0)
+    }
   }, [navigate, onClose])
 
   useEffect(() => {

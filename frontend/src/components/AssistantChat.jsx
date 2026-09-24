@@ -60,22 +60,27 @@ export default function AssistantChat({
   const bottomRef = useRef(null)
   const fileInputRef = useRef(null)
   const scrollRef = useRef(null)
+  const isAtBottomRef = useRef(true)
   const [showScrollBtn, setShowScrollBtn] = useState(false)
   const isFull = variant === 'full'
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    const el = scrollRef.current
+    if (el && isAtBottomRef.current) el.scrollTop = el.scrollHeight
   }, [messages, loading])
 
   const onScroll = useCallback(() => {
     const el = scrollRef.current
     if (!el) return
     const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
+    isAtBottomRef.current = atBottom
     setShowScrollBtn(!atBottom)
   }, [])
 
   const scrollToBottom = useCallback(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollTop = el.scrollHeight
   }, [])
 
   useEffect(() => {
@@ -154,7 +159,8 @@ export default function AssistantChat({
       )}
 
       {/* Messages */}
-      <div ref={scrollRef} onScroll={onScroll} className="relative flex-1 overflow-y-auto chat-scroll-mask">
+      <div ref={scrollRef} onScroll={onScroll} className="relative flex-1 min-h-0 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
+        <div className="pointer-events-none sticky top-0 z-[6] h-9 shrink-0 chat-fade-top" />
         <div className={`mx-auto w-full px-4 py-4 space-y-4 ${isFull ? 'max-w-3xl' : 'max-w-3xl'}`}>
 
           {/* ===== EMPTY STATE — Full page hero ===== */}
@@ -425,6 +431,8 @@ export default function AssistantChat({
           {loading && <TypingIndicator />}
           <div ref={bottomRef} />
         </div>
+
+        <div className="pointer-events-none sticky bottom-0 z-[6] h-9 shrink-0 chat-fade-bottom" />
 
         {/* Scroll-to-bottom FAB */}
         {showScrollBtn && (

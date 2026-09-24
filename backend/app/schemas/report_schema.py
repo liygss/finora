@@ -244,3 +244,44 @@ class PPNResponse(BaseModel):
     ppn: float
     harga_termasuk_ppn: float
     catatan: str = ""
+
+
+# ---------------------------------------------------------------------------
+# Tutup Buku (penutupan buku tahunan)
+# ---------------------------------------------------------------------------
+class TutupBukuStatusRow(ORMCompatibleModel):
+    tahun: int
+    is_closed: bool
+    laba_bersih: float | None = None
+    tanggal_tutup: date | None = None
+
+
+class TutupBukuAkunSaldo(ORMCompatibleModel):
+    kode_akun: str
+    nama_akun: str
+    saldo: float
+
+
+class TutupBukuReviewResponse(ORMCompatibleModel):
+    tahun: int
+    tanggal_per: date
+    pendapatan: list[TutupBukuAkunSaldo]
+    beban: list[TutupBukuAkunSaldo]
+    total_pendapatan: float
+    total_beban: float
+    laba_bersih: float
+    prive: float
+
+
+class TutupBukuRequest(BaseModel):
+    tahun: int
+
+
+class TutupBukuResultResponse(ORMCompatibleModel):
+    tahun: int
+    tanggal_tutup: date
+    laba_bersih: float
+    jurnal_penutup_id: str
+    jurnal_penutup_no_bukti: str
+    jurnal_prive_id: str | None = None
+    jurnal_prive_no_bukti: str | None = None

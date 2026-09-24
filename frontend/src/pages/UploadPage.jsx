@@ -209,7 +209,7 @@ export default function UploadPage() {
       notifyDataChanged()
       load()
       // Redirect ke chat dengan upload_id supaya user bisa ngechat data dulu
-      navigate(`/chatbot?upload_id=${data.id}`)
+      navigate(`/dashboard?upload_id=${data.id}`)
     } catch (err) {
       toast.error(extractError(err, `Gagal upload ${file.name}`))
     } finally {
@@ -420,7 +420,7 @@ export default function UploadPage() {
                 </div>
                 {STAGED_STATUS.includes(f.status) && (
                   <Link
-                    to={`/chatbot?upload_id=${f.id}`}
+                    to={`/dashboard?upload_id=${f.id}`}
                     className="shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:scale-105"
                     style={{ color: '#fff', background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}
                   >

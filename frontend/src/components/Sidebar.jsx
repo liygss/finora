@@ -6,7 +6,7 @@ import {
   LayoutDashboard, BookOpen, FileText,
   BarChart3, Upload, Calculator, LogOut, X,
   ChevronsLeft, ChevronsRight, Database, PlayCircle, FileSpreadsheet, Send, ShieldCheck,
-  MessageSquareWarning, Bot, Headphones,
+  MessageSquareWarning, Headphones, BookMarked,
 } from 'lucide-react'
 
 export default function Sidebar({ open, onClose }) {
@@ -22,7 +22,6 @@ export default function Sidebar({ open, onClose }) {
       label: 'Menu Utama',
       items: [
         { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { to: '/chatbot', label: 'Asisten Finora', icon: Bot },
       ]
     },
     {
@@ -31,6 +30,7 @@ export default function Sidebar({ open, onClose }) {
         { to: '/akun', label: 'Akun (COA)', icon: BookOpen },
         { to: '/jurnal', label: 'Jurnal Umum', icon: FileText },
         { to: '/laporan', label: 'Laporan Keuangan', icon: BarChart3 },
+        { to: '/tutup-buku', label: 'Tutup Buku', icon: BookMarked },
       ]
     },
     {

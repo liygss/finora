@@ -225,6 +225,40 @@ class JurnalDetail(Base):
 
 
 # ---------------------------------------------------------------------------
+# Tutup Buku (penutupan buku tahunan)
+# ---------------------------------------------------------------------------
+class TutupBuku(Base):
+    """Riwayat penutupan buku per (user, tahun fiskal).
+
+    Saat tutup buku berjalan, sistem membuat Jurnal Penutup (jenis PENUTUP)
+    yang memindahkan saldo Pendapatan & Beban ke Laba Ditahan (3-3000), opsi
+    jurnal penutup Prive, lalu mengunci semua jurnal di tahun tersebut.
+    Satu record per user per tahun — mencegah tutup buku ganda.
+    """
+
+    __tablename__ = "tutup_buku"
+    __table_args__ = (
+        UniqueConstraint("user_id", "tahun", name="uq_tutup_buku_user_tahun"),
+        Index("ix_tutup_buku_user_tahun", "user_id", "tahun"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), index=True)
+    tahun: Mapped[int] = mapped_column(Integer, nullable=False)
+    tanggal_tutup: Mapped[Date] = mapped_column(Date, nullable=False)
+    laba_bersih: Mapped[float] = mapped_column(Numeric(18, 2), default=0)
+    jurnal_penutup_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("jurnal_umum.id"), nullable=True
+    )
+    jurnal_penutup_no_bukti: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    jurnal_prive_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("jurnal_umum.id"), nullable=True
+    )
+    jurnal_prive_no_bukti: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+# ---------------------------------------------------------------------------
 # Upload & Ingestion tracking
 # ---------------------------------------------------------------------------
 class UploadedFile(Base):

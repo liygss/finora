@@ -939,8 +939,10 @@ html.dark .chat-canvas-bg::after {
   border-color: rgba(59, 130, 246, 0.4) !important;
 }
 
-/* ── Message area fade masks ── */
-.chat-scroll-mask {
-  mask-image: linear-gradient(to bottom, transparent 0%, black 32px, black calc(100% - 32px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 32px, black calc(100% - 32px), transparent 100%);
+/* ── Message area fade overlays ── */
+.chat-fade-top {
+  background: linear-gradient(to bottom, var(--color-surface-1), transparent);
+}
+.chat-fade-bottom {
+  background: linear-gradient(to top, var(--color-surface-1), transparent);
 }

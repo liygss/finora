@@ -27,7 +27,7 @@ from sqlalchemy.orm import Session
 
 from app.config.logging import get_logger
 from app.config.settings import settings
-from app.database.models import Akun, JurnalDetail, JurnalUmum, JenisJurnal
+from app.database.models import Akun, JurnalDetail, JurnalUmum, JenisJurnal, TutupBuku
 
 logger = get_logger(__name__)
 
@@ -755,6 +755,11 @@ def auto_journal_from_dataframe(
         r[0] for r in db.query(JurnalUmum.no_bukti).filter(JurnalUmum.created_by_id == user_id).all()
     }
 
+    # --- Pre-fetch: tahun yang sudah ditutup (tutup buku) supaya tidak diisi ulang ---
+    tutup_tahun: set[int] = {
+        r[0] for r in db.query(TutupBuku.tahun).filter(TutupBuku.user_id == user_id).all()
+    }
+
     # --- Translate tipe -> jenis values if needed ---
     if has_jenis and not has_akun_cols:
         sample_values = set(str(v).strip().lower() for v in dataframe[COL_JENIS].head(20))
@@ -775,6 +780,12 @@ def auto_journal_from_dataframe(
                 continue
 
             tanggal = _parse_date(getattr(row, COL_TANGGAL))
+            if tutup_tahun and tanggal.year in tutup_tahun:
+                errors.append(
+                    f"Baris {row_num + 1}: Tanggal {tanggal.isoformat()} berada di tahun "
+                    f"{tanggal.year} yang sudah ditutup (tutup buku), dilewati"
+                )
+                continue
             deskripsi = str(getattr(row, COL_DESKRIPSI)).strip() if COL_DESKRIPSI in cols else "Transaksi"
 
             debit_val = kredit_val = masuk_val = keluar_val = 0.0

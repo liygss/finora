@@ -14,10 +14,10 @@ import DashboardPage from './pages/DashboardPage'
 import AccountingPage from './pages/AccountingPage'
 import JurnalPage from './pages/JurnalPage'
 import ReportsPage from './pages/ReportsPage'
+import TutupBukuPage from './pages/TutupBukuPage'
 import UploadPage from './pages/UploadPage'
 import TaxPage from './pages/TaxPage'
 import SptPage from './pages/SptPage'
-import ChatbotPage from './pages/ChatbotPage'
 import KnowledgePage from './pages/KnowledgePage'
 import NotifAdminPage from './pages/NotifAdminPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
@@ -113,10 +113,11 @@ export default function App() {
           <Route path="/akun" element={<AccountingPage />} />
           <Route path="/jurnal" element={<JurnalPage />} />
           <Route path="/laporan" element={<ReportsPage />} />
+          <Route path="/tutup-buku" element={<TutupBukuPage />} />
           <Route path="/upload" element={<UploadPage />} />
           <Route path="/pajak" element={<TaxPage />} />
           <Route path="/spt" element={<SptPage />} />
-          <Route path="/chatbot" element={<ChatbotPage />} />
+          <Route path="/chatbot" element={<Navigate to="/dashboard" replace />} />
           <Route path="/knowledge" element={<KnowledgePage />} />
           <Route path="/notif-admin" element={<NotifAdminPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />

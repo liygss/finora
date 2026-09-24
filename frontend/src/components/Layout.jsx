@@ -29,11 +29,14 @@ export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const isChatbot = location.pathname === '/chatbot'
-
   useEffect(() => {
     setKey(k => k + 1)
   }, [location.pathname])
+
+  // Buka panel otomatis saat navigasi membawa upload_id (alur upload).
+  useEffect(() => {
+    if (location.search.includes('upload_id=')) setPanelOpen(true)
+  }, [location.search])
 
   // Auto-open GuidedTour on first dashboard visit after Buddy is dismissed.
   useEffect(() => {
@@ -209,14 +212,14 @@ export default function Layout() {
         </header>
 
         {/* Main content with page transition */}
-        <main className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden ${isChatbot ? '' : 'p-4 lg:p-6'}`}>
-          <div key={key} className={`${isChatbot ? 'h-full' : 'animate-fade-in'} min-w-0`}>
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden p-4 lg:p-6">
+          <div key={key} className="animate-fade-in min-w-0">
             <Outlet />
           </div>
         </main>
       </div>
 
-      {!isChatbot && <AskFinoraPanel collapsed={!panelOpen} onToggle={togglePanel} />}
+      <AskFinoraPanel collapsed={!panelOpen} onToggle={togglePanel} />
 
       {complaintOpen && <ComplaintModal onClose={() => setComplaintOpen(false)} />}
       <GuidedTour open={tourOpen} onClose={() => setTourOpen(false)} />
