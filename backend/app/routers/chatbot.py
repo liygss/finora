@@ -11,8 +11,10 @@ from sqlalchemy.orm import Session
 from app.accounting.jurnal_umum import JurnalDetailInputDTO, JurnalError
 from app.accounting.jurnal_umum import buat_jurnal as service_buat_jurnal
 from app.config.logging import get_logger
-from app.database.database import get_db
+from app.config.settings import settings
+from app.database.database import check_db_connection, check_qdrant_connection, get_db
 from app.database.models import Akun, User
+from app.llm.embedding_service import is_embedding_ready
 from app.llm.ollama_service import OllamaError, chat_completion
 from app.middleware.auth import require_active_user
 from app.rag.rag_pipeline import ask
@@ -40,7 +42,37 @@ CHATBOT_TIMEOUT_SECONDS = 60
 
 @router.get("/health")
 def health() -> dict:
-    return {"status": "ok", "module": "chatbot"}
+    """Health chatbot + status dependensi.
+
+    Sengaja hanya cek koneksi (tidak memanggil LLM/embedding) supaya tetap cepat.
+    Kolom `degraded` membantu cari tahu kenapa RAG tidak mengembalikan sumber:
+    di serverless kita tidak bisa membaca log runtime.
+    """
+    db_ok = check_db_connection()
+    qdrant_ok = check_qdrant_connection()
+    embedding_ready = is_embedding_ready()
+
+    degraded = []
+    if not db_ok:
+        degraded.append("database")
+    if not qdrant_ok:
+        degraded.append("qdrant")
+    if not embedding_ready:
+        # Embedding belum warm != error: di serverless model bisa saja sedang
+        # diunduh di background, RAG akan aktif di request berikutnya.
+        degraded.append("embedding_belum_warm")
+
+    return {
+        "status": "ok" if db_ok else "degraded",
+        "module": "chatbot",
+        "rag": {
+            "database": db_ok,
+            "qdrant": qdrant_ok,
+            "embedding_ready": embedding_ready,
+            "embedding_provider": settings.EMBEDDING_PROVIDER,
+        },
+        "degraded": degraded,
+    }
 
 
 @router.post("/ask", response_model=ChatResponse)
