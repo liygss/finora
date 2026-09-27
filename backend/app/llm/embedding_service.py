@@ -12,6 +12,7 @@ Semua modul lain (rag/*, services/ingestion/embedding.py) memanggil lewat
 """
 
 import os
+import threading
 from functools import lru_cache
 from pathlib import Path
 
@@ -22,32 +23,143 @@ logger = get_logger(__name__)
 
 EmbeddingError = RuntimeError
 
+
+class EmbeddingUnavailableError(EmbeddingError):
+    """Model embedding belum siap dalam batas waktu yang diizinkan.
+
+    Dipakai supaya jalur RAG bisa di-skip dengan rapi (bukan 500), sementara
+    pemuatan model tetap berjalan di background thread.
+    """
+
+
 _fastembed_model = None
+_model_ready = threading.Event()
+_load_started = False
+_load_lock = threading.Lock()
+_load_error: Exception | None = None
 
 
-def get_fastembed_model():
-    """Lazy singleton TextEmbedding dari fastembed."""
-    global _fastembed_model
-    if _fastembed_model is None:
+def _resolve_model_cache_dir() -> str:
+    """Pilih folder cache model embedding yang BENAR-BENAR bisa ditulis.
+
+    Di serverless (Vercel) filesystem proyek read-only, jadi `DATA_DIR/models`
+    tidak bisa dipakai untuk download model. Urutan fallback:
+      1. FASTEMBED_CACHE_PATH (kalau user set)
+      2. <writable DATA_DIR>/models
+      3. /tmp/finora/models  (selalu writable di serverless)
+    """
+    explicit = os.environ.get("FASTEMBED_CACHE_PATH")
+    candidates = [explicit] if explicit else []
+    candidates.append(str(Path(settings.DATA_DIR) / "models"))
+    candidates.append("/tmp/finora/models")
+
+    for cand in candidates:
+        if not cand:
+            continue
         try:
-            from fastembed import TextEmbedding
-        except ImportError as exc:  # pragma: no cover
-            raise EmbeddingError(
-                "Package 'fastembed' belum terpasang. Jalankan: pip install fastembed"
-            ) from exc
+            p = Path(cand)
+            p.mkdir(parents=True, exist_ok=True)
+            probe = p / ".write_probe"
+            probe.write_text("ok", encoding="utf-8")
+            probe.unlink()
+            return str(p)
+        except OSError:
+            continue
 
-        # Simpan model di folder data supaya tidak mengotori home user
-        cache_dir = str(Path(settings.DATA_DIR) / "models")
-        os.environ.setdefault("FASTEMBED_CACHE_PATH", cache_dir)
+    # Tidak ada yang bisa ditulis — biarkan fastembed pakai default-nya.
+    return "/tmp/finora/models"
 
-        logger.info("Memuat model embedding %s (pertama kali akan mendownload model)...", settings.EMBEDDING_MODEL)
+
+def _load_fastembed_model():
+    """Muat model fastembed (dipanggil di dalam background thread)."""
+    global _fastembed_model, _load_error
+    try:
+        from fastembed import TextEmbedding
+    except ImportError as exc:  # pragma: no cover
+        _load_error = EmbeddingError(
+            "Package 'fastembed' belum terpasang. Jalankan: pip install fastembed"
+        )
+        return
+
+    # Simpan model di folder yang writable supaya tidak mengotori home user
+    # dan tetap jalan di serverless (filesystem read-only).
+    cache_dir = _resolve_model_cache_dir()
+    os.environ.setdefault("FASTEMBED_CACHE_PATH", cache_dir)
+    os.environ.setdefault("HF_HOME", cache_dir)
+
+    logger.info("Memuat model embedding %s (cache=%s)...", settings.EMBEDDING_MODEL, cache_dir)
+    try:
         _fastembed_model = TextEmbedding(model_name=settings.EMBEDDING_MODEL)
-        logger.info("Model embedding siap.")
+    except Exception as exc:  # noqa: BLE001
+        _load_error = EmbeddingError(
+            f"Gagal memuat model embedding '{settings.EMBEDDING_MODEL}': {exc}"
+        )
+        return
+    logger.info("Model embedding siap.")
+
+
+def _load_worker():
+    global _load_error
+    try:
+        _load_fastembed_model()
+    except Exception as exc:  # noqa: BLE001
+        _load_error = exc
+        logger.error("Gagal memuat model embedding: %s", exc)
+    finally:
+        # WAJIB set di finally: kalau gagal pun, pemanggil tidak boleh hang.
+        _model_ready.set()
+
+
+def warm_up_embedding_model() -> bool:
+    """Mulai/ulang pemuatan model embedding di background thread. Non-blocking.
+
+    Aman dipanggil berulang kali: hanya thread pertama yang benar-benar jalan.
+    Mengembalikan True kalau model sudah siap.
+    """
+    global _load_started
+    if _model_ready.is_set():
+        return True
+
+    with _load_lock:
+        if _load_started:
+            return False
+        _load_started = True
+
+    threading.Thread(target=_load_worker, name="embedding-warmup", daemon=True).start()
+    return False
+
+
+def is_embedding_ready() -> bool:
+    """True kalau model embedding sudah siap dipakai."""
+    return _model_ready.is_set() and _fastembed_model is not None
+
+
+def get_fastembed_model(max_wait: float | None = None):
+    """Ambil model fastembed, tunggu paling lama `max_wait` detik.
+
+    `max_wait=None` berarti tunggu tanpa batas (dipakai jalur ingestion/CLI yang
+    tidak punya deadline request). Kalau `max_wait` habis, lempar
+    EmbeddingUnavailableError supaya RAG bisa di-skip, bukan menggantung request.
+    """
+    if is_embedding_ready():
+        return _fastembed_model
+
+    warm_up_embedding_model()
+    if not _model_ready.wait(timeout=max_wait):
+        raise EmbeddingUnavailableError(
+            f"Model embedding belum siap setelah {max_wait}s "
+            f"(sedang diunduh di background). RAG dilewati untuk request ini."
+        )
+
+    if _fastembed_model is None:
+        raise EmbeddingUnavailableError(
+            f"Gagal memuat model embedding: {_load_error or 'tidak diketahui'}"
+        )
     return _fastembed_model
 
 
-def _embed_fastembed(texts: list[str]) -> list[list[float]]:
-    model = get_fastembed_model()
+def _embed_fastembed(texts: list[str], max_wait: float | None = None) -> list[list[float]]:
+    model = get_fastembed_model(max_wait=max_wait)
     vectors = [v.tolist() for v in model.embed(texts)]
     return vectors
 
@@ -91,11 +203,11 @@ def _embed_ollama(texts: list[str]) -> list[list[float]]:
     return vectors
 
 
-def _get_embeddings(texts: list[str]) -> list[list[float]]:
+def _get_embeddings(texts: list[str], max_wait: float | None = None) -> list[list[float]]:
     provider = settings.EMBEDDING_PROVIDER.lower()
     try:
         if provider == "fastembed":
-            return _embed_fastembed(texts)
+            return _embed_fastembed(texts, max_wait=max_wait)
         if provider == "openai":
             return _embed_openai(texts)
         if provider == "ollama":
@@ -108,18 +220,33 @@ def _get_embeddings(texts: list[str]) -> list[list[float]]:
         raise EmbeddingError(f"Gagal membuat embedding: {exc}") from exc
 
 
-def get_embedding(text: str) -> list[float]:
-    """Embed satu string. Dipakai untuk query maupun untuk chunk dokumen."""
-    return _get_embeddings([text])[0]
+def get_embedding(text: str, max_wait: float | None = None) -> list[float]:
+    """Embed satu string. Dipakai untuk query maupun untuk chunk dokumen.
+
+    `max_wait` hanya relevan untuk fastembed: batas menunggu model siap supaya
+    request tidak hang di serverless.
+    """
+    return _get_embeddings([text], max_wait=max_wait)[0]
 
 
-def get_embeddings_batch(texts: list[str]) -> list[list[float]]:
+def get_embeddings_batch(texts: list[str], max_wait: float | None = None) -> list[list[float]]:
     """Embed banyak teks sekaligus (fastembed & openai mendukung batch native)."""
-    return _get_embeddings(texts)
+    return _get_embeddings(texts, max_wait=max_wait)
 
 
 @lru_cache
 def embedding_dimensions() -> int:
-    """Dimensi vektor model embedding saat ini (untuk koleksi Qdrant)."""
-    probe = get_embedding("probe")
-    return len(probe)
+    """Dimensi vektor model embedding saat ini (untuk koleksi Qdrant).
+
+    Kalau model belum bisa dimuat (mis. serverless yang belum sempat download),
+    jatuh ke QDRANT_VECTOR_SIZE supaya pembuatan collection tetap bisa jalan.
+    """
+    try:
+        probe = get_embedding("probe", max_wait=settings.EMBEDDING_MAX_WAIT_SECONDS)
+        return len(probe)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            "Tidak bisa probing dimensi model embedding (%s); pakai QDRANT_VECTOR_SIZE=%d.",
+            exc, settings.QDRANT_VECTOR_SIZE,
+        )
+        return settings.QDRANT_VECTOR_SIZE

@@ -15,7 +15,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 from sqlalchemy.orm import Session
 
 from app.config.logging import get_logger
-from app.config.settings import settings
+from app.config.settings import resolve_writable_dir, settings
 from app.database.database import SessionLocal, get_db
 from app.database.models import (
     DocumentChunk,
@@ -77,11 +77,21 @@ async def upload_file(
     if not validation.is_valid:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=validation.error)
 
-    upload_dir = Path(settings.UPLOAD_DIR)
+    upload_dir = Path(resolve_writable_dir(settings.UPLOAD_DIR, "uploads"))
     upload_dir.mkdir(parents=True, exist_ok=True)
     unique_name = f"{uuid.uuid4()}_{file.filename}"
     stored_path = upload_dir / unique_name
-    stored_path.write_bytes(content)
+    try:
+        stored_path.write_bytes(content)
+    except OSError as exc:
+        logger.error("Gagal menyimpan file upload: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_507_INSUFFICIENT_STORAGE,
+            detail=(
+                "Server tidak punya ruang penyimpanan yang bisa ditulis. "
+                "Coba lagi atau hubungi admin."
+            ),
+        ) from exc
 
     uploaded_file = UploadedFile(
         original_filename=file.filename,
@@ -144,12 +154,19 @@ async def add_knowledge(
     if not judul or not konten:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Judul dan konten tidak boleh kosong")
 
-    knowledge_dir = Path(settings.MARKDOWN_DIR) / "auto"
+    knowledge_dir = Path(resolve_writable_dir(settings.MARKDOWN_DIR, "markdown")) / "auto"
     knowledge_dir.mkdir(parents=True, exist_ok=True)
 
     safe_name = _safe_filename(judul)
     file_path = knowledge_dir / f"{safe_name}.md"
-    file_path.write_text(konten, encoding="utf-8")
+    try:
+        file_path.write_text(konten, encoding="utf-8")
+    except OSError as exc:
+        logger.error("Gagal menyimpan file knowledge: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_507_INSUFFICIENT_STORAGE,
+            detail="Server tidak bisa menyimpan file knowledge (disk penuh/read-only).",
+        ) from exc
 
     uploaded_file = UploadedFile(
         original_filename=f"{judul}.md",

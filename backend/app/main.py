@@ -9,6 +9,7 @@ Sebelum pertama kali jalan, siapkan database:
 """
 
 from contextlib import asynccontextmanager
+import os
 import threading
 import time
 
@@ -45,6 +46,11 @@ _seed_status = {
 }
 
 
+def _is_serverless() -> bool:
+    """True kalau jalan di Vercel (atau platform serverless lain)."""
+    return bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting %s (env=%s)...", settings.APP_NAME, settings.ENV)
@@ -62,10 +68,29 @@ async def lifespan(app: FastAPI):
         logger.warning("Qdrant tidak terhubung saat startup — fitur RAG tidak akan berfungsi.")
 
     # Seed knowledge base di background (idempotent — hanya proses file baru).
-    # Dengan ini aplikasi desktop langsung bisa dipakai tanpa langkah manual.
-    _seed_status["running"] = True
-    _seed_status["started_at"] = time.time()
-    threading.Thread(target=_seed_knowledge_background, daemon=True).start()
+    # Hanya untuk aplikasi desktop/lokal: di serverless (Vercel) instance bisa
+    # dibekukan atau dimatikan kapan saja sehingga daemon thread tidak pernah
+    # selesai, dan knowledge base lebih baik diisi dari mesin lain.
+    if _is_serverless():
+        logger.info(
+            "Environment serverless terdeteksi — seeding knowledge base "
+            "otomatis dilewati. Jalankan seeding manual lewat CLI."
+        )
+    else:
+        _seed_status["running"] = True
+        _seed_status["started_at"] = time.time()
+        threading.Thread(target=_seed_knowledge_background, daemon=True).start()
+
+    # Panaskan model embedding di background supaya permintaan pertama tidak
+    # ikut menunggu proses download (~241MB) yang bisa makan >100 detik.
+    if settings.EMBEDDING_WARMUP_ON_STARTUP and settings.EMBEDDING_PROVIDER.lower() == "fastembed":
+        from app.llm.embedding_service import warm_up_embedding_model
+
+        if warm_up_embedding_model():
+            logger.info("Model embedding sudah siap sebelum melayani request.")
+        else:
+            logger.info("Pemanasan model embedding dimulai di background thread.")
+
     yield
     logger.info("Shutting down %s...", settings.APP_NAME)
 

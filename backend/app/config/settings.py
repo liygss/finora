@@ -5,6 +5,7 @@ Semua nilai bisa di-override lewat environment variable atau file .env
 
 import os
 from functools import lru_cache
+from pathlib import Path
 from typing import List
 
 from pydantic import AnyHttpUrl, Field, model_validator
@@ -92,6 +93,15 @@ class Settings(BaseSettings):
     EMBEDDING_BASE_URL: str = "https://api.openai.com/v1"
     EMBEDDING_DIMENSIONS: int | None = None  # text-embedding-3-small bisa 512/1024/1536
 
+    # Batas waktu (detik) request chat menunggu model embedding siap. Di serverless
+    # model fastembed (~241MB) harus diunduh saat instance baru nyala, bisa >100 detik.
+    # Jadi request TIDAK boleh menunggu tak terbatas: kalau lewat, RAG dilewati dan
+    # chat dijawab LLM saja, sementara download lanjut di background.
+    EMBEDDING_MAX_WAIT_SECONDS: float = 10.0
+    # Panaskan model embedding saat aplikasi start, supaya permintaan pertama
+    # tidak memblokir proses download.
+    EMBEDDING_WARMUP_ON_STARTUP: bool = True
+
     # ---------- Auth / Security ----------
     SECRET_KEY: str = Field(default="")
     ALGORITHM: str = "HS256"
@@ -167,3 +177,27 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+
+
+@lru_cache
+def resolve_writable_dir(preferred: str, name: str) -> str:
+    """Kembalikan `preferred` kalau bisa ditulis, kalau tidak pakai /tmp/<name>.
+
+    Dipakai untuk folder yang perlu ditulis: upload, dump chunk, cache model.
+    Di serverless (Vercel) filesystem proyek read-only, jadi kita perlu
+    fallback ke /tmp yang selalu writable. Isi /tmp TIDAK persisten
+    antar instance — cukup untuk memproses satu request.
+    """
+    for candidate in (preferred, f"/tmp/finora/{name}"):
+        if not candidate:
+            continue
+        try:
+            path = Path(candidate)
+            path.mkdir(parents=True, exist_ok=True)
+            probe = path / ".write_probe"
+            probe.write_text("ok", encoding="utf-8")
+            probe.unlink()
+            return str(path)
+        except OSError:
+            continue
+    return f"/tmp/finora/{name}"

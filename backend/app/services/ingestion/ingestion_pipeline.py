@@ -72,11 +72,17 @@ def _ingest_markdown_text(
     if not chunks:
         raise IngestionError("Tidak ada konten yang bisa diekstrak dari file ini")
 
-    chunks_dir = Path(settings.CHUNKS_DIR)
-    chunks_dir.mkdir(parents=True, exist_ok=True)
-    safe_judul = judul.replace("/", "_")
-    for c in chunks:
-        (chunks_dir / f"{safe_judul}_chunk_{c.index:03d}.md").write_text(c.content, encoding="utf-8")
+    # Dump chunk ke file hanya untuk keperluan debug/inspection. Di serverless
+    # (filesystem read-only) ini harus best-effort: kegagalan menulis file tidak
+    # boleh menggagalkan ingestion ke Qdrant.
+    try:
+        chunks_dir = Path(settings.CHUNKS_DIR)
+        chunks_dir.mkdir(parents=True, exist_ok=True)
+        safe_judul = judul.replace("/", "_")
+        for c in chunks:
+            (chunks_dir / f"{safe_judul}_chunk_{c.index:03d}.md").write_text(c.content, encoding="utf-8")
+    except OSError as exc:
+        logger.debug("Tidak bisa menulis dump chunk ke disk (diabaikan): %s", exc)
 
     vectors = embed_chunks([c.content for c in chunks])
 
@@ -246,10 +252,16 @@ def process_uploaded_file(db: Session, uploaded_file: UploadedFile) -> UploadedF
         doc = normalize_document(doc)
         markdown_text = generate_markdown(doc, judul)
 
-        markdown_dir = Path(settings.MARKDOWN_DIR)
-        markdown_dir.mkdir(parents=True, exist_ok=True)
-        markdown_path = markdown_dir / f"{judul}.md"
-        markdown_path.write_text(markdown_text, encoding="utf-8")
+        # Simpan markdown hasil normalisasi (debug/inspection). Best-effort:
+        # di serverless filesystem read-only, kegagalan menulis tidak boleh
+        # menghentikan ingestion.
+        try:
+            markdown_dir = Path(settings.MARKDOWN_DIR)
+            markdown_dir.mkdir(parents=True, exist_ok=True)
+            markdown_path = markdown_dir / f"{judul}.md"
+            markdown_path.write_text(markdown_text, encoding="utf-8")
+        except OSError as exc:
+            logger.debug("Tidak bisa menyimpan markdown ke disk (diabaikan): %s", exc)
 
         jumlah_chunk = _ingest_markdown_text(db, uploaded_file, markdown_text, judul)
         _update_status(db, uploaded_file, StatusUpload.INGESTED)
