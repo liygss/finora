@@ -33,7 +33,16 @@ if settings.is_sqlite:
 
     db_path = settings.SQLITE_PATH
     parent = Path(db_path).parent
-    os.makedirs(parent, exist_ok=True)
+    try:
+        os.makedirs(parent, exist_ok=True)
+    except OSError as exc:
+        # Serverless (Vercel) filesystem read-only. Jangan sampai app crash
+        # hanya gara-gara ini — andalkan DATABASE_URL_OVERRIDE (PostgreSQL).
+        logger.warning(
+            "Tidak bisa menyiapkan folder SQLite %s (%s). "
+            "Set DATABASE_URL_OVERRIDE ke PostgreSQL untuk mode serverless.",
+            parent, exc,
+        )
 else:
     _engine_kwargs.update(pool_pre_ping=True, pool_size=10, max_overflow=20)
 
