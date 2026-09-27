@@ -55,8 +55,14 @@ class Settings(BaseSettings):
     QDRANT_PORT: int = 6333
     QDRANT_API_KEY: str | None = None
     QDRANT_COLLECTION_NAME: str = "accounting_knowledge"
-    QDRANT_VECTOR_SIZE: int = 384  # multilingual-e5-small (fastembed) = 384
+    QDRANT_VECTOR_SIZE: int = 384  # multilingual-e5-small = 384
     QDRANT_LOCAL_PATH: str = "data/qdrant"
+
+    # Model untuk Qdrant Cloud Inference (dipakai kalau EMBEDDING_PROVIDER=qdrant).
+    # Qdrant yang membuat vektornya di sisi server, jadi tidak ada model yang
+    # perlu diunduh ke backend — bebas cold start di serverless.
+    # Hanya model berlabel "Cost: Free" yang bisa dipakai tanpa API key tambahan.
+    QDRANT_INFERENCE_MODEL: str = "intfloat/multilingual-e5-small"
 
     @property
     def QDRANT_URL(self) -> str:
@@ -87,7 +93,7 @@ class Settings(BaseSettings):
     # fastembed (default): lokal, gratis, tanpa API key — cocok desktop app.
     # openai: OpenAI-compatible endpoint /v1/embeddings (butuh EMBEDDING_API_KEY).
     # ollama: pakai Ollama lokal (butuh Ollama terpasang).
-    EMBEDDING_PROVIDER: str = "fastembed"  # fastembed | openai | ollama
+    EMBEDDING_PROVIDER: str = "fastembed"  # fastembed | qdrant | openai | ollama
     EMBEDDING_MODEL: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     EMBEDDING_API_KEY: str | None = None
     EMBEDDING_BASE_URL: str = "https://api.openai.com/v1"

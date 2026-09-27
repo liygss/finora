@@ -1,9 +1,19 @@
-"""Operasi Qdrant: buat collection, upsert chunk+vector, dan search."""
+"""Operasi Qdrant: buat collection, upsert chunk+vector, dan search.
+
+Dua jalur pemrosesan vektor didukung:
+
+- Vektor dihitung di backend (provider fastembed/openai/ollama) lalu dikirim
+  ke Qdrant. Dipakai untuk Qdrant embedded lokal & mode desktop.
+- Teks mentah dikirim ke Qdrant Cloud Inference (provider 'qdrant'), yang
+  membuat vektornya sendiri di sisi server. Tidak ada model yang perlu
+  diunduh ke backend, jadi bebas cold start di serverless.
+"""
 
 import uuid
 
 from qdrant_client.models import (
     Distance,
+    Document,
     FieldCondition,
     Filter,
     MatchValue,
@@ -17,6 +27,20 @@ from app.database.database import get_qdrant_client
 from app.llm.embedding_service import embedding_dimensions
 
 logger = get_logger(__name__)
+
+# Batas ukuran batch upsert: terlalu besar dalam satu request berisiko timeout,
+# terutama lewat Qdrant Cloud Inference yang vektornya dibuat di sisi server.
+BATCH_SIZE = 50
+
+
+def _build_filter(category: str | None) -> Filter | None:
+    if not category:
+        return None
+    return Filter(must=[FieldCondition(key="category", match=MatchValue(value=category))])
+
+
+def _to_results(points) -> list[dict]:
+    return [{"id": p.id, "score": p.score, "payload": p.payload} for p in points]
 
 
 def _ensure_payload_indexes(client) -> None:
@@ -67,8 +91,7 @@ def upsert_chunks(
         for i in range(len(vectors))
     ]
 
-    # Batch upsert: kalau banyak chunk, pecah per 50 supaya tidak timeout
-    BATCH_SIZE = 50
+    # Batch upsert: kalau banyak chunk, pecah per BATCH_SIZE supaya tidak timeout
     for batch_start in range(0, len(points), BATCH_SIZE):
         batch = points[batch_start:batch_start + BATCH_SIZE]
         client.upsert(collection_name=settings.QDRANT_COLLECTION_NAME, points=batch)
@@ -82,22 +105,84 @@ def search(
     top_k: int | None = None,
     category: str | None = None,
 ) -> list[dict]:
-    """Cari chunk paling mirip. Mengembalikan list {id, score, payload}."""
+    """Cari chunk paling mirip dari vektor yang sudah dihitung backend."""
     ensure_collection()
     client = get_qdrant_client()
 
-    query_filter = None
-    if category:
-        query_filter = Filter(must=[FieldCondition(key="category", match=MatchValue(value=category))])
-
-    results = client.search(
+    results = client.query_points(
         collection_name=settings.QDRANT_COLLECTION_NAME,
-        query_vector=query_vector,
+        query=query_vector,
         limit=top_k or settings.TOP_K_RETRIEVAL,
-        query_filter=query_filter,
+        query_filter=_build_filter(category),
         with_payload=True,
+    ).points
+    return _to_results(results)
+
+
+def search_by_text(
+    query: str,
+    top_k: int | None = None,
+    category: str | None = None,
+) -> list[dict]:
+    """Cari chunk paling mirip dari teks mentah.
+
+    Qdrant Cloud Inference yang meng-embed query ini di sisi server, jadi
+    backend tidak perlu memuat model embedding sama sekali.
+    """
+    ensure_collection()
+    client = get_qdrant_client()
+
+    results = client.query_points(
+        collection_name=settings.QDRANT_COLLECTION_NAME,
+        query=Document(text=query, model=settings.QDRANT_INFERENCE_MODEL),
+        limit=top_k or settings.TOP_K_RETRIEVAL,
+        query_filter=_build_filter(category),
+        with_payload=True,
+    ).points
+    return _to_results(results)
+
+
+def upsert_documents(
+    contents: list[str],
+    payloads: list[dict],
+) -> list[str]:
+    """Simpan chunk ke Qdrant, dengan Qdrant yang membuat vektornya sendiri.
+
+    Dipakai saat EMBEDDING_PROVIDER=qdrant. `payloads[i]` minimal berisi:
+        {"content": str, "source_file_id": str, "source_filename": str,
+         "chunk_index": int, "category": str}
+    """
+    if len(contents) != len(payloads):
+        raise ValueError(
+            f"Jumlah konten ({len(contents)}) harus sama dengan jumlah payload ({len(payloads)})."
+        )
+
+    ensure_collection()
+    client = get_qdrant_client()
+
+    point_ids = [str(uuid.uuid4()) for _ in contents]
+    points = [
+        PointStruct(
+            id=point_ids[i],
+            vector=Document(text=contents[i], model=settings.QDRANT_INFERENCE_MODEL),
+            payload=payloads[i],
+        )
+        for i in range(len(contents))
+    ]
+
+    for batch_start in range(0, len(points), BATCH_SIZE):
+        client.upsert(
+            collection_name=settings.QDRANT_COLLECTION_NAME,
+            points=points[batch_start:batch_start + BATCH_SIZE],
+        )
+
+    logger.info(
+        "Upsert %d chunk ke Qdrant via inference '%s'.",
+        len(points),
+        settings.QDRANT_INFERENCE_MODEL,
     )
-    return [{"id": r.id, "score": r.score, "payload": r.payload} for r in results]
+    return point_ids
+
 
 
 def delete_by_source_file(source_file_id: str) -> None:

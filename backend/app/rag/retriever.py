@@ -1,10 +1,14 @@
-"""Retriever: embed query lalu cari chunk paling relevan di Qdrant."""
+"""Retriever: cari chunk paling relevan di Qdrant.
+
+Query boleh di-embed di backend (provider fastembed/openai/ollama) atau
+dikirim apa adanya ke Qdrant Cloud Inference (provider 'qdrant').
+"""
 
 from dataclasses import dataclass
 
 from app.config.logging import get_logger
 from app.config.settings import settings
-from app.llm.embedding_service import get_embedding
+from app.llm.embedding_service import get_embedding, uses_qdrant_inference
 from app.services.ingestion import qdrant_service
 
 logger = get_logger(__name__)
@@ -28,19 +32,20 @@ def retrieve(query: str, top_k: int | None = None, category: str | None = None) 
     balas 500 — retrieval knowledge base itu nilai tambah, bukan syarat.
     """
     try:
-        query_vector = get_embedding(
-            query, max_wait=settings.EMBEDDING_MAX_WAIT_SECONDS
-        )
+        if uses_qdrant_inference():
+            # Qdrant yang meng-embed query; backend tidak memuat model apa pun.
+            results = qdrant_service.search_by_text(
+                query, top_k=top_k or settings.TOP_K_RETRIEVAL, category=category
+            )
+        else:
+            query_vector = get_embedding(
+                query, max_wait=settings.EMBEDDING_MAX_WAIT_SECONDS
+            )
+            results = qdrant_service.search(
+                query_vector, top_k=top_k or settings.TOP_K_RETRIEVAL, category=category
+            )
     except Exception as exc:  # noqa: BLE001
-        logger.warning("Embedding query gagal, lewati retrieval knowledge base: %s", exc)
-        return []
-
-    try:
-        results = qdrant_service.search(
-            query_vector, top_k=top_k or settings.TOP_K_RETRIEVAL, category=category
-        )
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("Pencarian Qdrant gagal, lewati retrieval knowledge base: %s", exc)
+        logger.warning("Retrieval knowledge base gagal, lewati: %s", exc)
         return []
 
     return [

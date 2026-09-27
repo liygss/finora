@@ -22,6 +22,7 @@ from app.config.logging import get_logger
 from app.config.settings import settings
 from app.database.database import SessionLocal
 from app.database.models import DocumentChunk, StatusUpload, UploadedFile
+from app.llm.embedding_service import uses_qdrant_inference
 from app.services.ingestion import qdrant_service
 from app.services.ingestion.chunking import chunk_markdown
 from app.services.ingestion.csv_to_jurnal import auto_journal_from_dataframe
@@ -67,6 +68,9 @@ def _ingest_markdown_text(
     """
     Pipeline RAG: chunk -> embed -> simpan ke Qdrant + Postgres.
     Mengembalikan jumlah chunk yang berhasil disimpan.
+
+    Vektor bisa dibuat di backend (embed_chunks) atau oleh Qdrant Cloud
+    Inference, tergantung EMBEDDING_PROVIDER.
     """
     chunks = chunk_markdown(markdown_text)
     if not chunks:
@@ -84,7 +88,7 @@ def _ingest_markdown_text(
     except OSError as exc:
         logger.debug("Tidak bisa menulis dump chunk ke disk (diabaikan): %s", exc)
 
-    vectors = embed_chunks([c.content for c in chunks])
+    contents = [c.content for c in chunks]
 
     payloads = []
     for c in chunks:
@@ -106,7 +110,13 @@ def _ingest_markdown_text(
             }
         )
 
-    point_ids = qdrant_service.upsert_chunks(vectors, payloads)
+    if uses_qdrant_inference():
+        # Qdrant Cloud yang meng-embed isi chunk, jadi backend tidak perlu memuat
+        # model embedding sama sekali.
+        point_ids = qdrant_service.upsert_documents(contents, payloads)
+    else:
+        vectors = embed_chunks(contents)
+        point_ids = qdrant_service.upsert_chunks(vectors, payloads)
 
     for c, point_id in zip(chunks, point_ids):
         db.add(

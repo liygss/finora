@@ -112,6 +112,11 @@ def get_qdrant_client() -> QdrantClient:
 
     Cloud/server mode: kalau QDRANT_API_KEY diset, pakai url (https) + api_key.
     Embedded lokal: kalau tidak ada API key, pakai path file (tanpa server).
+
+    `cloud_inference=True` penting: tanpa flag itu, client akan mencoba
+    membuat vektor dari objek Document secara lokal (fastembed) dan gagal
+    untuk model milik Qdrant. Dengan flag tersebut objek Document diteruskan
+    apa adanya ke Qdrant Cloud, yang membuat embedding di sisi server.
     """
     global _qdrant_client
     if _qdrant_client is None:
@@ -122,8 +127,13 @@ def get_qdrant_client() -> QdrantClient:
                         url=f"https://{settings.QDRANT_HOST}",
                         api_key=settings.QDRANT_API_KEY,
                         timeout=60,
+                        cloud_inference=True,
                     )
-                    logger.info("Qdrant client terhubung ke cloud %s", settings.QDRANT_HOST)
+                    logger.info(
+                        "Qdrant client terhubung ke cloud %s (inference: %s)",
+                        settings.QDRANT_HOST,
+                        settings.QDRANT_INFERENCE_MODEL,
+                    )
                 else:
                     _qdrant_client = QdrantClient(
                         path=settings.QDRANT_LOCAL_PATH,

@@ -115,7 +115,13 @@ def warm_up_embedding_model() -> bool:
 
     Aman dipanggil berulang kali: hanya thread pertama yang benar-benar jalan.
     Mengembalikan True kalau model sudah siap.
+
+    Tidak ada yang perlu di-warm-up untuk provider non-fastembed (mis. Qdrant
+    Cloud Inference, yang meng-embed di sisi server), jadi langsung True.
     """
+    if settings.EMBEDDING_PROVIDER.lower() != "fastembed":
+        return True
+
     global _load_started
     if _model_ready.is_set():
         return True
@@ -130,7 +136,13 @@ def warm_up_embedding_model() -> bool:
 
 
 def is_embedding_ready() -> bool:
-    """True kalau model embedding sudah siap dipakai."""
+    """True kalau model embedding sudah siap dipakai.
+
+    Untuk provider non-fastembed tidak ada model lokal yang perlu dimuat, jadi
+    selalu True (embedding dibuat di sisi Qdrant/LLM).
+    """
+    if settings.EMBEDDING_PROVIDER.lower() != "fastembed":
+        return True
     return _model_ready.is_set() and _fastembed_model is not None
 
 
@@ -203,6 +215,16 @@ def _embed_ollama(texts: list[str]) -> list[list[float]]:
     return vectors
 
 
+def uses_qdrant_inference() -> bool:
+    """True kalau embedding dibuat oleh Qdrant Cloud, bukan di backend.
+
+    Kalau True, pemanggil harus mengirim TEKS ke Qdrant (lewat
+    `qdrant_service.search_by_text` / `upsert_documents`) — bukan vektor —
+    karena Qdrant tidak menyediakan endpoint untuk mengambil vektor mentah.
+    """
+    return settings.EMBEDDING_PROVIDER.lower() == "qdrant"
+
+
 def _get_embeddings(texts: list[str], max_wait: float | None = None) -> list[list[float]]:
     provider = settings.EMBEDDING_PROVIDER.lower()
     try:
@@ -212,6 +234,13 @@ def _get_embeddings(texts: list[str], max_wait: float | None = None) -> list[lis
             return _embed_openai(texts)
         if provider == "ollama":
             return _embed_ollama(texts)
+        if provider == "qdrant":
+            raise EmbeddingError(
+                "EMBEDDING_PROVIDER='qdrant' tidak bisa dipakai lewat get_embedding(): "
+                "Qdrant membuat vektornya sendiri di sisi server. Gunakan "
+                "qdrant_service.search_by_text() / upsert_documents() yang mengirim "
+                "teks, atau kembalikan EMBEDDING_PROVIDER ke 'fastembed'."
+            )
         raise EmbeddingError(f"EMBEDDING_PROVIDER tidak dikenal: {provider}")
     except EmbeddingError:
         raise
@@ -241,6 +270,11 @@ def embedding_dimensions() -> int:
     Kalau model belum bisa dimuat (mis. serverless yang belum sempat download),
     jatuh ke QDRANT_VECTOR_SIZE supaya pembuatan collection tetap bisa jalan.
     """
+    # Qdrant Cloud Inference tidak bisa di-probe dari sini: kita tidak pernah
+    # memegang vektornya, jadi dimensi harus berasal dari konfigurasi.
+    if uses_qdrant_inference():
+        return settings.QDRANT_VECTOR_SIZE
+
     try:
         probe = get_embedding("probe", max_wait=settings.EMBEDDING_MAX_WAIT_SECONDS)
         return len(probe)

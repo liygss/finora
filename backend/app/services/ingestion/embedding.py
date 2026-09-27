@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from app.config.logging import get_logger
-from app.config.settings import settings
+from app.config.settings import resolve_writable_dir, settings
 from app.llm.embedding_service import get_embedding
 
 logger = get_logger(__name__)
@@ -29,13 +29,31 @@ EMBEDDING_WORKERS = 4
 
 
 def _cache_path() -> Path:
-    path = Path(settings.EMBEDDINGS_DIR)
-    path.mkdir(parents=True, exist_ok=True)
-    return path / "embedding_cache.json"
+    # resolve_writable_dir() sudah menangani filesystem read-only (serverless)
+    # dengan fallback ke /tmp, jadi pemanggilan ini tidak akan crash di sini.
+    return Path(resolve_writable_dir(settings.EMBEDDINGS_DIR, "embeddings")) / "embedding_cache.json"
 
 
 def _hash_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _cache_fingerprint() -> str:
+    """Penanda model embedding yang dipakai saat cache dibuat.
+
+    Cache lama sengaja hanya memakai hash teks, sehingga mengganti model
+    (mis. fastembed -> provider lain) diam-diam mengembalikan vektor dari model
+    yang salah daninasional. Menyertakan nama model+pengaturan membuat kunci
+    cache otomatis berbeda begitu konfigurasi berubah.
+    """
+    raw = "|".join(
+        [
+            settings.EMBEDDING_PROVIDER.lower(),
+            settings.EMBEDDING_MODEL,
+            str(settings.QDRANT_INFERENCE_MODEL),
+        ]
+    )
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
 
 
 def _load_cache() -> dict[str, list[float]]:
@@ -44,20 +62,31 @@ def _load_cache() -> dict[str, list[float]]:
         return {}
     try:
         with open(path, encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
     except (json.JSONDecodeError, OSError) as exc:
         logger.warning("Gagal membaca embedding cache, mulai dari cache kosong: %s", exc)
         return {}
 
+    # Format lama: {"<hash>": [floats]}. Format baru: {"fingerprint": ..., "entries": {...}}
+    if not isinstance(data, dict) or "entries" not in data:
+        logger.info("Format embedding cache lama, diabaikan (perlu hitung ulang).")
+        return {}
+
+    if data.get("fingerprint") != _cache_fingerprint():
+        logger.info("Embedding cache dibuat dengan model lain, diabaikan (perlu hitung ulang).")
+        return {}
+
+    return data["entries"]
+
 
 def _save_cache(cache: dict[str, list[float]]) -> None:
     path = _cache_path()
+    payload = {"fingerprint": _cache_fingerprint(), "entries": cache}
     try:
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(cache, f)
+            json.dump(payload, f)
     except OSError as exc:
         logger.warning("Gagal menyimpan embedding cache: %s", exc)
-
 
 def _compute_one(text: str, key: str, idx: int) -> tuple[int, str, list[float]]:
     """Hitung embedding untuk satu teks. Dipanggil oleh ThreadPoolExecutor."""

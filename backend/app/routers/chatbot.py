@@ -70,6 +70,11 @@ def health() -> dict:
             "qdrant": qdrant_ok,
             "embedding_ready": embedding_ready,
             "embedding_provider": settings.EMBEDDING_PROVIDER,
+            "embedding_model": (
+                settings.QDRANT_INFERENCE_MODEL
+                if settings.EMBEDDING_PROVIDER.lower() == "qdrant"
+                else settings.EMBEDDING_MODEL
+            ),
         },
         "degraded": degraded,
     }

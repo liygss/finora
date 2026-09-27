@@ -18,8 +18,12 @@ sqlalchemy==2.0.36
 alembic==1.14.0
 
 # --- Vector database ---
-# extra [local] = mode embedded (file-based, tanpa server Qdrant).
-qdrant-client[local]==1.12.1
+# 1.14+ menambah flag cloud_inference=True. Tanpa flag itu, client mencoba
+# membuat vektor objek Document secara lokal (fastembed) dan gagal untuk model
+# milik Qdrant; dengan flag tersebut Document diteruskan ke Qdrant Cloud.
+# Catatan: extra [local] dihapus di 1.19, mode embedded (path=) tetap tersedia
+# tanpa extra itu.
+qdrant-client==1.19.1
 
 # --- Embedding lokal (RAG) ---
 fastembed==0.4.1
