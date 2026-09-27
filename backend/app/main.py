@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 import threading
 import time
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -94,6 +94,26 @@ app = FastAPI(
 # Tambah rate limiter ke app state
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Prefix yang sampai ke FastAPI. Di desktop/local path sudah tanpa prefix
+# (Vite proxy menghapusnya), sedangkan di Vercel path datang sebagai /api/...
+_API_PREFIX = "/api"
+
+
+@app.middleware("http")
+async def strip_api_prefix(request: Request, call_next):
+    """Buang prefix /api kalau masih ada, supaya router (yang tanpa prefix)
+    tetap cocok baik di local (sudah di-strip proxy) maupun di Vercel."""
+    path = request.scope.get("path", "")
+    if path == _API_PREFIX:
+        request.scope["path"] = "/"
+    elif path.startswith(_API_PREFIX + "/"):
+        request.scope["path"] = path[len(_API_PREFIX):]
+    raw_path = request.scope.get("raw_path")
+    if raw_path and raw_path.startswith(_API_PREFIX.encode()):
+        request.scope["raw_path"] = raw_path[len(_API_PREFIX):]
+    return await call_next(request)
+
 
 setup_cors(app)
 
