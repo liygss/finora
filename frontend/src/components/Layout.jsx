@@ -1,7 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './Sidebar'
-import AskFinoraPanel from './AskFinoraPanel'
+// Panel chat menolak -> memuat AssistantChat -> chatRender -> recharts (library
+// chart yang berat). Panel ini hanya muncul saat dibuka, jadi dimuat sesuai
+// kebutuhan supaya tidak ikut di bundle awal.
+const AskFinoraPanel = lazy(() => import('./AskFinoraPanel'))
 import ComplaintModal from './ComplaintModal'
 import NotificationsDropdown from './NotificationsDropdown'
 import ThemeToggle from './ThemeToggle'
@@ -219,7 +222,9 @@ export default function Layout() {
         </main>
       </div>
 
-      <AskFinoraPanel collapsed={!panelOpen} onToggle={togglePanel} />
+      <Suspense fallback={null}>
+        <AskFinoraPanel collapsed={!panelOpen} onToggle={togglePanel} />
+      </Suspense>
 
       {complaintOpen && <ComplaintModal onClose={() => setComplaintOpen(false)} />}
       <GuidedTour open={tourOpen} onClose={() => setTourOpen(false)} />

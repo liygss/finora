@@ -13,6 +13,11 @@ export function setUnauthorizedHandler(fn) {
 const client = axios.create({
   baseURL,
   withCredentials: true,
+  // Tanpa timeout, satu request yang menggantung membuat halaman tetap di
+  // status loading selamanya (dashboard mencoba ulang tiap 2,5 detik tanpa
+  // henti). Di Vercel serverless, cold start sesekali memang 40+ detik, jadi
+  // 45 detik memberi ruang tanpa membiarkan UI terkunci tanpa batas.
+  timeout: 45000,
   // JANGAN set Content-Type default di sini. Kalau header ini dipaksa jadi
   // 'application/json', axios tidak lagi menebak tipe konten, dan request
   // FormData jadi mengirim 'multipart/form-data' TANPA boundary sehingga
