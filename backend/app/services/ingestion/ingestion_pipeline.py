@@ -13,13 +13,14 @@ Status UploadedFile di-update di setiap tahap:
     UPLOADED -> PROCESSING -> POSTED (csv/xlsx) | INGESTED (pdf) | FAILED
 """
 
+import re
 import threading
 from pathlib import Path
 
 from sqlalchemy.orm import Session
 
 from app.config.logging import get_logger
-from app.config.settings import settings
+from app.config.settings import resolve_writable_dir, settings
 from app.database.database import SessionLocal
 from app.database.models import DocumentChunk, StatusUpload, UploadedFile
 from app.llm.embedding_service import uses_qdrant_inference
@@ -38,6 +39,28 @@ logger = get_logger(__name__)
 
 class IngestionError(Exception):
     pass
+
+
+# Pola yang bisa membocorkan detail internal kalau mentah-mentah dikirim ke user:
+#   - [Errno 2] No such file or directory: '/tmp/finora/uploads/<uuid>_trx.csv'
+#   - PermissionError: [Errno 13] Permission denied: '/var/task/data/...'
+_PATH_LIKE = re.compile(r"(/[^\s'\"]+)+|[A-Za-z]:\\\\[^\s'\"]*")
+# Prefiks errno bawaan OS yang tidak membantu user.
+_ERRNO_PREFIX = re.compile(r"^\[Errno \d+\]\s*")
+
+
+def _user_safe_error(exc: Exception) -> str:
+    """Ubah exception jadi pesan yang aman & berguna untuk ditampilkan ke user.
+
+    Pesan asli tetap logged penuh di server (logger.exception), jadi developer
+    tidak kehilangan informasi untuk debugging.
+    """
+    message = _ERRNO_PREFIX.sub("", str(exc)).strip()
+    message = _PATH_LIKE.sub("<file>", message)
+    # Ringkas supaya tidak membanjiri UI.
+    if len(message) > 300:
+        message = message[:297] + "..."
+    return message or f"Gagal memproses file ({type(exc).__name__})."
 
 
 def _cleanup_failed_file(stored_path: str) -> None:
@@ -80,7 +103,7 @@ def _ingest_markdown_text(
     # (filesystem read-only) ini harus best-effort: kegagalan menulis file tidak
     # boleh menggagalkan ingestion ke Qdrant.
     try:
-        chunks_dir = Path(settings.CHUNKS_DIR)
+        chunks_dir = Path(resolve_writable_dir(settings.CHUNKS_DIR, "chunks"))
         chunks_dir.mkdir(parents=True, exist_ok=True)
         safe_judul = judul.replace("/", "_")
         for c in chunks:
@@ -132,9 +155,24 @@ def _ingest_markdown_text(
     return len(chunks)
 
 
+def _file_source(uploaded_file: UploadedFile) -> bytes | str:
+    """Sumber file untuk dibaca: bytes dari database, atau path sebagai fallback.
+
+    `file_bytes` adalah sumber utama karena di serverless (Vercel) file di disk
+    sudah hilang sebelum request berikutnya arrive. `stored_path` dipakai hanya
+    untuk file lama (yang diupload sebelum kolom ini ada) dan mode desktop.
+    """
+    if uploaded_file.file_bytes:
+        return uploaded_file.file_bytes
+    if uploaded_file.stored_path:
+        return uploaded_file.stored_path
+    raise IngestionError(
+        "Isi file tidak ditemukan. File ini perlu di-upload ulang."
+    )
+
+
 def _rag_background(
     uploaded_file_id: str,
-    stored_path: str,
     file_type: str,
     judul: str,
 ) -> None:
@@ -148,13 +186,14 @@ def _rag_background(
         if not uploaded_file:
             logger.warning("RAG background: uploaded_file id=%s tidak ditemukan", uploaded_file_id)
             return
-        doc = load_file(stored_path, file_type)
+        doc = load_file(_file_source(uploaded_file), file_type)
         doc = normalize_document(doc)
         markdown_text = generate_markdown(doc, judul)
         jumlah_chunk = _ingest_markdown_text(db, uploaded_file, markdown_text, judul)
-        uploaded_file.status = StatusUpload.INGESTED
-        db.add(uploaded_file)
-        db.commit()
+        # JANGAN set status di sini. Untuk file transaksi status sudah POSTED
+        # (jurnal sudah dibuat) dan menimpanya jadi INGESTED membuat status
+        # berbeda antar platform: di lokal thread selalu selesai, di serverless
+        # sering dibekukan sebelum sempat jalan.
         logger.info("RAG background selesai untuk '%s': %d chunk tersimpan.", uploaded_file.original_filename, jumlah_chunk)
     except Exception as exc:
         logger.info("RAG background skip (tidak wajib): %s", exc)
@@ -172,7 +211,7 @@ def process_uploaded_file(db: Session, uploaded_file: UploadedFile) -> UploadedF
     try:
         _update_status(db, uploaded_file, StatusUpload.PROCESSING)
 
-        doc = load_file(uploaded_file.stored_path, uploaded_file.file_type)
+        doc = load_file(_file_source(uploaded_file), uploaded_file.file_type)
 
         judul = Path(uploaded_file.original_filename).stem
 
@@ -203,7 +242,7 @@ def process_uploaded_file(db: Session, uploaded_file: UploadedFile) -> UploadedF
                 # RAG di background thread (non-blocking, normalize+markdown juga di sini)
                 t = threading.Thread(
                     target=_rag_background,
-                    args=(uploaded_file.id, uploaded_file.stored_path, uploaded_file.file_type, judul),
+                    args=(uploaded_file.id, uploaded_file.file_type, judul),
                     daemon=True,
                 )
                 t.start()
@@ -243,7 +282,7 @@ def process_uploaded_file(db: Session, uploaded_file: UploadedFile) -> UploadedF
                 # pertanyaan dari isi PDF ini (sama seperti jalur CSV/XLSX).
                 t = threading.Thread(
                     target=_rag_background,
-                    args=(uploaded_file.id, uploaded_file.stored_path, uploaded_file.file_type, judul),
+                    args=(uploaded_file.id, uploaded_file.file_type, judul),
                     daemon=True,
                 )
                 t.start()
@@ -266,7 +305,7 @@ def process_uploaded_file(db: Session, uploaded_file: UploadedFile) -> UploadedF
         # di serverless filesystem read-only, kegagalan menulis tidak boleh
         # menghentikan ingestion.
         try:
-            markdown_dir = Path(settings.MARKDOWN_DIR)
+            markdown_dir = Path(resolve_writable_dir(settings.MARKDOWN_DIR, "markdown"))
             markdown_dir.mkdir(parents=True, exist_ok=True)
             markdown_path = markdown_dir / f"{judul}.md"
             markdown_path.write_text(markdown_text, encoding="utf-8")
@@ -283,8 +322,10 @@ def process_uploaded_file(db: Session, uploaded_file: UploadedFile) -> UploadedF
         return uploaded_file
 
     except Exception as exc:  # noqa: BLE001
-        logger.error("Ingestion gagal untuk '%s': %s", uploaded_file.original_filename, exc)
-        _update_status(db, uploaded_file, StatusUpload.FAILED, error=str(exc))
+        logger.exception("Ingestion gagal untuk '%s'", uploaded_file.original_filename)
+        # Simpan pesan yang aman untuk ditampilkan ke user. Detail lengkap
+        # (path internal, errno, traceback) hanya ada di log server.
+        _update_status(db, uploaded_file, StatusUpload.FAILED, error=_user_safe_error(exc))
         _cleanup_failed_file(uploaded_file.stored_path)
         raise
 

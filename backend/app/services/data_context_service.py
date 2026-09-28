@@ -95,7 +95,12 @@ def _analyze_staged_file(uploaded_file) -> str | None:
     try:
         from app.services.ingestion.file_loader import load_file
 
-        doc = load_file(uploaded_file.stored_path, uploaded_file.file_type)
+        # Bytes dari database dulu: di serverless file di disk sudah hilang.
+        source = uploaded_file.file_bytes or uploaded_file.stored_path
+        if not source:
+            return None
+
+        doc = load_file(source, uploaded_file.file_type)
         df = doc.get_transaction_dataframe()
         if df is None or df.empty:
             return None

@@ -173,6 +173,13 @@ DEFAULT_CHART_OF_ACCOUNTS: list[tuple[str, str, KategoriAkun, str, SaldoNormal]]
 
 def _sqlite_typecompilation(col_type):
     t = str(col_type).upper()
+    # PENTING: kolom binary harus jadi BLOB (SQLite) / BYTEA (Postgres).
+    # Kalau jatuh ke TEXT di bawah, isi file upload rusak diam-diam: tidak ada
+    # error, tapi tidak terbaca sebagai bytes.
+    # Catatan: SQLite memberi BLOB affinity hanya kalau nama tipenya mengandung
+    # "BLOB", jadi "BYTEA" tidak boleh dipakai di SQLite.
+    if "LARGEBINARY" in t or "BYTEA" in t or "BLOB" in t:
+        return "BYTEA" if not settings.is_sqlite else "BLOB"
     if "STRING" in t or "VARCHAR" in t or "TEXT" in t:
         return "TEXT"
     if "BOOLEAN" in t:

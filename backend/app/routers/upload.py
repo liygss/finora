@@ -1,16 +1,28 @@
 """
 Router upload file (transaksi csv/xlsx, aturan pdf) dan input knowledge teks.
 
-File disimpan ke disk lalu diproses lewat ingestion pipeline
-(app/services/ingestion/ingestion_pipeline.py) di background task supaya
-endpoint tidak perlu menunggu embedding selesai sebelum merespons.
+Alur file (STAGED -> commit):
+  POST /upload/file          -> simpan isi file ke database, status STAGED
+  POST /upload/{id}/commit   -> baca isi file dari database, proses jadi jurnal
+
+Isi file disimpan di kolom `uploaded_files.file_bytes`, BUKAN bergantung pada file
+di disk. Di Vercel filesystem proyek read-only dan /tmp tidak bertahan antar
+request, jadi file yang ditulis di request upload sudah hilang ketika request
+commit arrive di instance berikutnya (terbukti menghasilkan HTTP 500
+`FileNotFoundError`). `stored_path` tetap ditulis sebagai best-effort untuk
+keebutuhan aplikasi desktop/lokal (Electron) yang tidak serverless.
+
+Endpoint /upload/file hanya menaruh file di database (STAGED) tanpa memproses;
+pemrosesan berjalan saat user mengonfirmasi lewat /commit.
 """
 
 import re
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, UploadFile, status
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from sqlalchemy.orm import Session
 
@@ -38,6 +50,20 @@ from app.services.ingestion.validator import validate_upload
 router = APIRouter(prefix="/upload", tags=["Upload"])
 logger = get_logger(__name__)
 
+# Rate limiter. Instance ini memakai storage sendiri (pola yang sama dengan
+# app/routers/authentication.py); app.state.limiter yang dipakai untuk
+# exception handler dipasang di app/main.py.
+limiter = Limiter(key_func=get_remote_address)
+
+# Batas request. Upload menelan memory + parse + embedding jadi dibuat ketat;
+# commit sedikit lebih longgar karena user sah sedang menuntaskan satu file.
+UPLOAD_RATE_LIMIT = "5/minute"
+COMMIT_RATE_LIMIT = "10/minute"
+
+# Status yang masih boleh diproses ulang lewat /commit. STAGED = belum pernah
+# dicoba; FAILED = percobaan sebelumnya gagal dan aman untuk dicoba lagi.
+_COMMITTABLE_STATUS = {StatusUpload.STAGED, StatusUpload.FAILED}
+
 
 def _safe_filename(name: str) -> str:
     """Sanitasi nama file untuk mencegah path traversal."""
@@ -53,21 +79,29 @@ def health() -> dict:
     return {"status": "ok", "module": "upload"}
 
 
-def _run_ingestion_in_background(uploaded_file_id: str) -> None:
-    db = SessionLocal()
+def _persist_file_best_effort(content: bytes, filename: str) -> str | None:
+    """Tulis file ke disk kalau memungkinkan; kembalikan path atau None.
+
+    Kegagalan menulis TIDAK lagi membatalkan upload: isi file sudah aman di
+    `file_bytes`, dan itulah yang dibaca saat commit. Versi lama membalas 507 di
+    sini, sehingga di Vercel (filesystem read-only) upload selalu gagal total,
+    padahal prosesnya sendiri tidak butuh disk sama sekali.
+    """
     try:
-        uploaded_file = db.query(UploadedFile).filter(UploadedFile.id == uploaded_file_id).first()
-        if uploaded_file:
-            process_uploaded_file(db, uploaded_file)
-    except Exception:
-        logger.exception("Background ingestion gagal untuk file id=%s", uploaded_file_id)
-    finally:
-        db.close()
+        upload_dir = Path(resolve_writable_dir(settings.UPLOAD_DIR, "uploads"))
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        stored_path = upload_dir / f"{uuid.uuid4()}_{filename}"
+        stored_path.write_bytes(content)
+        return str(stored_path)
+    except OSError as exc:
+        logger.warning("Tidak bisa menyimpan file ke disk (diabaikan, isi tetap ada di DB): %s", exc)
+        return None
 
 
 @router.post("/file", response_model=UploadedFileResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit(UPLOAD_RATE_LIMIT)
 async def upload_file(
-    background_tasks: BackgroundTasks,
+    request: Request,
     file: UploadFile,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
@@ -77,25 +111,19 @@ async def upload_file(
     if not validation.is_valid:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=validation.error)
 
-    upload_dir = Path(resolve_writable_dir(settings.UPLOAD_DIR, "uploads"))
-    upload_dir.mkdir(parents=True, exist_ok=True)
-    unique_name = f"{uuid.uuid4()}_{file.filename}"
-    stored_path = upload_dir / unique_name
-    try:
-        stored_path.write_bytes(content)
-    except OSError as exc:
-        logger.error("Gagal menyimpan file upload: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_507_INSUFFICIENT_STORAGE,
-            detail=(
-                "Server tidak punya ruang penyimpanan yang bisa ditulis. "
-                "Coba lagi atau hubungi admin."
-            ),
-        ) from exc
+    # Isi file disimpan di database (file_bytes) karena inilah sumber kebenaran
+    # saat commit. Penulisan ke disk hanya bonus untuk mode desktop/lokal.
+    stored_path = _persist_file_best_effort(content, file.filename)
+    if stored_path is None:
+        logger.info(
+            "File '%s' tidak bisa ditulis ke disk; akan diproses dari database.",
+            file.filename,
+        )
 
     uploaded_file = UploadedFile(
         original_filename=file.filename,
-        stored_path=str(stored_path),
+        stored_path=stored_path or "",
+        file_bytes=content,
         file_type=validation.file_type,
         file_size_bytes=len(content),
         uploaded_by_id=current_user.id,
@@ -360,12 +388,19 @@ def delete_upload(
 # Commit — konfirmasi upload STAGED → jurnal
 # ---------------------------------------------------------------------------
 @router.post("/{upload_id}/commit", response_model=CommitResponse)
+@limiter.limit(COMMIT_RATE_LIMIT)
 def commit_upload(
+    request: Request,
     upload_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> dict:
-    """Konfirmasi upload STAGED → jalankan auto-jurnal → POSTED."""
+    """Konfirmasi upload STAGED → jalankan auto-jurnal → POSTED.
+
+    File berstatus FAILED juga boleh di-commit ulang (retry), karena kegagalan
+    sebelumnya sering hanya masalah lingkungan (mis. file hilang di /tmp) yang
+    sekarang sudah diperbaiki. Tanpa ini satu kegagalan = file permanen rusak.
+    """
     _validate_uuid(upload_id, "upload_id")
     uploaded_file = (
         db.query(UploadedFile)
@@ -375,16 +410,29 @@ def commit_upload(
     if uploaded_file is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Upload tidak ditemukan")
 
-    if uploaded_file.status != StatusUpload.STAGED:
+    if uploaded_file.status not in _COMMITTABLE_STATUS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"File sudah diproses (status: {uploaded_file.status.value}). Hanya file STAGED yang bisa di-commit.",
+            detail=f"File sudah diproses (status: {uploaded_file.status.value}). Hanya file yang belum selesai diproses yang bisa di-commit.",
         )
+
+    if uploaded_file.status == StatusUpload.FAILED:
+        # Bersihkan sisa error supaya tidak terbawa kalau retry juga gagal.
+        uploaded_file.error_message = None
+        logger.info("Retry commit untuk file id=%s (sebelumnya FAILED).", upload_id)
 
     try:
         uploaded_file = process_uploaded_file(db, uploaded_file)
-    except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Gagal memproses file: {exc}")
+    except Exception as exc:  # noqa: BLE001
+        # Jangan kirim str(exc) ke user: bisa berisi path internal/errno.
+        # Pesan yang lebih berguna sudah disimpan di uploaded_file.error_message.
+        logger.exception("Commit upload id=%s gagal", upload_id)
+        db.refresh(uploaded_file)
+        detail = uploaded_file.error_message or "Gagal memproses file. Coba lagi atau periksa format file."
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Gagal memproses file: {detail}",
+        ) from exc
 
     jurnal_count = db.query(JurnalUmum).filter(JurnalUmum.sumber_upload_id == uploaded_file.id).count()
     logger.info("Commit upload '%s': %d jurnal dibuat.", uploaded_file.original_filename, jurnal_count)

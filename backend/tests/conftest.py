@@ -55,12 +55,14 @@ def setup_db():
 
 @pytest.fixture(autouse=True)
 def _reset_rate_limiter():
-    """Reset slowapi counter tiap tes supaya batas 3-5 request/menit di endpoint
-    auth tidak membuat tes lain gagal (counter global per-process)."""
+    """Reset slowapi counter tiap tes supaya batas request/menit di endpoint
+    auth & upload tidak membuat tes lain gagal (counter global per-process)."""
     yield
     from app.routers.authentication import limiter as auth_limiter
+    from app.routers.upload import limiter as upload_limiter
 
     auth_limiter.reset()
+    upload_limiter.reset()
 
 
 @pytest.fixture()

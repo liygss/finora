@@ -57,9 +57,20 @@ async def lifespan(app: FastAPI):
     # Pastikan tabel & chart of accounts tersedia (aman dijalankan tiap start).
     from app.database.migration import create_tables, seed_bootstrap_admin, seed_chart_of_accounts
 
-    create_tables()
-    seed_chart_of_accounts()
-    seed_bootstrap_admin()
+    # JANGAN biarkan kegagalan DDL mematikan seluruh app. Tanpa penjaga ini, satu
+    # miskonfigurasi DATABASE_URL membuat lifespan melempar -> app gagal start ->
+    # semua endpoint (termasuk /health) balas 500. Lebih baik app hidup dengan
+    # fitur yang bermasalah daripada total mati.
+    try:
+        create_tables()
+        seed_chart_of_accounts()
+        seed_bootstrap_admin()
+    except Exception:
+        logger.exception(
+            "Inisialisasi database gagal saat startup. Endpoint yang butuh database "
+            "akan error sampai masalah koneksi diperbaiki."
+        )
+
     db_ok = check_db_connection()
     qdrant_ok = check_qdrant_connection()
     if not db_ok:

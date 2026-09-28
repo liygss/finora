@@ -23,6 +23,7 @@ from sqlalchemy import (
     Index,
     Integer,
     JSON,
+    LargeBinary,
     Numeric,
     String,
     Text,
@@ -67,7 +68,8 @@ class StatusUpload(str, enum.Enum):
     UPLOADED = "UPLOADED"
     STAGED = "STAGED"          # file sudah diupload, belum di-commit ke jurnal
     PROCESSING = "PROCESSING"
-    NORMALIZED = "NORMALIZED"
+    NORMALIZED = "NORMALIZED"  # tidak terpakai; dibiarkan agar tidak mengubah
+                                # enum yang mungkin sudah tersimpan di database
     INGESTED = "INGESTED"        # sudah masuk ke vector store (untuk pdf/aturan)
     POSTED = "POSTED"            # sudah jadi jurnal (untuk csv/xlsx transaksi)
     FAILED = "FAILED"
@@ -266,6 +268,12 @@ class UploadedFile(Base):
     Metadata file yang diupload user.
     - csv/xlsx transaksi -> diproses jadi JurnalUmum (lihat services/ingestion)
     - pdf aturan/kebijakan -> diproses jadi DocumentChunk untuk RAG
+
+    Isi file asli disimpan di `file_bytes`, bukan cuma di `stored_path`. Di
+    serverless (Vercel) filesystem read-only DAN /tmp tidak bertahan antar
+    request, sehingga file yang ditulis di request upload sudah hilang saat
+    request commit arrives di instance berikutnya. `stored_path` tetap diisi
+    karena dipakai untuk aplikasi desktop/lokal (Electron) dan dump markdown.
     """
 
     __tablename__ = "uploaded_files"
@@ -273,6 +281,7 @@ class UploadedFile(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
     original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
     stored_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    file_bytes: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
     file_type: Mapped[str] = mapped_column(String(10), nullable=False)  # csv | xlsx | pdf
     file_size_bytes: Mapped[int] = mapped_column(default=0)
     status: Mapped[StatusUpload] = mapped_column(Enum(StatusUpload), default=StatusUpload.UPLOADED)

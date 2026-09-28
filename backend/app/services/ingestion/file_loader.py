@@ -1,14 +1,28 @@
 """
 Baca isi file mentah (csv/xlsx/xls/pdf) jadi representasi perantara yang seragam,
 supaya markdown_generator.py tidak perlu tahu format aslinya.
+
+Loader menerima `bytes` maupun `str` (path). Alur `bytes` dipakai di serverless
+(Vercel): file disimpan di database, bukan di disk, karena /tmp tidak bertahan
+antar request. `pd.read_csv`, `pd.read_excel`, dan `PdfReader` semuanya menerima
+file-like object, jadi tidak perlu tempfile sama sekali.
 """
 
+import io
+import os
 import re
 from dataclasses import dataclass, field
 from datetime import date, datetime
 
 import pandas as pd
 from pypdf import PdfReader
+
+
+def _as_source(source: bytes | str) -> bytes | str:
+    """Normalisasi input jadi bytes atau path yang bisa dibaca pandas/pypdf."""
+    if isinstance(source, (bytes, bytearray, memoryview)):
+        return bytes(source)
+    return str(source)
 
 
 @dataclass
@@ -109,27 +123,40 @@ def _sheet_transaction_score(df: pd.DataFrame) -> float:
     return score
 
 
-def load_csv(path: str) -> LoadedDocument:
-    df = _read_csv_tolerant(path)
+def load_csv(source: bytes | str) -> LoadedDocument:
+    df = _read_csv_tolerant(source)
     return LoadedDocument(file_type="csv", tables=[LoadedTable(sheet_name="Sheet1", dataframe=df)])
 
 
-def _read_csv_tolerant(path: str) -> pd.DataFrame:
+def _read_csv_tolerant(source: bytes | str) -> pd.DataFrame:
     """Baca CSV dengan fallback encoding (utf-8-sig -> latin-1) supaya file
     dari Excel/Windows dengan BOM atau encoding lama tetap bisa diproses."""
+    stream = source if isinstance(source, bytes) else None
     for encoding in ("utf-8-sig", "utf-8", "latin-1", "cp1252"):
         try:
-            return pd.read_csv(path, encoding=encoding)
+            if stream is not None:
+                # Buffer baru tiap percobaan: stream pandas sudah habis dibaca.
+                return pd.read_csv(io.BytesIO(stream), encoding=encoding)
+            return pd.read_csv(source, encoding=encoding)
         except (UnicodeDecodeError, pd.errors.ParserError):
             continue
-    raise ValueError(f"Tidak bisa membaca file CSV (encoding tidak dikenal): {path}")
+    raise ValueError(f"Tidak bisa membaca file CSV (encoding tidak dikenal): {_describe(source)}")
 
 
-def load_xlsx(path: str) -> LoadedDocument:
+def load_xlsx(source: bytes | str) -> LoadedDocument:
     # Ekstensi .xls (Excel lama) butuh engine 'xlrd'; .xlsx/.xlsm pakai 'openpyxl'.
-    engine = "xlrd" if str(path).lower().endswith(".xls") else "openpyxl"
+    if isinstance(source, bytes):
+        # Nama sheet tidak bisa diambil dari path saat baca dari memory, jadi
+        # engine ditentukan dari bytes (openpyxl modern, xlrd hanya untuk .xls
+        # lama yang memang jadi file terpisah).
+        engine = "openpyxl"
+    else:
+        engine = "xlrd" if str(source).lower().endswith(".xls") else "openpyxl"
     try:
-        sheets = pd.read_excel(path, sheet_name=None, engine=engine)
+        if isinstance(source, bytes):
+            sheets = pd.read_excel(io.BytesIO(source), sheet_name=None, engine=engine)
+        else:
+            sheets = pd.read_excel(source, sheet_name=None, engine=engine)
     except ImportError as exc:
         raise ValueError(
             f"Gagal membaca file Excel: engine '{engine}' tidak tersedia. "
@@ -139,21 +166,29 @@ def load_xlsx(path: str) -> LoadedDocument:
         # Fallback: biarkan pandas memilih engine sendiri (mis. ekstensi tak
         # standar / file ringan yang sedikit rusak).
         try:
-            sheets = pd.read_excel(path, sheet_name=None)
+            raw = io.BytesIO(source) if isinstance(source, bytes) else source
+            sheets = pd.read_excel(raw, sheet_name=None)
         except Exception as inner:
             raise ValueError(f"Tidak bisa membaca file Excel: {inner}") from inner
     tables = [LoadedTable(sheet_name=name, dataframe=df) for name, df in sheets.items()]
     return LoadedDocument(file_type="xlsx", tables=tables)
 
 
-def load_pdf(path: str) -> LoadedDocument:
-    reader = PdfReader(path)
+def load_pdf(source: bytes | str) -> LoadedDocument:
+    reader = PdfReader(io.BytesIO(source) if isinstance(source, bytes) else source)
     pages = [page.extract_text() or "" for page in reader.pages]
     return LoadedDocument(file_type="pdf", raw_text_pages=pages)
 
 
-def load_file(path: str, file_type: str) -> LoadedDocument:
+def _describe(source) -> str:
+    """Label aman untuk pesan error (jangan bocorkan path/isi file ke user)."""
+    return "<file dari database>" if isinstance(source, bytes) else os.path.basename(str(source))
+
+
+def load_file(source: bytes | str, file_type: str) -> LoadedDocument:
+    """Baca file dari `bytes` (serverless) atau `str` path (lokal/desktop)."""
+    source = _as_source(source)
     loaders = {"csv": load_csv, "xlsx": load_xlsx, "pdf": load_pdf}
     if file_type not in loaders:
         raise ValueError(f"Tipe file tidak dikenal: {file_type}")
-    return loaders[file_type](path)
+    return loaders[file_type](source)
