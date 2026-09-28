@@ -257,6 +257,50 @@ def test_upload_dibatasi_rate_limit(auth_client):
     assert 429 in statuses, f"rate limit tidak aktif: {statuses}"
 
 
+def test_commit_melepas_file_bytes_setelah_diproses(auth_client, db, stub_rag):
+    """Isi file harus dibuang dari DB setelah jurnal terbentuk.
+
+    Kalau dibiarkan, tiap upload menambah MB ke database dan kuota provider
+    gratis habis — sempat membuat seluruh aplikasi mati dengan error
+    "Your account or project has exceeded the quota".
+    """
+    files = {"file": ("trx.csv", io.BytesIO(CSV_TRANSAKSI), "text/csv")}
+    upload_id = auth_client.post("/upload/file", files=files).json()["id"]
+
+    db.expire_all()
+    before = db.query(UploadedFile).filter(UploadedFile.id == upload_id).first()
+    assert before.file_bytes == CSV_TRANSAKSI
+
+    resp = auth_client.post(f"/upload/{upload_id}/commit")
+    assert resp.status_code == 200, resp.text
+
+    db.expire_all()
+    after = db.query(UploadedFile).filter(UploadedFile.id == upload_id).first()
+    assert after.file_bytes is None, "file_bytes harus dilepas setelah commit sukses"
+    # Metadata tetap ada supaya UI masih bisa menampilkan riwayat file.
+    assert after.original_filename == "trx.csv"
+    assert after.status == StatusUpload.POSTED
+
+
+def test_file_bytes_tetap_ada_bila_commit_gagal(auth_client, db, monkeypatch, stub_rag):
+    """Kalau commit gagal, bytes harus disimpan supaya user bisa retry."""
+    from app.services.ingestion import ingestion_pipeline
+
+    files = {"file": ("trx.csv", io.BytesIO(CSV_TRANSAKSI), "text/csv")}
+    upload_id = auth_client.post("/upload/file", files=files).json()["id"]
+
+    def _boom(*a, **k):
+        raise RuntimeError("gagal sementara")
+
+    monkeypatch.setattr(ingestion_pipeline, "load_file", _boom)
+    assert auth_client.post(f"/upload/{upload_id}/commit").status_code == 500
+
+    db.expire_all()
+    row = db.query(UploadedFile).filter(UploadedFile.id == upload_id).first()
+    assert row.file_bytes == CSV_TRANSAKSI, "bytes wajib disimpan untuk retry"
+    assert row.status == StatusUpload.FAILED
+
+
 # ---------------------------------------------------------------------------
 # Bootsafe
 # ---------------------------------------------------------------------------

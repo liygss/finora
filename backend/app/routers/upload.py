@@ -98,6 +98,34 @@ def _persist_file_best_effort(content: bytes, filename: str) -> str | None:
         return None
 
 
+def _release_file_bytes(db: Session, uploaded_file: UploadedFile) -> None:
+    """Buang isi file mentah dari database setelah file selesai diproses.
+
+    `file_bytes` hanya dibutuhkan di antara upload dan commit supaya serverless
+    tidak bergantung file di /tmp. Setelah jurnal (atau chunk RAG) terbentuk,
+    byte aslinya tidak ada gunanya lagi — dan membiarkannya akan membuat
+    database membengkak tanpa batas. File hasil upload bisa berukuran MB, dan
+    provider database gratis punya kuota storage yang kecil; sempat database
+    Finora kehabisan kuota dan seluruh aplikasi mati hanya karena ini.
+    """
+    if not uploaded_file.file_bytes:
+        return
+    try:
+        ukuran = len(uploaded_file.file_bytes)
+        uploaded_file.file_bytes = None
+        db.add(uploaded_file)
+        db.commit()
+        logger.info(
+            "Isi file '%s' (%d KB) dilepas dari database setelah diproses.",
+            uploaded_file.original_filename,
+            ukuran // 1024,
+        )
+    except Exception as exc:  # noqa: BLE001
+        # Tidak boleh menggagalkan commit yang sudah berhasil; best-effort saja.
+        db.rollback()
+        logger.warning("Gagal melepas file_bytes untuk id=%s: %s", uploaded_file.id, exc)
+
+
 @router.post("/file", response_model=UploadedFileResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit(UPLOAD_RATE_LIMIT)
 async def upload_file(
@@ -436,6 +464,8 @@ def commit_upload(
 
     jurnal_count = db.query(JurnalUmum).filter(JurnalUmum.sumber_upload_id == uploaded_file.id).count()
     logger.info("Commit upload '%s': %d jurnal dibuat.", uploaded_file.original_filename, jurnal_count)
+
+    _release_file_bytes(db, uploaded_file)
 
     return {
         "status": uploaded_file.status.value,
