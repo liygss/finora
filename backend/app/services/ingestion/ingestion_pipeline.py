@@ -44,7 +44,10 @@ class IngestionError(Exception):
 # Pola yang bisa membocorkan detail internal kalau mentah-mentah dikirim ke user:
 #   - [Errno 2] No such file or directory: '/tmp/finora/uploads/<uuid>_trx.csv'
 #   - PermissionError: [Errno 13] Permission denied: '/var/task/data/...'
-_PATH_LIKE = re.compile(r"(/[^\s'\"]+)+|[A-Za-z]:\\\\[^\s'\"]*")
+# Syaratnya: garis miring harus di AWAL sebuah token (didahului spasi/kutip, bukan
+# huruf). Tanpa itu teks biasa seperti "CSV/XLSX" ikut terpotong jadi "CSV<file>"
+# dan membuat pesan yang，本来 sudah jelas jadi membingungkan.
+_PATH_LIKE = re.compile(r"(?<![\w./])(/[^\s'\"]+)|([A-Za-z]:\\{1,2}[^\s'\"]*)")
 # Prefiks errno bawaan OS yang tidak membantu user.
 _ERRNO_PREFIX = re.compile(r"^\[Errno \d+\]\s*")
 

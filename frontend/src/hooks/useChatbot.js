@@ -173,9 +173,8 @@ export default function useChatbot() {
       try {
         const fd = new FormData()
         fd.append('file', file)
-        const { data: uploaded } = await client.post('/upload/file', fd, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        })
+        // Jangan set Content-Type manual: browser harus menambahkan boundary.
+        const { data: uploaded } = await client.post('/upload/file', fd)
         activeUploadId = uploaded.id
         setLastUploadId(uploaded.id)
         lastUploadIdRef.current = uploaded.id
@@ -479,9 +478,8 @@ export default function useChatbot() {
     try {
       const fd = new FormData()
       fd.append('file', file)
-      const { data: uploaded } = await client.post('/upload/file', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      // Jangan set Content-Type manual: browser harus menambahkan boundary.
+      const { data: uploaded } = await client.post('/upload/file', fd)
 
       // Store upload_id for follow-up questions
       setLastUploadId(uploaded.id)

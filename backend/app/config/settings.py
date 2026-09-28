@@ -149,7 +149,13 @@ class Settings(BaseSettings):
     # Folder installer aplikasi desktop (DMG/EXE/AppImage) yang disajikan
     # langsung dari backend lewat GET /downloads/<file> (untuk halaman landing).
     DOWNLOADS_DIR: str = "../downloads"
-    MAX_UPLOAD_SIZE_MB: int = 25
+    # Batas Vercel untuk request body serverless function adalah 4.5MB. Menyetel
+    # nilai lebih besar hanya menghasilkan HTTP 413 "Request Entity Too Large"
+    # dari platform (tanpa pesan dari aplikasi), jadi batasnya diturunkan ke
+    # bawah plafon itu supaya penolakan terjadi di level aplikasi dengan pesan
+    # yang jelas. Batas ini hanya berlaku di serverless; desktop tidak punya
+    # plafon tersebut.
+    MAX_UPLOAD_SIZE_MB: int = 4
     ALLOWED_UPLOAD_EXTENSIONS: List[str] = [".csv", ".xlsx", ".xls", ".pdf"]
 
     # ---------- RAG ----------

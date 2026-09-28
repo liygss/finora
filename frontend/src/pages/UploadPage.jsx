@@ -204,7 +204,7 @@ export default function UploadPage() {
     fd.append('file', file)
     setUploading(true)
     try {
-      const { data } = await client.post('/upload/file', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const { data } = await client.post('/upload/file', fd)
       toast.success(`${file.name} terupload! Siap dianalisis.`)
       notifyDataChanged()
       load()

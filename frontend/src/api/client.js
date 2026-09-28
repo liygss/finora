@@ -13,7 +13,12 @@ export function setUnauthorizedHandler(fn) {
 const client = axios.create({
   baseURL,
   withCredentials: true,
-  headers: { 'Content-Type': 'application/json' },
+  // JANGAN set Content-Type default di sini. Kalau header ini dipaksa jadi
+  // 'application/json', axios tidak lagi menebak tipe konten, dan request
+  // FormData jadi mengirim 'multipart/form-data' TANPA boundary sehingga
+  // server menolak dengan "Missing boundary in multipart".
+  // Axios sudah otomatis memakai application/json untuk payload biasa dan
+  // membiarkan browser yang sets boundary untuk FormData.
 })
 
 client.interceptors.response.use(

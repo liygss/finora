@@ -143,20 +143,26 @@ def _read_csv_tolerant(source: bytes | str) -> pd.DataFrame:
     raise ValueError(f"Tidak bisa membaca file CSV (encoding tidak dikenal): {_describe(source)}")
 
 
-def load_xlsx(source: bytes | str) -> LoadedDocument:
-    # Ekstensi .xls (Excel lama) butuh engine 'xlrd'; .xlsx/.xlsm pakai 'openpyxl'.
+def _xlsx_engine(source: bytes | str) -> str:
+    """Pilih engine Excel.
+
+    File .xls (Excel 97-2003) hanya bisa dibaca xlrd; .xlsx/.xlsm pakai openpyxl.
+    Saat sumber berupa bytes, nama file tidak tersedia, jadi ekstensi dideteksi dari
+    magic bytes: .xls adalah kontainer OLE2 (D0 CF 11 E0), sedangkan .xlsx itu
+    arsip ZIP (PK\\x03\\x04).
+    """
     if isinstance(source, bytes):
-        # Nama sheet tidak bisa diambil dari path saat baca dari memory, jadi
-        # engine ditentukan dari bytes (openpyxl modern, xlrd hanya untuk .xls
-        # lama yang memang jadi file terpisah).
-        engine = "openpyxl"
-    else:
-        engine = "xlrd" if str(source).lower().endswith(".xls") else "openpyxl"
+        if source[:8] == b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1":
+            return "xlrd"
+        return "openpyxl"
+    return "xlrd" if str(source).lower().endswith(".xls") else "openpyxl"
+
+
+def load_xlsx(source: bytes | str) -> LoadedDocument:
+    engine = _xlsx_engine(source)
     try:
-        if isinstance(source, bytes):
-            sheets = pd.read_excel(io.BytesIO(source), sheet_name=None, engine=engine)
-        else:
-            sheets = pd.read_excel(source, sheet_name=None, engine=engine)
+        raw = io.BytesIO(source) if isinstance(source, bytes) else source
+        sheets = pd.read_excel(raw, sheet_name=None, engine=engine)
     except ImportError as exc:
         raise ValueError(
             f"Gagal membaca file Excel: engine '{engine}' tidak tersedia. "
