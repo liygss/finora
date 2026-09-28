@@ -96,6 +96,24 @@ def check_db_connection() -> bool:
         return False
 
 
+def get_database_size_mb() -> float | None:
+    """Ukuran database dalam MB, atau None kalau tidak bisa diukur.
+
+    Dipakai health endpoint sebagai peringatan dini: provider database gratis
+    punya kuota storage kecil, dan ketika kuota habis project di-suspend sehingga
+    seluruh aplikasi mati tanpa bisa diperbaiki dari sisi aplikasi.
+    """
+    if settings.is_sqlite:
+        return None
+    try:
+        with engine.connect() as conn:
+            size = conn.execute(text("SELECT pg_database_size(current_database())")).scalar()
+        return round(size / (1024 * 1024), 1)
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("Tidak bisa mengukur ukuran database: %s", exc)
+        return None
+
+
 # ---------------------------------------------------------------------------
 # Qdrant (vector database)
 # ---------------------------------------------------------------------------

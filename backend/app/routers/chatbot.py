@@ -12,7 +12,12 @@ from app.accounting.jurnal_umum import JurnalDetailInputDTO, JurnalError
 from app.accounting.jurnal_umum import buat_jurnal as service_buat_jurnal
 from app.config.logging import get_logger
 from app.config.settings import settings
-from app.database.database import check_db_connection, check_qdrant_connection, get_db
+from app.database.database import (
+    check_db_connection,
+    check_qdrant_connection,
+    get_db,
+    get_database_size_mb,
+)
 from app.database.models import Akun, User
 from app.llm.embedding_service import is_embedding_ready
 from app.llm.ollama_service import OllamaError, chat_completion
@@ -62,6 +67,13 @@ def health() -> dict:
         # diunduh di background, RAG akan aktif di request berikutnya.
         degraded.append("embedding_belum_warm")
 
+    # Peringatan dini kuota storage. Saat kuota habis, provider men-suspend
+    # project sehingga seluruh aplikasi mati (registrasi, upload, dashboard)
+    # dan tidak bisa diperbaiki dari sisi aplikasi — hanya dari akun provider.
+    db_size_mb = get_database_size_mb() if db_ok else None
+    if db_size_mb is not None and db_size_mb >= settings.DB_SIZE_WARN_MB:
+        degraded.append(f"penyimpanan_database_mendekati_kuota({db_size_mb}MB)")
+
     return {
         "status": "ok" if db_ok else "degraded",
         "module": "chatbot",
@@ -76,6 +88,7 @@ def health() -> dict:
                 else settings.EMBEDDING_MODEL
             ),
         },
+        "database_size_mb": db_size_mb,
         "degraded": degraded,
     }
 

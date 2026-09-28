@@ -156,6 +156,11 @@ class Settings(BaseSettings):
     # yang jelas. Batas ini hanya berlaku di serverless; desktop tidak punya
     # plafon tersebut.
     MAX_UPLOAD_SIZE_MB: int = 4
+
+    # Ambang peringatan ukuran database (MB) untuk /api/chatbot/health. Plan
+    # gratis database biasanya punya kuota sekitar 500MB; project di-suspend
+    # begitu kuota habis, dan itu tidak bisa diperbaiki dari sisi aplikasi.
+    DB_SIZE_WARN_MB: float = 400.0
     ALLOWED_UPLOAD_EXTENSIONS: List[str] = [".csv", ".xlsx", ".xls", ".pdf"]
 
     # ---------- RAG ----------
