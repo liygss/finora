@@ -28,7 +28,7 @@ const SLIDES = [
     icon: LayoutDashboard,
     title: 'Dashboard Real-Time',
     tag: 'Ringkasan Keuangan',
-    color: '#3B82F6',
+    color: '#2563EB',
     desc: 'Pantau saldo kas & bank, pendapatan, beban, dan laba bersih dalam satu pandangan. Semua angka diperbarui otomatis setiap ada transaksi.',
     bullets: ['Statistik & grafik real-time', 'Filter per bulan / kuartal', 'Akses cepat ke semua fitur'],
   },
@@ -37,7 +37,7 @@ const SLIDES = [
     icon: MessageSquare,
     title: 'Chatbot AI Akuntansi',
     tag: 'Tanya Jawab Cerdas',
-    color: '#10B981',
+    color: '#059669',
     desc: 'Tanyakan apa saja soal SAK EMKM, pajak, sampai kondisi keuangan bisnis Anda. AI menjawab akurat dengan sumber dari knowledge base.',
     bullets: ['Pahami SAK EMKM & PPh Final', 'Jawaban disertai sumber', 'Akses data keuangan akun'],
   },
@@ -46,7 +46,7 @@ const SLIDES = [
     icon: FileText,
     title: 'Jurnal Umum Otomatis',
     tag: 'Pencatatan Transaksi',
-    color: '#F59E0B',
+    color: '#D97706',
     desc: 'Buat jurnal dengan sistem debit-kredit yang otomatis menjaga keseimbangan. Tidak perlu paham akuntansi untuk mencatatnya.',
     bullets: ['Validasi balance otomatis', 'Pilih akun dari Chart of Account', 'Detail multi-baris per transaksi'],
   },
@@ -55,7 +55,7 @@ const SLIDES = [
     icon: BarChart3,
     title: 'Laporan Keuangan',
     tag: 'Neraca & Laba Rugi',
-    color: '#8B5CF6',
+    color: '#7C3AED',
     desc: 'Laba rugi, neraca saldo, posisi keuangan, hingga CALK dibuat otomatis dan siap diunduh dalam berbagai format.',
     bullets: ['Laporan sesuai SAK EMKM', 'Export PDF, Excel & CSV', 'CALK (Catatan atas Laporan) otomatis'],
   },
@@ -64,7 +64,7 @@ const SLIDES = [
     icon: Calculator,
     title: 'Kalkulator Pajak',
     tag: 'PPh Final & PPN',
-    color: '#EF4444',
+    color: '#DC2626',
     desc: 'Hitung PPh Final UMKM 0,5% dan PPN secara instan. Lengkap dengan rincian dan catatan perhitungan.',
     bullets: ['PPh Final 0,5% otomatis', 'PPN 11% & barang mewah', 'Rincian perhitungan lengkap'],
   },
@@ -73,7 +73,7 @@ const SLIDES = [
     icon: UploadCloud,
     title: 'Upload & Proses',
     tag: 'Knowledge Base',
-    color: '#06B6D4',
+    color: '#0891B2',
     desc: 'Upload CSV transaksi atau PDF aturan pajak. Sistem otomatis memproses, memvalidasi, dan menyimpannya ke knowledge base AI.',
     bullets: ['Drag & drop file', 'Status proses real-time', 'CSV, XLSX, PDF didukung'],
   },
@@ -101,10 +101,10 @@ function useCountUp(target, duration = 1600) {
 
 function DashboardMock() {
   const stats = [
-    { label: 'Saldo Kas', value: DEMO_DASHBOARD.saldoKas, icon: Wallet, color: 'var(--color-accent-blue)', bg: 'rgba(59,130,246,0.12)' },
-    { label: 'Saldo Bank', value: DEMO_DASHBOARD.saldoBank, icon: Banknote, color: 'var(--color-accent-emerald)', bg: 'rgba(16,185,129,0.12)' },
-    { label: 'Pendapatan', value: DEMO_DASHBOARD.pendapatan, icon: TrendingUp, color: 'var(--color-accent-emerald)', bg: 'rgba(16,185,129,0.12)' },
-    { label: 'Beban', value: DEMO_DASHBOARD.beban, icon: TrendingDown, color: 'var(--color-accent-red)', bg: 'rgba(239,68,68,0.12)' },
+    { label: 'Saldo Kas', value: DEMO_DASHBOARD.saldoKas, icon: Wallet, color: 'var(--color-accent-blue)', bg: 'rgba(37,99,235,0.12)' },
+    { label: 'Saldo Bank', value: DEMO_DASHBOARD.saldoBank, icon: Banknote, color: 'var(--color-accent-emerald)', bg: 'rgba(5,150,105,0.12)' },
+    { label: 'Pendapatan', value: DEMO_DASHBOARD.pendapatan, icon: TrendingUp, color: 'var(--color-accent-emerald)', bg: 'rgba(5,150,105,0.12)' },
+    { label: 'Beban', value: DEMO_DASHBOARD.beban, icon: TrendingDown, color: 'var(--color-accent-red)', bg: 'rgba(220,38,38,0.12)' },
   ]
 
   return (
@@ -156,8 +156,8 @@ function DashboardMock() {
                 contentStyle={{ background: 'var(--color-surface-0)', border: '1px solid rgba(148,163,184,0.2)', borderRadius: 12, fontSize: 12 }}
                 labelStyle={{ color: 'var(--color-slate-text)' }}
               />
-              <Bar dataKey="Pendapatan" fill="#3B82F6" radius={[4, 4, 0, 0]} isAnimationActive={false} shape={MotionBarShape} activeBar={<MotionActiveBar />} />
-              <Bar dataKey="Beban" fill="#F59E0B" radius={[4, 4, 0, 0]} isAnimationActive={false} shape={MotionBarShape} activeBar={<MotionActiveBar />} />
+              <Bar dataKey="Pendapatan" fill="#2563EB" radius={[4, 4, 0, 0]} isAnimationActive={false} shape={MotionBarShape} activeBar={<MotionActiveBar />} />
+              <Bar dataKey="Beban" fill="#D97706" radius={[4, 4, 0, 0]} isAnimationActive={false} shape={MotionBarShape} activeBar={<MotionActiveBar />} />
             </BarChart>
           </ResponsiveContainer>
         </motion.div>
@@ -190,7 +190,7 @@ function ChatbotMock() {
     <div className="flex h-full flex-col rounded-2xl overflow-hidden animate-scale-in" style={{ background: 'var(--color-glass-bg)', border: '1px solid rgba(148,163,184,0.12)' }}>
       <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid rgba(148,163,184,0.12)' }}>
         <div className="relative">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #059669, #10B981)', boxShadow: '0 0 16px rgba(16,185,129,0.4)' }}>
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #059669, #059669)', boxShadow: '0 0 16px rgba(15,23,42,0.12)' }}>
             <Bot size={18} className="text-white" />
           </div>
           <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[var(--color-surface-deep)]" style={{ background: 'var(--color-accent-emerald)' }} />
@@ -199,20 +199,20 @@ function ChatbotMock() {
           <div className="text-sm font-bold" style={{ color: 'var(--color-slate-heading)' }}>Asisten Finora</div>
           <div className="text-[10px] font-medium" style={{ color: 'var(--color-accent-emerald)' }}>Online • Menjawab instan</div>
         </div>
-        <span className="ml-auto rounded-full px-2.5 py-1 text-[10px] font-bold" style={{ background: 'rgba(16,185,129,0.12)', color: 'var(--color-accent-emerald)', border: '1px solid rgba(16,185,129,0.25)' }}>
+        <span className="ml-auto rounded-full px-2.5 py-1 text-[10px] font-bold" style={{ background: 'rgba(5,150,105,0.12)', color: 'var(--color-accent-emerald)', border: '1px solid rgba(5,150,105,0.25)' }}>
           SAK EMKM
         </span>
       </div>
 
       <div className="flex-1 space-y-4 p-4 overflow-hidden">
         <div className="flex justify-end animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <div className="max-w-[85%] rounded-2xl rounded-tr-sm px-4 py-3 text-sm" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', color: '#fff', boxShadow: '0 4px 16px rgba(37,99,235,0.35)' }}>
+          <div className="max-w-[85%] rounded-2xl rounded-tr-sm px-4 py-3 text-sm" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', color: '#fff', boxShadow: '0 4px 16px rgba(15,23,42,0.12)' }}>
             Bagaimana mencatat penjualan tunai sesuai SAK EMKM?
           </div>
         </div>
 
         <div className="flex gap-3 animate-fade-in" style={{ animationDelay: '900ms' }}>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #059669, #10B981)' }}>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #059669, #059669)' }}>
             <Bot size={15} className="text-white" />
           </div>
           <div className="space-y-2">
@@ -223,7 +223,7 @@ function ChatbotMock() {
             </div>
             <div className="rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed animate-fade-in" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.15)', color: 'var(--color-slate-text)', animationDelay: '1600ms' }}>
               <p className="mb-2">Pada SAK EMKM, penjualan tunai dicatat:</p>
-              <div className="space-y-1 rounded-xl p-3 text-xs" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
+              <div className="space-y-1 rounded-xl p-3 text-xs" style={{ background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.2)' }}>
                 <div className="flex justify-between"><span style={{ color: 'var(--color-accent-emerald)' }}>Debit — Kas</span><span className="font-semibold" style={{ color: 'var(--color-accent-emerald)' }}>Rp 1.500.000</span></div>
                 <div className="flex justify-between"><span style={{ color: 'var(--color-accent-red)' }}>Kredit — Pendapatan</span><span className="font-semibold" style={{ color: 'var(--color-accent-red)' }}>Rp 1.500.000</span></div>
               </div>
@@ -247,7 +247,7 @@ function JurnalMock() {
           <div className="text-sm font-bold" style={{ color: 'var(--color-slate-heading)' }}>Jurnal Umum</div>
           <div className="text-[11px]" style={{ color: 'var(--color-slate-muted)' }}>Bulan Maret 2026</div>
         </div>
-        <span className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: 'rgba(16,185,129,0.12)', color: 'var(--color-accent-emerald)', border: '1px solid rgba(16,185,129,0.25)' }}>
+        <span className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: 'rgba(5,150,105,0.12)', color: 'var(--color-accent-emerald)', border: '1px solid rgba(5,150,105,0.25)' }}>
           <CheckCircle2 size={13} /> Balance ✓
         </span>
       </div>
@@ -265,7 +265,7 @@ function JurnalMock() {
             {DEMO_JURNAL.map((row, i) => (
               <tr key={row.no} className="row-in" style={{ borderBottom: '1px solid rgba(148,163,184,0.06)', animationDelay: `${300 + i * 250}ms` }}>
                 <td className="px-5 py-3">
-                  <span className="rounded-lg px-2 py-0.5 text-[11px] font-bold" style={{ background: 'rgba(59,130,246,0.12)', color: 'var(--color-accent-blue)' }}>{row.no}</span>
+                  <span className="rounded-lg px-2 py-0.5 text-[11px] font-bold" style={{ background: 'rgba(37,99,235,0.12)', color: 'var(--color-accent-blue)' }}>{row.no}</span>
                   <div className="mt-0.5 text-[11px]" style={{ color: 'var(--color-slate-muted)' }}>{row.tanggal}</div>
                 </td>
                 <td className="px-5 py-3 font-medium" style={{ color: 'var(--color-slate-text)' }}>{row.deskripsi}</td>
@@ -296,7 +296,7 @@ function LaporanMock() {
     <div className="space-y-3">
       <div className="flex items-center justify-between rounded-2xl px-5 py-4 animate-fade-in" style={{ background: 'var(--color-glass-bg)', border: '1px solid rgba(148,163,184,0.12)' }}>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)', boxShadow: '0 4px 16px rgba(139,92,246,0.4)' }}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #7C3AED, #7C3AED)', boxShadow: '0 4px 16px rgba(15,23,42,0.12)' }}>
             <BarChart3 size={18} className="text-white" />
           </div>
           <div>
@@ -304,15 +304,15 @@ function LaporanMock() {
             <div className="text-[11px]" style={{ color: 'var(--color-slate-muted)' }}>Per 31 Juli 2026</div>
           </div>
         </div>
-        <span className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold animate-glow-pulse" style={{ background: 'rgba(139,92,246,0.12)', color: 'var(--color-accent-purple)', border: '1px solid rgba(139,92,246,0.3)' }}>
+        <span className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: 'rgba(124,58,237,0.1)', color: 'var(--color-accent-purple)', border: '1px solid rgba(124,58,237,0.25)' }}>
           <ShieldCheck size={13} /> Seimbang
         </span>
       </div>
 
       {[
-        { label: 'Total Aset', value: aset, color: 'var(--color-accent-blue)', bg: 'rgba(59,130,246,0.1)', delay: '200ms' },
-        { label: 'Total Liabilitas', value: liabilitas, color: 'var(--color-accent-red)', bg: 'rgba(239,68,68,0.1)', delay: '500ms' },
-        { label: 'Total Modal + Laba', value: modal, color: 'var(--color-accent-emerald)', bg: 'rgba(16,185,129,0.1)', delay: '800ms' },
+        { label: 'Total Aset', value: aset, color: 'var(--color-accent-blue)', bg: 'rgba(37,99,235,0.1)', delay: '200ms' },
+        { label: 'Total Liabilitas', value: liabilitas, color: 'var(--color-accent-red)', bg: 'rgba(220,38,38,0.1)', delay: '500ms' },
+        { label: 'Total Modal + Laba', value: modal, color: 'var(--color-accent-emerald)', bg: 'rgba(5,150,105,0.1)', delay: '800ms' },
       ].map((row) => (
         <div key={row.label} className="flex items-center justify-between rounded-2xl px-5 py-4 animate-fade-in" style={{ background: 'var(--color-glass-bg)', border: '1px solid rgba(148,163,184,0.12)', animationDelay: row.delay }}>
           <div className="flex items-center gap-2.5">
@@ -323,7 +323,7 @@ function LaporanMock() {
         </div>
       ))}
 
-      <div className="rounded-2xl px-5 py-3.5 text-center animate-fade-in" style={{ background: 'rgba(139,92,246,0.08)', border: '1px dashed rgba(139,92,246,0.35)', animationDelay: '1100ms' }}>
+      <div className="rounded-2xl px-5 py-3.5 text-center animate-fade-in" style={{ background: 'rgba(124,58,237,0.08)', border: '1px dashed rgba(124,58,237,0.35)', animationDelay: '1100ms' }}>
         <span className="text-xs font-bold" style={{ color: 'var(--color-accent-purple)' }}>Aset = Liabilitas + Modal ✓</span>
       </div>
     </div>
@@ -343,13 +343,12 @@ function PajakMock() {
         </div>
         <div className="text-2xl font-black" style={{ color: 'var(--color-slate-heading)' }}>{formatRupiah(Math.round(omzet))}</div>
         <div className="mt-3 flex flex-wrap gap-2">
-          <span className="rounded-lg px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--color-accent-red)', border: '1px solid rgba(239,68,68,0.25)' }}>Tarif: {DEMO_PAJAK.tarif}</span>
-          <span className="rounded-lg px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(59,130,246,0.1)', color: 'var(--color-accent-blue)', border: '1px solid rgba(59,130,246,0.25)' }}>Omzet Kumulatif: {formatRupiah(DEMO_PAJAK.omzetKumulatif)}</span>
+          <span className="rounded-lg px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(220,38,38,0.1)', color: 'var(--color-accent-red)', border: '1px solid rgba(220,38,38,0.25)' }}>Tarif: {DEMO_PAJAK.tarif}</span>
+          <span className="rounded-lg px-2.5 py-1 text-[11px] font-bold" style={{ background: 'rgba(37,99,235,0.1)', color: 'var(--color-accent-blue)', border: '1px solid rgba(37,99,235,0.25)' }}>Omzet Kumulatif: {formatRupiah(DEMO_PAJAK.omzetKumulatif)}</span>
         </div>
       </div>
 
-      <div className="relative rounded-2xl p-5 overflow-hidden animate-scale-in" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05))', border: '1px solid rgba(239,68,68,0.3)', animationDelay: '500ms' }}>
-        <div className="absolute -top-10 -right-10 h-28 w-28 rounded-full blur-2xl animate-blob" style={{ background: 'rgba(239,68,68,0.25)' }} />
+      <div className="relative rounded-2xl p-5 overflow-hidden animate-scale-in" style={{ background: 'linear-gradient(135deg, rgba(220,38,38,0.15), rgba(220,38,38,0.05))', border: '1px solid rgba(220,38,38,0.3)', animationDelay: '500ms' }}>
         <div className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-accent-red)' }}>PPh Final Terutang</div>
         <div className="text-3xl font-black" style={{ color: 'var(--color-accent-red)' }}>{formatRupiah(Math.round(pph))}</div>
         <div className="mt-3 text-[11px] leading-relaxed" style={{ color: 'var(--color-slate-body)' }}>
@@ -379,7 +378,7 @@ function UploadMock() {
   return (
     <div className="flex h-full flex-col rounded-2xl overflow-hidden animate-fade-in" style={{ background: 'var(--color-glass-bg)', border: '1px solid rgba(148,163,184,0.12)' }}>
       <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: '1px solid rgba(148,163,184,0.12)' }}>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #0891B2, #06B6D4)', boxShadow: '0 4px 16px rgba(6,182,212,0.4)' }}>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #0891B2, #0891B2)', boxShadow: '0 4px 16px rgba(6,182,212,0.4)' }}>
           <UploadCloud size={18} className="text-white" />
         </div>
         <div>
@@ -481,9 +480,6 @@ export default function DemoPage() {
   return (
     <div className="app-bg relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-[-20%] right-[-10%] h-[60vh] w-[60vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(37,99,235,0.18)' }} />
-        <div className="absolute bottom-[-30%] left-[-15%] h-[60vh] w-[60vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(139,92,246,0.12)', animationDelay: '5s' }} />
-        <div className="absolute top-[40%] left-[35%] h-[45vh] w-[45vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(16,185,129,0.07)', animationDelay: '9s' }} />
       </div>
 
       <div className="relative z-10 flex min-h-screen flex-col">
@@ -494,7 +490,7 @@ export default function DemoPage() {
             {user ? 'Dashboard' : 'Beranda'}
           </Link>
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl" style={{ boxShadow: '0 4px 14px rgba(59,130,246,0.4)' }}>
+            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl" style={{ boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}>
               <img src="/finora_logo.jpeg" alt="Finora" className="h-full w-full object-cover" />
             </div>
             <span className="text-sm font-bold" style={{ color: 'var(--color-slate-heading)' }}>Finora <span className="hidden sm:inline font-medium" style={{ color: 'var(--color-slate-muted)' }}>/ Demo</span></span>
@@ -603,9 +599,9 @@ export default function DemoPage() {
                 <div className="relative rounded-3xl p-1.5 animate-scale-in" style={{ background: `linear-gradient(145deg, ${slide.color}33, transparent 60%)`, border: '1px solid rgba(148,163,184,0.15)', boxShadow: '0 24px 60px var(--color-shadow, rgba(0,0,0,0.45))' }}>
                   <div className="relative overflow-hidden rounded-[22px]">
                     <div className="flex items-center gap-1.5 px-4 py-3" style={{ background: 'var(--color-surface-card)', borderBottom: '1px solid rgba(148,163,184,0.12)' }}>
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#EF4444' }} />
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#F59E0B' }} />
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#10B981' }} />
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#DC2626' }} />
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#D97706' }} />
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#059669' }} />
                       <span className="ml-3 text-[10px] font-medium" style={{ color: 'var(--color-slate-muted)' }}>app.aiumkm.id — {slide.key}</span>
                     </div>
                     <div className="h-[430px] lg:h-[470px] p-4 overflow-y-auto" style={{ background: 'var(--color-glass-bg)' }}>
@@ -622,15 +618,15 @@ export default function DemoPage() {
         {onboard && done && (
           <div className="px-5 lg:px-8 pb-6">
             <div className="mx-auto max-w-6xl animate-slide-up">
-              <div className="flex items-center gap-5 rounded-3xl px-6 py-6 sm:px-10" style={{ background: 'var(--color-glass-bg)', border: '1px solid rgba(59,130,246,0.25)', backdropFilter: 'blur(16px)', boxShadow: '0 16px 48px rgba(59,130,246,0.15)' }}>
-                <div className="hidden sm:flex shrink-0 h-16 w-16 items-center justify-center rounded-2xl overflow-hidden animate-buddy-pop" style={{ boxShadow: '0 4px 20px rgba(59,130,246,0.4)' }}>
+              <div className="flex items-center gap-5 rounded-3xl px-6 py-6 sm:px-10" style={{ background: 'var(--color-glass-bg)', border: '1px solid rgba(37,99,235,0.25)', backdropFilter: 'blur(16px)', boxShadow: '0 16px 48px rgba(15,23,42,0.12)' }}>
+                <div className="hidden sm:flex shrink-0 h-16 w-16 items-center justify-center rounded-2xl overflow-hidden animate-buddy-pop" style={{ boxShadow: '0 4px 20px rgba(15,23,42,0.12)' }}>
                   <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-full w-full object-contain" />
                 </div>
                 <div className="flex-1">
                   <div className="text-base font-bold" style={{ color: 'var(--color-slate-heading)' }}>Mantap! Itu dia fitur inti Finora.</div>
                   <p className="text-xs mt-1" style={{ color: 'var(--color-slate-muted)' }}>Sekarang kamu sudah tahu gambarannya. Yuk lanjut ke tutorial singkat biar makin jago pakai!</p>
                 </div>
-                <Link to="/dashboard" className="shrink-0 group inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 8px 24px rgba(59,130,246,0.4)' }}>
+                <Link to="/dashboard" className="shrink-0 group inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}>
                   Mulai Tutorial <ArrowRight size={15} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </div>
@@ -681,7 +677,7 @@ export default function DemoPage() {
         <div className="px-5 lg:px-8 pb-10">
           <div className="mx-auto flex max-w-6xl flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl px-6 py-6 sm:px-10" style={{ background: 'var(--color-glass-bg)', border: '1px solid rgba(148,163,184,0.15)', backdropFilter: 'blur(16px)' }}>
             <div className="flex items-center gap-4">
-              <div className="hidden sm:flex h-11 w-11 items-center justify-center rounded-2xl overflow-hidden animate-float-gentle" style={{ boxShadow: '0 4px 20px rgba(59,130,246,0.5)' }}>
+              <div className="hidden sm:flex h-11 w-11 items-center justify-center rounded-2xl overflow-hidden animate-float-gentle" style={{ boxShadow: '0 4px 20px rgba(15,23,42,0.12)' }}>
                 {onboard ? (
                   <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-full w-full object-contain" />
                 ) : (
@@ -694,11 +690,11 @@ export default function DemoPage() {
               </div>
             </div>
             {user ? (
-              <Link to="/dashboard" className="group inline-flex shrink-0 items-center gap-2 rounded-full px-7 py-3.5 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-1" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 10px 30px rgba(59,130,246,0.45)' }}>
+              <Link to="/dashboard" className="group inline-flex shrink-0 items-center gap-2 rounded-full px-7 py-3.5 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-1" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 10px 30px rgba(15,23,42,0.12)' }}>
                 {onboard ? 'Mulai Tutorial' : 'Buka Dashboard'} <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             ) : (
-              <Link to="/register" className="group inline-flex shrink-0 items-center gap-2 rounded-full px-7 py-3.5 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-1" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 10px 30px rgba(59,130,246,0.45)' }}>
+              <Link to="/register" className="group inline-flex shrink-0 items-center gap-2 rounded-full px-7 py-3.5 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-1" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 10px 30px rgba(15,23,42,0.12)' }}>
                 Mulai Sekarang <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             )}

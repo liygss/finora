@@ -77,8 +77,8 @@ export default function BuddySetupWelcome({ onDismiss }) {
               height: 4 + i * 2,
               left: `${15 + i * 14}%`,
               bottom: '20%',
-              background: `rgba(59, 130, 246, ${0.3 + i * 0.05})`,
-              boxShadow: `0 0 ${8 + i * 4}px rgba(59, 130, 246, 0.4)`,
+              background: `rgba(37, 99, 235, ${0.3 + i * 0.05})`,
+              boxShadow: `0 0 ${8 + i * 4}px rgba(37, 99, 235, 0.4)`,
             }}
           />
         ))}
@@ -90,23 +90,23 @@ export default function BuddySetupWelcome({ onDismiss }) {
         animate="visible"
         className="relative w-full max-w-md"
       >
-        <div className="rounded-3xl overflow-hidden" style={{ background: 'var(--color-surface-card)', border: '1px solid var(--color-border-subtle)', boxShadow: '0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.1), 0 0 120px rgba(59,130,246,0.08)' }}>
+        <div className="rounded-3xl overflow-hidden" style={{ background: 'var(--color-surface-card)', border: '1px solid var(--color-border-subtle)', boxShadow: '0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(15,23,42,0.12), 0 0 120px rgba(15,23,42,0.12)' }}>
 
           {/* Buddy image area with ambient glow */}
-          <div className="relative flex items-center justify-center pt-10 pb-6 overflow-hidden" style={{ background: 'linear-gradient(180deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.04) 60%, transparent 100%)' }}>
+          <div className="relative flex items-center justify-center pt-10 pb-6 overflow-hidden" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.15) 0%, rgba(37,99,235,0.04) 60%, transparent 100%)' }}>
             {/* Background glow orbs */}
             <div className="absolute inset-0 pointer-events-none">
               <motion.div
                 animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute top-0 right-4 h-40 w-40 rounded-full blur-3xl"
-                style={{ background: 'rgba(59,130,246,0.25)' }}
+                style={{ background: 'rgba(37,99,235,0.25)' }}
               />
               <motion.div
                 animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.2, 0.1] }}
                 transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 className="absolute bottom-0 left-4 h-32 w-32 rounded-full blur-3xl"
-                style={{ background: 'rgba(139,92,246,0.2)' }}
+                style={{ background: 'rgba(124,58,237,0.2)' }}
               />
             </div>
 
@@ -190,7 +190,7 @@ export default function BuddySetupWelcome({ onDismiss }) {
                 whileHover={{ scale: 1.02, y: -1 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full flex items-center justify-center gap-2.5 rounded-xl px-5 py-3.5 text-sm font-bold text-white transition-all duration-200"
-                style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 6px 24px rgba(59, 130, 246, 0.45), inset 0 1px 1px rgba(255,255,255,0.2)' }}
+                style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 6px 24px rgba(15,23,42,0.12), inset 0 1px 1px rgba(255,255,255,0.2)' }}
               >
                 <span>Mulai Isi Data</span>
                 <motion.span

@@ -73,7 +73,7 @@ export default function AccountingPage() {
       <span className={`badge ${KATEGORI_BADGE[r.kategori] || ''}`} style={!KATEGORI_BADGE[r.kategori] ? { background: 'rgba(148,163,184,0.12)', color: 'var(--color-slate-body)' } : undefined}>{r.kategori}</span>
     )},
     { header: 'Saldo Normal', accessor: 'saldo_normal', render: r => (
-      <span className="badge" style={{ background: r.saldo_normal === 'DEBIT' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(59, 130, 246, 0.12)', color: r.saldo_normal === 'DEBIT' ? '#34D399' : 'var(--color-accent-blue)' }}>{r.saldo_normal}</span>
+      <span className="badge" style={{ background: r.saldo_normal === 'DEBIT' ? 'rgba(5, 150, 105, 0.12)' : 'rgba(37, 99, 235, 0.12)', color: r.saldo_normal === 'DEBIT' ? '#10B981' : 'var(--color-accent-blue)' }}>{r.saldo_normal}</span>
     )},
     {
       header: 'Saldo', accessor: 'saldo', render: r => {
@@ -84,7 +84,7 @@ export default function AccountingPage() {
         const isDebit = s.debit > 0
         const nilai = isDebit ? s.debit : s.kredit
         return (
-          <span className="inline-flex items-center font-mono tabular-nums text-sm font-semibold num-cell" style={{ color: isDebit ? '#34D399' : 'var(--color-accent-blue)' }}>
+          <span className="inline-flex items-center font-mono tabular-nums text-sm font-semibold num-cell" style={{ color: isDebit ? '#10B981' : 'var(--color-accent-blue)' }}>
             {formatRupiah(nilai)}
           </span>
         )
@@ -107,9 +107,9 @@ export default function AccountingPage() {
       {/* Filters & Search */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex gap-2 flex-wrap">
-          <button onClick={() => setFilter('')} className="rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200" style={!filter ? { background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', color: 'white', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)' } : { background: 'var(--color-surface-card)', color: 'var(--color-slate-body)', border: '1px solid rgba(148, 163, 184, 0.14)' }}>Semua</button>
+          <button onClick={() => setFilter('')} className="rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200" style={!filter ? { background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', color: 'white', boxShadow: '0 4px 12px rgba(15,23,42,0.12)' } : { background: 'var(--color-surface-card)', color: 'var(--color-slate-body)', border: '1px solid rgba(148, 163, 184, 0.14)' }}>Semua</button>
           {KATEGORI.map(k => (
-            <button key={k} onClick={() => setFilter(k)} className="rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200" style={filter === k ? { background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', color: 'white', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)' } : { background: 'var(--color-surface-card)', color: 'var(--color-slate-body)', border: '1px solid rgba(148, 163, 184, 0.14)' }}>{k}</button>
+            <button key={k} onClick={() => setFilter(k)} className="rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200" style={filter === k ? { background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', color: 'white', boxShadow: '0 4px 12px rgba(15,23,42,0.12)' } : { background: 'var(--color-surface-card)', color: 'var(--color-slate-body)', border: '1px solid rgba(148, 163, 184, 0.14)' }}>{k}</button>
           ))}
         </div>
         <div className="relative">

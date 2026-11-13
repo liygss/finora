@@ -42,9 +42,6 @@ export default function RegisterPage() {
     <div className="relative flex min-h-screen overflow-hidden" style={{ background: 'var(--color-surface-0)' }}>
       {/* Aurora background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-[-15%] right-[-10%] h-[55vh] w-[55vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(37, 99, 235, 0.18)' }} />
-        <div className="absolute bottom-[-25%] left-[-10%] h-[55vh] w-[55vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(139, 92, 246, 0.1)', animationDelay: '5s' }} />
-        <div className="absolute top-[40%] left-[30%] h-[40vh] w-[40vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(16, 185, 129, 0.06)', animationDelay: '9s' }} />
         <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(148,163,184,0.05) 1px, transparent 0)', backgroundSize: '36px 36px' }} />
       </div>
 
@@ -52,9 +49,6 @@ export default function RegisterPage() {
         {/* Left decorative panel - Blue gradient */}
         <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0B1E50 0%, #1D4ED8 50%, #2563EB 100%)' }}>
           {/* Aurora blobs */}
-          <div className="absolute top-16 right-16 h-72 w-72 rounded-full blur-3xl animate-blob" style={{ background: 'rgba(255, 255, 255, 0.04)' }} />
-          <div className="absolute bottom-20 left-10 h-64 w-64 rounded-full blur-3xl animate-blob delay-200" style={{ background: 'rgba(96, 165, 250, 0.25)' }} />
-          <div className="absolute top-1/3 right-1/3 h-48 w-48 rounded-full blur-3xl animate-blob delay-400" style={{ background: 'rgba(255, 255, 255, 0.04)' }} />
           <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '28px 28px' }} />
 
           {/* Floating elements */}
@@ -92,7 +86,7 @@ export default function RegisterPage() {
             <div className="mt-12 space-y-4 animate-slide-in-left delay-200">
               {benefits.map((text, i) => (
                 <div key={i} className="flex items-center gap-3 text-sm" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16,185,129,0.25)' }}>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: 'rgba(5, 150, 105, 0.2)', border: '1px solid rgba(5,150,105,0.25)' }}>
                     <CheckCircle size={14} style={{ color: '#6EE7B7' }} />
                   </div>
                   {text}
@@ -114,7 +108,7 @@ export default function RegisterPage() {
             <div className="lg:hidden flex items-center gap-3 mb-8">
               <div
                 className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl"
-                style={{ boxShadow: '0 4px 16px rgba(37, 99, 235, 0.3)' }}
+                style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.12)' }}
               >
                 <img src="/finora_logo.jpeg" alt="Finora" className="h-full w-full object-cover" />
               </div>
@@ -126,7 +120,7 @@ export default function RegisterPage() {
               style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border-soft)', backdropFilter: 'blur(24px)', boxShadow: '0 24px 80px rgba(0, 0, 0, 0.2)' }}
             >
               <div className="mb-8">
-                <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold mb-4" style={{ background: 'rgba(16,185,129,0.12)', color: '#6EE7B7', border: '1px solid rgba(16,185,129,0.25)' }}>
+                <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold mb-4" style={{ background: 'rgba(5,150,105,0.12)', color: '#6EE7B7', border: '1px solid rgba(5,150,105,0.25)' }}>
                   <Rocket size={12} /> Daftar Gratis
                 </div>
                 <h2 className="text-2xl font-[900] tracking-tight" style={{ color: 'var(--color-slate-heading)' }}>Buat Akun Baru</h2>
@@ -136,11 +130,11 @@ export default function RegisterPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="animate-slide-up">
                   <label className="label">Nama Lengkap</label>
-                  <input type="text" required value={form.full_name} onChange={set('full_name')} className="input-field" placeholder="Budi Santoso" />
+                  <input type="text" required value={form.full_name} onChange={set('full_name')} className="input-field" placeholder="prabowo subianto" />
                 </div>
                 <div className="animate-slide-up delay-100">
                   <label className="label">Email</label>
-                  <input type="email" required value={form.email} onChange={set('email')} className="input-field" placeholder="budi@toko.com" />
+                  <input type="email" required value={form.email} onChange={set('email')} className="input-field" placeholder="prabowo@gmail.com" />
                 </div>
                 <div className="animate-slide-up delay-200">
                   <label className="label">Password</label>

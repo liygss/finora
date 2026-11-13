@@ -103,12 +103,12 @@ export default function BuddyOnboarding({ open, onStartDemo, onContinue, onSkip 
           <X size={16} />
         </button>
 
-        <div className="rounded-3xl overflow-hidden" style={{ background: 'var(--color-surface-card)', border: '1px solid var(--color-border-soft)', boxShadow: '0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(59,130,246,0.08)' }}>
+        <div className="rounded-3xl overflow-hidden" style={{ background: 'var(--color-surface-card)', border: '1px solid var(--color-border-soft)', boxShadow: '0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(15,23,42,0.12)' }}>
           {/* Buddy image area */}
-          <div className="relative flex items-center justify-center pt-8 pb-4" style={{ background: 'linear-gradient(180deg, rgba(59,130,246,0.12) 0%, transparent 100%)' }}>
+          <div className="relative flex items-center justify-center pt-8 pb-4" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.12) 0%, transparent 100%)' }}>
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-2 right-6 h-32 w-32 rounded-full blur-3xl" style={{ background: 'rgba(59,130,246,0.18)' }} />
-              <div className="absolute bottom-0 left-8 h-24 w-24 rounded-full blur-2xl" style={{ background: 'rgba(139,92,246,0.12)' }} />
+              <div className="absolute top-2 right-6 h-32 w-32 rounded-full blur-3xl" style={{ background: 'rgba(37,99,235,0.18)' }} />
+              <div className="absolute bottom-0 left-8 h-24 w-24 rounded-full blur-2xl" style={{ background: 'rgba(124,58,237,0.12)' }} />
             </div>
             <AnimatePresence mode="wait">
               <motion.div
@@ -150,7 +150,7 @@ export default function BuddyOnboarding({ open, onStartDemo, onContinue, onSkip 
                   style={{
                     width: i === step ? 20 : 8,
                     height: 8,
-                    background: i === step ? 'linear-gradient(135deg, #1D4ED8, #3B82F6)' : i < step ? 'var(--color-accent-blue)' : 'var(--color-border-soft)',
+                    background: i === step ? 'linear-gradient(135deg, #1D4ED8, #2563EB)' : i < step ? 'var(--color-accent-blue)' : 'var(--color-border-soft)',
                     opacity: i > step && !isLast ? 0.4 : 1,
                   }}
                 />
@@ -167,7 +167,7 @@ export default function BuddyOnboarding({ open, onStartDemo, onContinue, onSkip 
                   onClick={advance}
                   disabled={isTyping}
                   className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold text-white transition-all duration-300 disabled:opacity-50"
-                  style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 4px 14px rgba(59,130,246,0.4)' }}
+                  style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
                 >
                   <span>{isLast ? 'Lihat Pilihan' : 'Selanjutnya'}</span> <ChevronRight size={14} />
                 </button>
@@ -177,7 +177,7 @@ export default function BuddyOnboarding({ open, onStartDemo, onContinue, onSkip 
                 <button
                   onClick={onStartDemo}
                   className="w-full flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:scale-[1.01]"
-                  style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 4px 14px rgba(59,130,246,0.4)' }}
+                  style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
                 >
                   <span>▶</span>
                   <span>Lihat Demo Singkat (~40 detik)</span>

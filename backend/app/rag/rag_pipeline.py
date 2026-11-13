@@ -23,7 +23,8 @@ logger = get_logger(__name__)
 MAX_HISTORY_MESSAGES = 6  # jumlah pesan terakhir yang dibawa sebagai konteks percakapan
 RETRIEVAL_TOP_K = 8       # ambil agak banyak dulu dari Qdrant
 RERANK_TOP_N = 4          # baru dipangkas ke yang paling relevan setelah rerank
-CATEGORY_BOOST_TOP_K = 6  # tambahan retrieval per kategori (tax/accounting) untuk recall
+CATEGORY_BOOST_TOP_K = 6
+TAX_BOOST_CATEGORIES = ("tax", "regulations", "faq")
 
 
 @dataclass
@@ -77,6 +78,7 @@ def ask(
     pertanyaan: str,
     financial_context: str | None = None,
     page: str | None = None,
+    context_label: str | None = None,
 ) -> RagAnswer:
     session = _get_or_create_session(db, user_id, session_id)
     histori = _ambil_histori(db, session)
@@ -88,7 +90,11 @@ def ask(
     # 1b. Boosting kategori: kalau pertanyaan bernuansa pajak/akuntansi/aplikasi, cari
     #     juga khusus kategori tsb lalu gabungkan (dedupe) dengan hasil umum.
     domain = detect_domain(pertanyaan)
-    if domain in ("tax", "accounting", "app"):
+    if domain == "tax":
+        for category in TAX_BOOST_CATEGORIES:
+            category_hits = retrieve(pertanyaan, top_k=CATEGORY_BOOST_TOP_K, category=category)
+            retrieved = merge_chunks(retrieved, category_hits)
+    elif domain in ("accounting", "app"):
         category_hits = retrieve(pertanyaan, top_k=CATEGORY_BOOST_TOP_K, category=domain)
         retrieved = merge_chunks(retrieved, category_hits)
 
@@ -103,7 +109,7 @@ def ask(
         financial_context = get_financial_context(db, user_id, pertanyaan)
 
     # 4. Prompt (gabungkan knowledge base + financial context)
-    messages = build_messages(pertanyaan, context, histori, financial_context, page)
+    messages = build_messages(pertanyaan, context, histori, financial_context, page, context_label)
 
     # 5. LLM
     raw_answer = chat_completion(messages)

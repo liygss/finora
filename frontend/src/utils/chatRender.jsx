@@ -5,10 +5,17 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Cartes
 
 function renderInline(text) {
   return text
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold" style="color: var(--color-slate-heading)">$1</strong>')
-    .replace(/\*([^*\n]+)\*/g, '<em style="color: var(--color-slate-text)">$1</em>')
-    .replace(/`(.*?)`/g, '<code class="rounded-lg px-1.5 py-0.5 text-xs font-mono" style="background: rgba(59, 130, 246, 0.15); color: var(--color-accent-blue)">$1</code>')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*([^*\n]+)\*/g, '$1')
+    .replace(/\\\*/g, '')
     .replace(/\*/g, '')
+    .replace(/`(.*?)`/g, '<code class="rounded-md px-1.5 py-0.5 text-[0.85em] font-mono" style="background: rgba(37, 99, 235, 0.15); color: var(--color-accent-blue)">$1</code>')
+}
+
+function renderListItem(text) {
+  const match = text.match(/^([^:]{1,48}):\s*(.+)$/)
+  if (!match) return renderInline(text)
+  return `<span class="font-semibold" style="color: var(--color-slate-heading)">${renderInline(match[1])}:</span> ${renderInline(match[2])}`
 }
 
 export function renderMarkdown(text) {
@@ -42,7 +49,7 @@ export function renderMarkdown(text) {
     }
 
     if (line.trim() === '') {
-      result.push(<br key={`br-${i}`} />)
+      result.push(<div key={`space-${i}`} className="h-2" />)
       continue
     }
 
@@ -66,28 +73,50 @@ export function renderMarkdown(text) {
       continue
     }
 
-    let processed = line
-      .replace(/^[-•*] (.*$)/gm, '<li class="ml-4" style="color: var(--color-slate-text)">• $1</li>')
-      .replace(/^(\d+)\. (.*$)/gm, '<li class="ml-4" style="color: var(--color-slate-text)"><span class="font-semibold" style="color: var(--color-accent-blue)">$1.</span> $2</li>')
-
-    processed = renderInline(processed)
-
-    if (processed.includes('<li')) {
-      result.push(<div key={`li-${i}`} className="my-0.5" dangerouslySetInnerHTML={{ __html: processed }} />)
-    } else if (line.startsWith('> ')) {
+    const unordered = line.match(/^[-•*]\s+(.*)$/)
+    const ordered = line.match(/^(\d+)\.\s+(.*)$/)
+    if (unordered || ordered) {
+      const isOrdered = Boolean(ordered)
+      const items = []
+      let j = i
+      while (j < lines.length) {
+        const match = isOrdered
+          ? lines[j].match(/^(\d+)\.\s+(.*)$/)
+          : lines[j].match(/^[-•*]\s+(.*)$/)
+        if (!match) break
+        items.push(isOrdered ? match[2] : match[1])
+        j++
+      }
+      i = j - 1
+      const ListTag = isOrdered ? 'ol' : 'ul'
       result.push(
-        <blockquote key={`q-${i}`} className="my-1.5 rounded-r-lg border-l-2 pl-3 py-1 pr-2 text-sm" style={{ borderColor: 'var(--color-accent-blue)', background: 'rgba(59, 130, 246, 0.08)', color: 'var(--color-slate-body)' }} dangerouslySetInnerHTML={{ __html: processed.replace(/^&gt; /, '') }} />
+        <ListTag
+          key={`list-${i}`}
+          className={isOrdered ? 'my-1.5 space-y-1 pl-5 text-sm leading-7' : 'my-1.5 space-y-1 pl-3 text-sm leading-7'}
+          style={{ color: 'var(--color-slate-text)', listStyleType: isOrdered ? 'decimal' : 'none' }}
+        >
+          {items.map((item, idx) => (
+            <li key={idx} className="break-words" dangerouslySetInnerHTML={{ __html: renderListItem(item) }} />
+          ))}
+        </ListTag>
+      )
+      continue
+    }
+
+    if (line.startsWith('> ')) {
+      result.push(
+        <blockquote key={`q-${i}`} className="my-2 rounded-r-lg border-l-2 py-1.5 pl-3 pr-2 text-sm leading-7" style={{ borderColor: 'var(--color-accent-blue)', background: 'rgba(37, 99, 235, 0.08)', color: 'var(--color-slate-body)' }} dangerouslySetInnerHTML={{ __html: renderInline(line.slice(2)) }} />
       )
     } else if (line.startsWith('#### ')) {
-      result.push(<h4 key={`h4-${i}`} className="text-sm font-bold mt-2 mb-1" style={{ color: 'var(--color-slate-heading)' }} dangerouslySetInnerHTML={{ __html: processed.slice(5) }} />)
+      result.push(<h4 key={`h4-${i}`} className="mb-1 mt-2.5 text-[13px] font-bold" style={{ color: 'var(--color-slate-heading)' }} dangerouslySetInnerHTML={{ __html: renderInline(line.slice(5)) }} />)
     } else if (line.startsWith('### ')) {
-      result.push(<h3 key={`h3-${i}`} className="text-base font-bold mt-2 mb-1" style={{ color: 'var(--color-slate-heading)' }} dangerouslySetInnerHTML={{ __html: processed.slice(4) }} />)
+      result.push(<h3 key={`h3-${i}`} className="mb-1 mt-3 text-sm font-bold" style={{ color: 'var(--color-slate-heading)' }} dangerouslySetInnerHTML={{ __html: renderInline(line.slice(4)) }} />)
     } else if (line.startsWith('# ')) {
-      result.push(<h1 key={`h-${i}`} className="text-lg font-bold mt-3 mb-1" style={{ color: 'var(--color-slate-heading)' }} dangerouslySetInnerHTML={{ __html: processed.slice(2) }} />)
+      result.push(<h1 key={`h-${i}`} className="mb-1.5 mt-3 text-lg font-bold" style={{ color: 'var(--color-slate-heading)' }} dangerouslySetInnerHTML={{ __html: renderInline(line.slice(2)) }} />)
     } else if (line.startsWith('## ')) {
-      result.push(<h2 key={`h-${i}`} className="text-base font-bold mt-2 mb-1" style={{ color: 'var(--color-slate-heading)' }} dangerouslySetInnerHTML={{ __html: processed.slice(3) }} />)
+      result.push(<h2 key={`h2-${i}`} className="mb-1.5 mt-3 text-[15px] font-bold" style={{ color: 'var(--color-slate-heading)' }} dangerouslySetInnerHTML={{ __html: renderInline(line.slice(3)) }} />)
     } else {
-      result.push(<p key={`p-${i}`} className="text-sm leading-relaxed my-0.5" style={{ color: 'var(--color-slate-text)' }} dangerouslySetInnerHTML={{ __html: processed }} />)
+      result.push(<p key={`p-${i}`} className="my-1 break-words text-sm leading-7" style={{ color: 'var(--color-slate-text)' }} dangerouslySetInnerHTML={{ __html: renderInline(line) }} />)
     }
   }
 
@@ -132,7 +161,7 @@ function Table({ data }) {
     <div className="my-2 overflow-x-auto rounded-xl" style={{ border: '1px solid rgba(148, 163, 184, 0.2)' }}>
       <table className="w-full text-xs border-collapse">
         <thead>
-          <tr style={{ background: 'rgba(59, 130, 246, 0.12)' }}>
+          <tr style={{ background: 'rgba(37, 99, 235, 0.12)' }}>
             {header.map((h, idx) => (
               <th key={idx} className="px-3 py-1.5 text-left font-bold whitespace-nowrap" style={{ color: 'var(--color-slate-heading)', borderBottom: '1px solid rgba(148, 163, 184, 0.25)' }}>
                 {h}
@@ -167,17 +196,13 @@ export function TypingIndicator() {
       <div
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden"
         style={{
-          boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+          boxShadow: '0 4px 12px rgba(15,23,42,0.12)',
         }}
       >
         <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-full w-full object-contain" />
       </div>
-      <div className="rounded-2xl rounded-bl-md px-5 py-4" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148, 163, 184, 0.14)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)' }}>
-        <div className="flex items-center gap-1.5">
-          <div className="h-2 w-2 rounded-full typing-dot" style={{ background: '#2563EB' }} />
-          <div className="h-2 w-2 rounded-full typing-dot" style={{ background: 'var(--color-brand-soft)' }} />
-          <div className="h-2 w-2 rounded-full typing-dot" style={{ background: '#1D4ED8' }} />
-        </div>
+      <div className="rounded-2xl rounded-bl-md px-4 py-3" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148, 163, 184, 0.14)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)' }}>
+        <Loader2 size={16} className="animate-spin" style={{ color: 'var(--color-brand-soft)' }} />
       </div>
     </motion.div>
   )
@@ -194,7 +219,7 @@ export function CopyButton({ text }) {
 
   return (
     <button onClick={handleCopy} className="p-1 rounded-lg transition hover:bg-white/10" style={{ color: 'var(--color-slate-muted)' }} title="Salin pesan">
-      {copied ? <Check size={12} style={{ color: '#10B981' }} /> : <Copy size={12} />}
+      {copied ? <Check size={12} style={{ color: '#059669' }} /> : <Copy size={12} />}
     </button>
   )
 }
@@ -203,11 +228,11 @@ export function CopyButton({ text }) {
 // File attachment chip
 // ---------------------------------------------------------------------------
 const FILE_STATUS = {
-  uploading: { icon: Loader2, color: '#F59E0B', label: 'Mengupload...', spin: true },
-  processing: { icon: Clock, color: '#F59E0B', label: 'Diproses' },
-  POSTED: { icon: CheckCircle2, color: '#10B981', label: 'Jurnal dibuat' },
-  INGESTED: { icon: CheckCircle2, color: '#10B981', label: 'Pengetahuan tersimpan' },
-  FAILED: { icon: XCircle, color: '#EF4444', label: 'Gagal' },
+  uploading: { icon: Loader2, color: '#D97706', label: 'Mengupload...', spin: true },
+  processing: { icon: Clock, color: '#D97706', label: 'Diproses' },
+  POSTED: { icon: CheckCircle2, color: '#059669', label: 'Jurnal dibuat' },
+  INGESTED: { icon: CheckCircle2, color: '#059669', label: 'Pengetahuan tersimpan' },
+  FAILED: { icon: XCircle, color: '#DC2626', label: 'Gagal' },
 }
 
 const FILE_ICONS = {
@@ -222,7 +247,7 @@ export function FileAttachmentChip({ file }) {
   const StatusIcon = status.icon
 
   return (
-    <div className="inline-flex items-center gap-2 rounded-xl px-3 py-2 mt-1" style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+    <div className="inline-flex items-center gap-2 rounded-xl px-3 py-2 mt-1" style={{ background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)' }}>
       <Icon size={16} style={{ color: 'var(--color-accent-blue)' }} />
       <span className="text-xs font-medium truncate max-w-[160px]" style={{ color: 'var(--color-slate-heading)' }}>{file.filename}</span>
       <StatusIcon
@@ -251,8 +276,8 @@ export function DatasetTable({ items, status, onConfirm }) {
   }
 
   return (
-    <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(16, 185, 129, 0.25)', background: 'rgba(16, 185, 129, 0.04)' }}>
-      <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid rgba(16, 185, 129, 0.15)', background: 'rgba(16, 185, 129, 0.08)' }}>
+    <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(5, 150, 105, 0.25)', background: 'rgba(5, 150, 105, 0.04)' }}>
+      <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid rgba(5, 150, 105, 0.15)', background: 'rgba(5, 150, 105, 0.08)' }}>
         <span className="text-xs font-bold" style={{ color: 'var(--color-accent-emerald)' }}>
           📊 {items.length} transaksi ditemukan
         </span>
@@ -260,7 +285,7 @@ export function DatasetTable({ items, status, onConfirm }) {
       <div className="max-h-[240px] overflow-y-auto">
         <table className="w-full text-[11px] border-collapse">
           <thead>
-            <tr style={{ background: 'rgba(16, 185, 129, 0.06)' }}>
+            <tr style={{ background: 'rgba(5, 150, 105, 0.06)' }}>
               <th className="px-2.5 py-1.5 text-left font-bold" style={{ color: 'var(--color-slate-heading)' }}>#</th>
               <th className="px-2.5 py-1.5 text-left font-bold" style={{ color: 'var(--color-slate-heading)' }}>Deskripsi</th>
               <th className="px-2.5 py-1.5 text-left font-bold" style={{ color: 'var(--color-slate-heading)' }}>Tanggal</th>
@@ -273,12 +298,12 @@ export function DatasetTable({ items, status, onConfirm }) {
               const totalDebit = item.detail.reduce((s, d) => s + (d.debit || 0), 0)
               const totalKredit = item.detail.reduce((s, d) => s + (d.kredit || 0), 0)
               return (
-                <tr key={idx} style={{ borderTop: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                <tr key={idx} style={{ borderTop: '1px solid rgba(5, 150, 105, 0.1)' }}>
                   <td className="px-2.5 py-1.5 font-medium" style={{ color: 'var(--color-accent-emerald)' }}>{idx + 1}</td>
                   <td className="px-2.5 py-1.5 font-medium" style={{ color: 'var(--color-slate-heading)' }}>{item.deskripsi}</td>
                   <td className="px-2.5 py-1.5" style={{ color: 'var(--color-slate-body)' }}>{item.tanggal}</td>
                   <td className="px-2.5 py-1.5 text-right font-medium" style={{ color: 'var(--color-accent-emerald)' }}>Rp {formatRp(totalDebit)}</td>
-                  <td className="px-2.5 py-1.5 text-right font-medium" style={{ color: '#EF4444' }}>Rp {formatRp(totalKredit)}</td>
+                  <td className="px-2.5 py-1.5 text-right font-medium" style={{ color: '#DC2626' }}>Rp {formatRp(totalKredit)}</td>
                 </tr>
               )
             })}
@@ -286,12 +311,12 @@ export function DatasetTable({ items, status, onConfirm }) {
         </table>
       </div>
       {status === 'ready' && (
-        <div className="px-3 py-2.5" style={{ borderTop: '1px solid rgba(16, 185, 129, 0.15)' }}>
+        <div className="px-3 py-2.5" style={{ borderTop: '1px solid rgba(5, 150, 105, 0.15)' }}>
           <button
             onClick={handleSave}
             disabled={saving}
             className="flex items-center justify-center gap-2 w-full rounded-xl px-4 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg, #059669, #10B981)', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)' }}
+            style={{ background: 'linear-gradient(135deg, #059669, #059669)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
           >
             {saving ? 'Menyimpan...' : <><Check size={14} /> Simpan Semua Jurnal ({items.length})</>}
           </button>
@@ -327,7 +352,7 @@ export function TransactionConfirm({ transaction, onConfirm, onReject }) {
 
   if (status === 'saved') {
     return (
-      <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(16, 185, 129, 0.25)', background: 'rgba(16, 185, 129, 0.06)' }}>
+      <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(5, 150, 105, 0.25)', background: 'rgba(5, 150, 105, 0.06)' }}>
         <div className="px-3 py-2.5 text-center">
           <span className="text-xs font-bold" style={{ color: 'var(--color-accent-emerald)' }}>
             <CheckCircle2 size={13} className="inline mr-1" /> Jurnal tersimpan
@@ -340,9 +365,9 @@ export function TransactionConfirm({ transaction, onConfirm, onReject }) {
 
   if (status === 'rejected') {
     return (
-      <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(239, 68, 68, 0.25)', background: 'rgba(239, 68, 68, 0.06)' }}>
+      <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(220, 38, 38, 0.25)', background: 'rgba(220, 38, 38, 0.06)' }}>
         <div className="px-3 py-2.5 text-center">
-          <span className="text-xs font-bold" style={{ color: '#EF4444' }}>
+          <span className="text-xs font-bold" style={{ color: '#DC2626' }}>
             <XCircle size={13} className="inline mr-1" /> Dibatalkan
           </span>
         </div>
@@ -351,9 +376,9 @@ export function TransactionConfirm({ transaction, onConfirm, onReject }) {
   }
 
   return (
-    <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(59, 130, 246, 0.25)', background: 'rgba(59, 130, 246, 0.04)' }}>
+    <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(37, 99, 235, 0.25)', background: 'rgba(37, 99, 235, 0.04)' }}>
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid rgba(59, 130, 246, 0.15)', background: 'rgba(59, 130, 246, 0.1)' }}>
+      <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid rgba(37, 99, 235, 0.15)', background: 'rgba(37, 99, 235, 0.1)' }}>
         <FileSpreadsheet size={14} style={{ color: 'var(--color-brand-soft)' }} />
         <span className="text-xs font-bold" style={{ color: 'var(--color-brand-soft)' }}>
           Jurnal Baru
@@ -372,7 +397,7 @@ export function TransactionConfirm({ transaction, onConfirm, onReject }) {
       <div className="overflow-x-auto">
         <table className="w-full text-[11px] border-collapse">
           <thead>
-            <tr style={{ background: 'rgba(59, 130, 246, 0.06)' }}>
+            <tr style={{ background: 'rgba(37, 99, 235, 0.06)' }}>
               <th className="px-2.5 py-1.5 text-left font-bold" style={{ color: 'var(--color-slate-heading)' }}>Akun</th>
               <th className="px-2.5 py-1.5 text-right font-bold" style={{ color: 'var(--color-slate-heading)' }}>Debit</th>
               <th className="px-2.5 py-1.5 text-right font-bold" style={{ color: 'var(--color-slate-heading)' }}>Kredit</th>
@@ -388,17 +413,17 @@ export function TransactionConfirm({ transaction, onConfirm, onReject }) {
                 <td className="px-2.5 py-1.5 text-right tabular-nums font-medium" style={{ color: d.debit > 0 ? 'var(--color-accent-emerald)' : 'var(--color-slate-muted)' }}>
                   {d.debit > 0 ? `Rp ${formatRp(d.debit)}` : '-'}
                 </td>
-                <td className="px-2.5 py-1.5 text-right tabular-nums font-medium" style={{ color: d.kredit > 0 ? '#EF4444' : 'var(--color-slate-muted)' }}>
+                <td className="px-2.5 py-1.5 text-right tabular-nums font-medium" style={{ color: d.kredit > 0 ? '#DC2626' : 'var(--color-slate-muted)' }}>
                   {d.kredit > 0 ? `Rp ${formatRp(d.kredit)}` : '-'}
                 </td>
               </tr>
             ))}
           </tbody>
           <tfoot>
-            <tr style={{ borderTop: '2px solid rgba(59, 130, 246, 0.2)', background: 'rgba(59, 130, 246, 0.06)' }}>
+            <tr style={{ borderTop: '2px solid rgba(37, 99, 235, 0.2)', background: 'rgba(37, 99, 235, 0.06)' }}>
               <td className="px-2.5 py-1.5 font-bold" style={{ color: 'var(--color-slate-heading)' }}>Total</td>
               <td className="px-2.5 py-1.5 text-right tabular-nums font-bold" style={{ color: 'var(--color-accent-emerald)' }}>Rp {formatRp(totalDebit)}</td>
-              <td className="px-2.5 py-1.5 text-right tabular-nums font-bold" style={{ color: '#EF4444' }}>Rp {formatRp(totalKredit)}</td>
+              <td className="px-2.5 py-1.5 text-right tabular-nums font-bold" style={{ color: '#DC2626' }}>Rp {formatRp(totalKredit)}</td>
             </tr>
           </tfoot>
         </table>
@@ -406,18 +431,18 @@ export function TransactionConfirm({ transaction, onConfirm, onReject }) {
 
       {/* Balance indicator */}
       <div className="px-3 py-1.5" style={{ borderTop: '1px solid rgba(148, 163, 184, 0.1)' }}>
-        <span className="text-[10px] font-medium" style={{ color: totalDebit === totalKredit ? 'var(--color-accent-emerald)' : '#EF4444' }}>
+        <span className="text-[10px] font-medium" style={{ color: totalDebit === totalKredit ? 'var(--color-accent-emerald)' : '#DC2626' }}>
           {totalDebit === totalKredit ? '✓ Seimbang' : '✗ Tidak seimbang'}
         </span>
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-2 px-3 py-2.5" style={{ borderTop: '1px solid rgba(59, 130, 246, 0.15)' }}>
+      <div className="flex gap-2 px-3 py-2.5" style={{ borderTop: '1px solid rgba(37, 99, 235, 0.15)' }}>
         <button
           onClick={handleSave}
           disabled={saving || totalDebit !== totalKredit}
           className="flex-1 flex items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 4px 14px var(--color-brand-glow)' }}
+          style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px var(--color-brand-glow)' }}
         >
           {saving ? (
             <><Loader2 size={13} className="animate-spin" /> Menyimpan...</>
@@ -459,9 +484,9 @@ export function DateSeparator({ label = 'Hari ini' }) {
 export function SummaryCard({ title, metrics = [] }) {
   if (!metrics.length) return null
   return (
-    <div className="my-2 rounded-xl overflow-hidden" style={{ background: 'rgba(59, 130, 246, 0.06)', border: '1px solid rgba(59, 130, 246, 0.18)' }}>
+    <div className="my-2 rounded-xl overflow-hidden" style={{ background: 'rgba(37, 99, 235, 0.06)', border: '1px solid rgba(37, 99, 235, 0.18)' }}>
       {title && (
-        <div className="px-3 py-2 font-bold text-xs" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--color-brand-soft)', borderBottom: '1px solid rgba(59, 130, 246, 0.15)' }}>
+        <div className="px-3 py-2 font-bold text-xs" style={{ background: 'rgba(37, 99, 235, 0.12)', color: 'var(--color-brand-soft)', borderBottom: '1px solid rgba(37, 99, 235, 0.15)' }}>
           {title}
         </div>
       )}
@@ -480,7 +505,7 @@ export function SummaryCard({ title, metrics = [] }) {
 // ---------------------------------------------------------------------------
 // RichChart — interactive chart from table data (bar/line)
 // ---------------------------------------------------------------------------
-const CHART_COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16']
+const CHART_COLORS = ['#2563EB', '#059669', '#D97706', '#DC2626', '#7C3AED', '#EC4899', '#0891B2', '#84CC16']
 
 function parseNumeric(str) {
   if (!str) return 0
@@ -530,12 +555,12 @@ function RichChart({ data, chartType = 'bar' }) {
   return (
     <div className="my-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(148, 163, 184, 0.2)' }}>
       {/* Toggle bar */}
-      <div className="flex items-center gap-1 px-2 py-1.5" style={{ background: 'rgba(59, 130, 246, 0.08)', borderBottom: '1px solid rgba(148, 163, 184, 0.15)' }}>
+      <div className="flex items-center gap-1 px-2 py-1.5" style={{ background: 'rgba(37, 99, 235, 0.08)', borderBottom: '1px solid rgba(148, 163, 184, 0.15)' }}>
         <button
           onClick={() => setView('chart')}
           className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all"
           style={{
-            background: view === 'chart' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+            background: view === 'chart' ? 'rgba(37, 99, 235, 0.2)' : 'transparent',
             color: view === 'chart' ? 'var(--color-brand-soft)' : 'var(--color-slate-muted)',
           }}
         >
@@ -545,7 +570,7 @@ function RichChart({ data, chartType = 'bar' }) {
           onClick={() => setView('table')}
           className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all"
           style={{
-            background: view === 'table' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+            background: view === 'table' ? 'rgba(37, 99, 235, 0.2)' : 'transparent',
             color: view === 'table' ? 'var(--color-brand-soft)' : 'var(--color-slate-muted)',
           }}
         >
@@ -596,8 +621,10 @@ function RichChart({ data, chartType = 'bar' }) {
 // ActionBar — quick-action buttons after financial answers
 // ---------------------------------------------------------------------------
 const ACTION_STYLES = {
-  primary: { bg: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', color: '#fff', shadow: '0 4px 14px var(--color-brand-glow)' },
-  success: { bg: 'linear-gradient(135deg, #059669, #10B981)', color: '#fff', shadow: '0 4px 14px rgba(16, 185, 129, 0.3)' },
+  primary: { bg: 'linear-gradient(135deg, #1D4ED8, #2563EB)', color: '#fff', shadow: '0 4px 14px var(--color-brand-glow)' },
+  success: { bg: 'linear-gradient(135deg, #059669, #059669)', color: '#fff', shadow: '0 4px 14px rgba(5, 150, 105, 0.3)' },
+  amber: { bg: 'rgba(217, 119, 6, 0.12)', color: 'var(--color-accent-amber)', shadow: 'none', border: '1px solid rgba(217, 119, 6, 0.25)' },
+  blue: { bg: 'rgba(37, 99, 235, 0.12)', color: 'var(--color-brand-soft)', shadow: 'none', border: '1px solid rgba(37, 99, 235, 0.25)' },
   outline: { bg: 'var(--color-surface-card)', color: 'var(--color-brand-soft)', shadow: 'none', border: '1px solid var(--color-border-subtle)' },
 }
 
@@ -613,7 +640,7 @@ export function ActionBar({ actions = [], onAction }) {
   return (
     <div className="flex flex-wrap gap-1.5 mt-2">
       {actions.map((action, i) => {
-        const style = ACTION_STYLES[action.style || 'outline']
+        const style = ACTION_STYLES[action.style] || ACTION_STYLES.outline
         const Icon = ACTION_ICONS[action.icon] || ReceiptText
         return (
           <motion.button
@@ -643,9 +670,9 @@ export function ActionBar({ actions = [], onAction }) {
 // ---------------------------------------------------------------------------
 export function MetricHighlight({ label, value, color = 'var(--color-accent-emerald)', icon: Icon }) {
   return (
-    <div className="my-2 flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: 'rgba(59, 130, 246, 0.06)', border: '1px solid rgba(59, 130, 246, 0.18)' }}>
+    <div className="my-2 flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: 'rgba(37, 99, 235, 0.06)', border: '1px solid rgba(37, 99, 235, 0.18)' }}>
       {Icon && (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--color-brand-soft)' }}>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'rgba(37, 99, 235, 0.12)', color: 'var(--color-brand-soft)' }}>
           <Icon size={18} />
         </div>
       )}

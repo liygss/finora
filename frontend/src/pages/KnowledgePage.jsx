@@ -17,10 +17,10 @@ const KATEGORI_OPTIONS = [
 ]
 
 const STATUS_ICON = {
-  UPLOADED: <Clock size={14} style={{ color: '#F59E0B' }} />,
-  PROCESSING: <Loader2 size={14} className="animate-spin" style={{ color: '#F59E0B' }} />,
-  INGESTED: <CheckCircle size={14} style={{ color: '#10B981' }} />,
-  FAILED: <XCircle size={14} style={{ color: '#EF4444' }} />,
+  UPLOADED: <Clock size={14} style={{ color: '#D97706' }} />,
+  PROCESSING: <Loader2 size={14} className="animate-spin" style={{ color: '#D97706' }} />,
+  INGESTED: <CheckCircle size={14} style={{ color: '#059669' }} />,
+  FAILED: <XCircle size={14} style={{ color: '#DC2626' }} />,
 }
 
 const STATUS_LABEL = {
@@ -31,9 +31,9 @@ const STATUS_LABEL = {
 }
 
 const STATUS_COLOR = {
-  UPLOADED: '#FBBF24',
-  PROCESSING: '#FBBF24',
-  INGESTED: '#34D399',
+  UPLOADED: '#F59E0B',
+  PROCESSING: '#F59E0B',
+  INGESTED: '#10B981',
   FAILED: '#F87171',
 }
 
@@ -196,7 +196,7 @@ export default function KnowledgePage() {
           <div className="space-y-2">
             {items.map(item => (
               <div key={item.id} className="card flex items-center gap-4 !p-4">
-                <div className="rounded-xl p-2.5 shrink-0" style={{ background: 'rgba(59, 130, 246, 0.12)' }}>
+                <div className="rounded-xl p-2.5 shrink-0" style={{ background: 'rgba(37, 99, 235, 0.12)' }}>
                   <BookOpen size={18} style={{ color: 'var(--color-brand-soft)' }} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -204,7 +204,7 @@ export default function KnowledgePage() {
                     <p className="text-sm font-bold truncate" style={{ color: 'var(--color-slate-heading)' }}>
                       {item.original_filename.replace('.md', '')}
                     </p>
-                    <span className="badge text-[10px] shrink-0" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--color-accent-blue)' }}>
+                    <span className="badge text-[10px] shrink-0" style={{ background: 'rgba(37, 99, 235, 0.12)', color: 'var(--color-accent-blue)' }}>
                       {item.file_size_bytes} bytes
                     </span>
                   </div>

@@ -13,14 +13,14 @@ import { Users, Wrench, UserPlus, Search, RefreshCw, Database, CheckCircle2, XCi
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 const PLAN_BADGE = {
-  MAINTENANCE: { label: 'Maintenance', bg: 'rgba(16, 185, 129, 0.14)', fg: '#34D399', border: 'rgba(16, 185, 129, 0.35)' },
+  MAINTENANCE: { label: 'Maintenance', bg: 'rgba(5, 150, 105, 0.14)', fg: '#10B981', border: 'rgba(5, 150, 105, 0.35)' },
   FREE: { label: 'Gratis', bg: 'rgba(148, 163, 184, 0.1)', fg: '#CBD5E1', border: 'rgba(148, 163, 184, 0.25)' },
 }
 
 const ROLE_BADGE = {
-  ADMIN: { label: 'Admin', bg: 'rgba(139, 92, 246, 0.14)', fg: '#C4B5FD', border: 'rgba(139, 92, 246, 0.35)' },
-  OWNER: { label: 'Owner', bg: 'rgba(59, 130, 246, 0.12)', fg: 'var(--color-accent-blue)', border: 'rgba(59, 130, 246, 0.3)' },
-  STAFF: { label: 'Staff', bg: 'rgba(245, 158, 11, 0.12)', fg: '#FCD34D', border: 'rgba(245, 158, 11, 0.3)' },
+  ADMIN: { label: 'Admin', bg: 'rgba(124, 58, 237, 0.14)', fg: '#C4B5FD', border: 'rgba(124, 58, 237, 0.35)' },
+  OWNER: { label: 'Owner', bg: 'rgba(37, 99, 235, 0.12)', fg: 'var(--color-accent-blue)', border: 'rgba(37, 99, 235, 0.3)' },
+  STAFF: { label: 'Staff', bg: 'rgba(217, 119, 6, 0.12)', fg: '#FCD34D', border: 'rgba(217, 119, 6, 0.3)' },
 }
 
 function Badge({ kind, value }) {
@@ -39,7 +39,7 @@ function PlanChart({ data }) {
   return (
     <div className="space-y-2.5">
       {data.map((entry) => {
-        const color = entry.name === 'Maintenance' ? '#10B981' : '#64748B'
+        const color = entry.name === 'Maintenance' ? '#059669' : '#64748B'
         return (
           <div key={entry.name} className="rounded-xl px-3.5 py-2.5" style={{ background: 'rgba(148, 163, 184, 0.06)', border: '1px solid rgba(148, 163, 184, 0.1)' }}>
             <div className="flex items-center justify-between">
@@ -125,7 +125,7 @@ function ManageModal({ user, onClose, onSaved }) {
             <button
               onClick={() => setForm({ ...form, is_active: !form.is_active })}
               className="relative h-7 w-12 rounded-full transition-colors duration-200"
-              style={{ background: form.is_active ? '#10B981' : 'rgba(148,163,184,0.3)' }}
+              style={{ background: form.is_active ? '#059669' : 'rgba(148,163,184,0.3)' }}
             >
               <span className="absolute top-1 h-5 w-5 rounded-full transition-all duration-200" style={{ left: form.is_active ? 24 : 4, background: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.25)' }} />
             </button>
@@ -258,13 +258,13 @@ function HealthCard() {
           <div key={r.label} className="flex items-center justify-between rounded-xl px-3.5 py-3" style={{ background: 'rgba(148, 163, 184, 0.06)', border: '1px solid rgba(148, 163, 184, 0.1)' }}>
             <div className="flex items-center gap-2.5">
               {r.ok
-                ? <CheckCircle2 size={16} style={{ color: '#34D399' }} />
+                ? <CheckCircle2 size={16} style={{ color: '#10B981' }} />
                 : <XCircle size={16} style={{ color: '#F87171' }} />}
               <span className="text-sm font-semibold" style={{ color: 'var(--color-slate-text)' }}>{r.label}</span>
             </div>
             <span className="text-xs font-bold px-2 py-1 rounded-full" style={r.ok
-              ? { background: 'rgba(16,185,129,0.14)', color: '#34D399', border: '1px solid rgba(16,185,129,0.3)' }
-              : { background: 'rgba(239,68,68,0.14)', color: '#F87171', border: '1px solid rgba(239,68,68,0.3)' }}>
+              ? { background: 'rgba(5,150,105,0.14)', color: '#10B981', border: '1px solid rgba(5,150,105,0.3)' }
+              : { background: 'rgba(220,38,38,0.14)', color: '#F87171', border: '1px solid rgba(220,38,38,0.3)' }}>
               {health ? (r.ok ? 'OK' : 'Gangguan') : 'Memuat...'}
             </span>
             {r.info && (
@@ -347,7 +347,7 @@ export default function AdminDashboardPage() {
       render: (u) => (
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-white"
-            style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%)', boxShadow: '0 4px 10px rgba(59,130,246,0.35)' }}>
+            style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 4px 10px rgba(15,23,42,0.12)' }}>
             {u.full_name?.charAt(0)?.toUpperCase() || '?'}
           </div>
           <div className="min-w-0">
@@ -372,8 +372,8 @@ export default function AdminDashboardPage() {
     {
       header: 'Status',
       render: (u) => (
-        <span className="inline-flex items-center gap-1.5 text-xs font-semibold" style={{ color: u.is_active ? '#34D399' : '#F87171' }}>
-          <span className="h-2 w-2 rounded-full" style={{ background: u.is_active ? '#10B981' : '#EF4444', boxShadow: u.is_active ? '0 0 8px rgba(16,185,129,0.7)' : 'none' }} />
+        <span className="inline-flex items-center gap-1.5 text-xs font-semibold" style={{ color: u.is_active ? '#10B981' : '#F87171' }}>
+          <span className="h-2 w-2 rounded-full" style={{ background: u.is_active ? '#059669' : '#DC2626', boxShadow: u.is_active ? '0 0 8px rgba(5,150,105,0.7)' : 'none' }} />
           {u.is_active ? 'Aktif' : 'Nonaktif'}
         </span>
       ),
@@ -392,7 +392,7 @@ export default function AdminDashboardPage() {
         <button
           onClick={() => setManageTarget({ ...u, isSelf: u.id === user.id })}
           className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:bg-blue-500/10"
-          style={{ color: 'var(--color-brand-soft)', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(96,165,250,0.25)' }}
+          style={{ color: 'var(--color-brand-soft)', background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(96,165,250,0.25)' }}
         >
           Kelola
         </button>
@@ -405,7 +405,7 @@ export default function AdminDashboardPage() {
       {/* Header */}
       <motion.div variants={fadeUp} initial="hidden" animate="visible" className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%)', boxShadow: '0 4px 14px rgba(59,130,246,0.4)' }}>
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}>
             <Users size={20} className="text-white" />
           </div>
           <div>
@@ -417,7 +417,7 @@ export default function AdminDashboardPage() {
           <button onClick={refresh} className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition-all duration-200 hover:bg-blue-500/10" style={{ color: 'var(--color-brand-soft)', background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.14)' }}>
             <RefreshCw size={13} /> Segarkan
           </button>
-          <button onClick={() => setCreateOpen(true)} className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200 hover:shadow-lg" style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%)', color: '#fff', boxShadow: '0 4px 12px rgba(59,130,246,0.35)' }}>
+          <button onClick={() => setCreateOpen(true)} className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200 hover:shadow-lg" style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', color: '#fff', boxShadow: '0 4px 12px rgba(15,23,42,0.12)' }}>
             <UserPlus size={14} /> Tambah User
           </button>
         </div>
@@ -446,11 +446,11 @@ export default function AdminDashboardPage() {
             </div>
             <div className="card !p-3">
               <div className="text-[10px] font-medium" style={{ color: 'var(--color-slate-muted)' }}>Menunggu</div>
-              <div className="text-xl font-extrabold mt-0.5" style={{ color: '#F59E0B' }}>{feedbackStats?.open ?? '—'}</div>
+              <div className="text-xl font-extrabold mt-0.5" style={{ color: '#D97706' }}>{feedbackStats?.open ?? '—'}</div>
             </div>
             <div className="card !p-3">
               <div className="text-[10px] font-medium" style={{ color: 'var(--color-slate-muted)' }}>Dijawab</div>
-              <div className="text-xl font-extrabold mt-0.5" style={{ color: '#34D399' }}>{feedbackStats?.replied ?? '—'}</div>
+              <div className="text-xl font-extrabold mt-0.5" style={{ color: '#10B981' }}>{feedbackStats?.replied ?? '—'}</div>
             </div>
             <div className="card !p-3">
               <div className="text-[10px] font-medium" style={{ color: 'var(--color-slate-muted)' }}>Selesai</div>
@@ -460,7 +460,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={() => navigate('/admin/feedback')}
             className="w-full text-xs font-semibold px-3 py-2 rounded-xl transition-all hover:bg-blue-500/10"
-            style={{ color: 'var(--color-brand-soft)', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(96,165,250,0.25)' }}
+            style={{ color: 'var(--color-brand-soft)', background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(96,165,250,0.25)' }}
           >
             Lihat Semua →
           </button>
@@ -479,17 +479,17 @@ export default function AdminDashboardPage() {
                 <div key={fb.id} className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition hover:bg-white/[0.03]" style={{ border: '1px solid rgba(148,163,184,0.1)' }}>
                   <div className="shrink-0 mt-0.5">
                     {fb.status === 'OPEN'
-                      ? <AlertCircle size={15} style={{ color: '#F59E0B' }} />
+                      ? <AlertCircle size={15} style={{ color: '#D97706' }} />
                       : fb.status === 'REPLIED'
-                        ? <CheckCircle size={15} style={{ color: '#34D399' }} />
+                        ? <CheckCircle size={15} style={{ color: '#10B981' }} />
                         : <CheckCircle2 size={15} style={{ color: 'var(--color-slate-muted)' }} />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold truncate" style={{ color: 'var(--color-slate-heading)' }}>{fb.subject}</span>
                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0" style={{
-                        background: fb.status === 'OPEN' ? 'rgba(245,158,11,0.12)' : fb.status === 'REPLIED' ? 'rgba(16,185,129,0.12)' : 'rgba(148,163,184,0.1)',
-                        color: fb.status === 'OPEN' ? '#F59E0B' : fb.status === 'REPLIED' ? '#34D399' : 'var(--color-slate-muted)',
+                        background: fb.status === 'OPEN' ? 'rgba(217,119,6,0.12)' : fb.status === 'REPLIED' ? 'rgba(5,150,105,0.12)' : 'rgba(148,163,184,0.1)',
+                        color: fb.status === 'OPEN' ? '#D97706' : fb.status === 'REPLIED' ? '#10B981' : 'var(--color-slate-muted)',
                       }}>
                         {fb.status === 'OPEN' ? 'Baru' : fb.status === 'REPLIED' ? 'Dijawab' : 'Selesai'}
                       </span>
@@ -522,13 +522,13 @@ export default function AdminDashboardPage() {
                 labelStyle={{ color: 'var(--color-slate-heading)' }}
                 itemStyle={{ color: 'var(--color-slate-text)' }}
               />
-              <Bar dataKey="free" name="Gratis" stackId="a" fill="#3B82F6" radius={[0, 0, 0, 0]} maxBarSize={46} />
-              <Bar dataKey="maintenance" name="Maintenance" stackId="a" fill="#10B981" radius={[8, 8, 0, 0]} maxBarSize={46} />
+              <Bar dataKey="free" name="Gratis" stackId="a" fill="#2563EB" radius={[0, 0, 0, 0]} maxBarSize={46} />
+              <Bar dataKey="maintenance" name="Maintenance" stackId="a" fill="#059669" radius={[8, 8, 0, 0]} maxBarSize={46} />
             </BarChart>
           </ResponsiveContainer>
           <div className="flex items-center gap-5 mt-3">
-            <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: 'var(--color-slate-text)' }}><span className="w-2.5 h-2.5 rounded-full" style={{ background: '#3B82F6' }} /> Gratis</span>
-            <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: 'var(--color-slate-text)' }}><span className="w-2.5 h-2.5 rounded-full" style={{ background: '#10B981', boxShadow: '0 0 8px rgba(16,185,129,0.5)' }} /> Maintenance</span>
+            <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: 'var(--color-slate-text)' }}><span className="w-2.5 h-2.5 rounded-full" style={{ background: '#2563EB' }} /> Gratis</span>
+            <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: 'var(--color-slate-text)' }}><span className="w-2.5 h-2.5 rounded-full" style={{ background: '#059669', boxShadow: '0 0 8px rgba(15,23,42,0.12)' }} /> Maintenance</span>
           </div>
         </motion.div>
 

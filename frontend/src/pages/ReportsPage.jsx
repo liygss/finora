@@ -217,7 +217,7 @@ export default function ReportsPage() {
               setDebouncedDate(today)
             }}
             className="text-xs font-medium px-2.5 py-2 rounded-lg transition-all duration-200"
-            style={{ color: 'var(--color-brand-soft)', background: 'rgba(59, 130, 246, 0.12)' }}
+            style={{ color: 'var(--color-brand-soft)', background: 'rgba(37, 99, 235, 0.12)' }}
           >
             Hari Ini
           </button>
@@ -242,7 +242,7 @@ export default function ReportsPage() {
               disabled={isBusy}
               className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200"
               style={{
-                background: !isBusy ? 'linear-gradient(135deg, #059669, #10B981)' : 'rgba(148, 163, 184, 0.12)',
+                background: !isBusy ? 'linear-gradient(135deg, #059669, #059669)' : 'rgba(148, 163, 184, 0.12)',
                 color: !isBusy ? 'white' : 'var(--color-slate-muted)',
                 cursor: !isBusy ? 'pointer' : 'not-allowed',
               }}
@@ -256,7 +256,7 @@ export default function ReportsPage() {
               disabled={isBusy}
               className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200"
               style={{
-                background: !isBusy ? 'linear-gradient(135deg, #D97706, #F59E0B)' : 'rgba(148, 163, 184, 0.12)',
+                background: !isBusy ? 'linear-gradient(135deg, #D97706, #D97706)' : 'rgba(148, 163, 184, 0.12)',
                 color: !isBusy ? 'white' : 'var(--color-slate-muted)',
                 cursor: !isBusy ? 'pointer' : 'not-allowed',
               }}
@@ -278,7 +278,7 @@ export default function ReportsPage() {
             style={tab === t.key ? {
               background: 'linear-gradient(135deg, #1D4ED8, #2563EB)',
               color: 'white',
-              boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)',
+              boxShadow: '0 4px 14px rgba(15,23,42,0.12)',
             } : {
               color: 'var(--color-slate-body)',
             }}
@@ -292,7 +292,7 @@ export default function ReportsPage() {
       {data && tab === 'neraca-saldo' && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade-in">
           <div className="card !p-4 flex items-center gap-3 hover:-translate-y-0.5">
-            <div className="rounded-xl p-2.5" style={{ background: 'rgba(16, 185, 129, 0.12)' }}>
+            <div className="rounded-xl p-2.5" style={{ background: 'rgba(5, 150, 105, 0.12)' }}>
               <TrendingUp size={18} style={{ color: 'var(--color-accent-emerald)' }} />
             </div>
             <div>
@@ -301,7 +301,7 @@ export default function ReportsPage() {
             </div>
           </div>
           <div className="card !p-4 flex items-center gap-3 hover:-translate-y-0.5">
-            <div className="rounded-xl p-2.5" style={{ background: 'rgba(239, 68, 68, 0.12)' }}>
+            <div className="rounded-xl p-2.5" style={{ background: 'rgba(220, 38, 38, 0.12)' }}>
               <TrendingDown size={18} style={{ color: '#F87171' }} />
             </div>
             <div>
@@ -310,7 +310,7 @@ export default function ReportsPage() {
             </div>
           </div>
           <div className="card !p-4 flex items-center gap-3 hover:-translate-y-0.5">
-            <div className="rounded-xl p-2.5" style={{ background: data.is_balance ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)' }}>
+            <div className="rounded-xl p-2.5" style={{ background: data.is_balance ? 'rgba(5, 150, 105, 0.12)' : 'rgba(220, 38, 38, 0.12)' }}>
               <Scale size={18} style={{ color: data.is_balance ? 'var(--color-accent-emerald)' : '#F87171' }} />
             </div>
             <div>
@@ -326,7 +326,7 @@ export default function ReportsPage() {
       {loading ? <LoadingSpinner className="mt-10" /> : !data ? (
         error ? (
           <div className="card text-center py-10">
-            <AlertCircle size={32} className="mx-auto mb-3" style={{ color: '#EF4444' }} />
+            <AlertCircle size={32} className="mx-auto mb-3" style={{ color: '#DC2626' }} />
             <p className="text-sm font-semibold" style={{ color: 'var(--color-slate-heading)' }}>{error}</p>
             <button onClick={load} className="btn-primary mt-4 !px-4 !py-2 text-sm">Coba Lagi</button>
           </div>
@@ -370,7 +370,7 @@ function NeracaSaldoView({ data }) {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-bold" style={{ color: 'var(--color-slate-heading)' }}>Neraca Saldo</h3>
-        <span className="badge" style={{ background: data.is_balance ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)', color: data.is_balance ? 'var(--color-accent-emerald)' : '#F87171' }}>
+        <span className="badge" style={{ background: data.is_balance ? 'rgba(5, 150, 105, 0.12)' : 'rgba(220, 38, 38, 0.12)', color: data.is_balance ? 'var(--color-accent-emerald)' : '#F87171' }}>
           {data.is_balance ? 'Balance' : 'Tidak Balance'}
         </span>
       </div>
@@ -397,7 +397,7 @@ function NeracaSaldoView({ data }) {
             ))}
           </tbody>
           <tfoot>
-            <tr className="font-bold" style={{ borderTop: '2px solid rgba(59, 130, 246, 0.4)', background: 'rgba(59, 130, 246, 0.1)' }}>
+            <tr className="font-bold" style={{ borderTop: '2px solid rgba(37, 99, 235, 0.4)', background: 'rgba(37, 99, 235, 0.1)' }}>
               <td colSpan={3} className="py-3 px-6 uppercase tracking-wider text-xs" style={{ color: 'var(--color-accent-blue)' }}>Total</td>
               <td className="py-3 px-6 num-cell font-mono text-sm font-extrabold" style={{ color: 'var(--color-slate-heading)' }}>{formatRupiah(data.total_debit)}</td>
               <td className="py-3 px-6 num-cell font-mono text-sm font-extrabold" style={{ color: 'var(--color-slate-heading)' }}>{formatRupiah(data.total_kredit)}</td>
@@ -421,7 +421,7 @@ function LabaRugiView({ data }) {
         <span className="font-mono tabular-nums text-[var(--color-slate-heading)]">{formatRupiah(data.laba_kotor)}</span>
       </div>
       <Section title="Beban Operasional" items={data.beban_operasional || []} />
-      <div className="flex justify-between pt-3 font-bold text-lg rounded-2xl p-4 -mx-4" style={{ borderTop: '2px solid rgba(59, 130, 246, 0.4)', background: 'rgba(59, 130, 246, 0.1)' }}>
+      <div className="flex justify-between pt-3 font-bold text-lg rounded-2xl p-4 -mx-4" style={{ borderTop: '2px solid rgba(37, 99, 235, 0.4)', background: 'rgba(37, 99, 235, 0.1)' }}>
         <span className="uppercase tracking-wider text-xs" style={{ color: 'var(--color-accent-blue)' }}>Laba Bersih</span>
         <span className="font-mono tabular-nums" style={{ color: data.laba_bersih >= 0 ? 'var(--color-accent-emerald)' : '#F87171' }}>{formatRupiah(data.laba_bersih)}</span>
       </div>
@@ -441,11 +441,11 @@ function PosisiKeuanganView({ data }) {
         <span className="text-[var(--color-slate-text)]">Laba/Rugi Berjalan</span>
         <span className="font-mono font-medium tabular-nums text-[var(--color-slate-heading)]">{formatRupiah(data.laba_rugi_berjalan)}</span>
       </div>
-      <div className="flex justify-between pt-3 font-bold text-lg rounded-2xl p-4 -mx-4" style={{ borderTop: '2px solid rgba(59, 130, 246, 0.4)', background: 'rgba(59, 130, 246, 0.1)' }}>
+      <div className="flex justify-between pt-3 font-bold text-lg rounded-2xl p-4 -mx-4" style={{ borderTop: '2px solid rgba(37, 99, 235, 0.4)', background: 'rgba(37, 99, 235, 0.1)' }}>
         <span className="uppercase tracking-wider text-xs" style={{ color: 'var(--color-accent-blue)' }}>Total Liabilitas + Modal</span>
         <span className="font-mono tabular-nums text-[var(--color-slate-heading)]">{formatRupiah(data.total_liabilitas_dan_modal)}</span>
       </div>
-      <span className="badge" style={{ background: data.is_balance ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)', color: data.is_balance ? 'var(--color-accent-emerald)' : '#F87171' }}>
+      <span className="badge" style={{ background: data.is_balance ? 'rgba(5, 150, 105, 0.12)' : 'rgba(220, 38, 38, 0.12)', color: data.is_balance ? 'var(--color-accent-emerald)' : '#F87171' }}>
         {data.is_balance ? 'Balance' : 'Tidak Balance'}
       </span>
     </div>
@@ -508,7 +508,7 @@ function Section({ title, items, total, showNote }) {
           </tbody>
           {total !== undefined && (
             <tfoot>
-              <tr className="font-bold" style={{ borderTop: '2px solid rgba(59, 130, 246, 0.4)', background: 'rgba(59, 130, 246, 0.1)' }}>
+              <tr className="font-bold" style={{ borderTop: '2px solid rgba(37, 99, 235, 0.4)', background: 'rgba(37, 99, 235, 0.1)' }}>
                 <td colSpan={showNote ? 3 : 2} className="px-6 py-3 text-xs uppercase tracking-wider" style={{ color: 'var(--color-accent-blue)' }}>Total {title}</td>
                 <td className="px-6 py-3 num-cell font-mono text-sm font-extrabold" style={{ color: 'var(--color-slate-heading)' }}>{formatRupiah(total)}</td>
               </tr>

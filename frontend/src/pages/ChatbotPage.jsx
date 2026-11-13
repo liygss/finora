@@ -52,20 +52,20 @@ export default function ChatbotPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden" style={{ boxShadow: '0 4px 16px var(--color-brand-glow)' }}>
                 <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-full w-full object-contain" />
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2" style={{ background: '#10B981', borderColor: 'var(--color-surface-2)' }}>
-                <span className="absolute inset-0 rounded-full animate-ping" style={{ background: '#10B981', opacity: 0.5 }} />
+              <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2" style={{ background: '#059669', borderColor: 'var(--color-surface-2)' }}>
+                <span className="absolute inset-0 rounded-full animate-ping" style={{ background: '#059669', opacity: 0.5 }} />
               </span>
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold truncate" style={{ color: 'var(--color-slate-heading)' }}>Asisten Finora</span>
-                <span className="shrink-0 inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: 'rgba(59, 130, 246, 0.15)', color: 'var(--color-brand-soft)', border: '1px solid rgba(59, 130, 246, 0.25)' }}>
+                <span className="shrink-0 inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: 'rgba(37, 99, 235, 0.15)', color: 'var(--color-brand-soft)', border: '1px solid rgba(37, 99, 235, 0.25)' }}>
                   <Sparkles size={8} />
                   AI
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] font-medium" style={{ color: 'var(--color-accent-emerald)' }}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#10B981' }} />
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#059669' }} />
                 Online · Siap membantu
               </div>
             </div>

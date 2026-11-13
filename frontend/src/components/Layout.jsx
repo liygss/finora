@@ -122,14 +122,14 @@ export default function Layout() {
 
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         {/* Header */}
-        <header className="relative z-40 flex h-18 items-center gap-3 sm:gap-4 px-3 sm:px-4 lg:px-6 overflow-hidden" style={{ background: 'var(--color-header-bg)', backdropFilter: 'blur(20px) saturate(180%)', borderBottom: '1px solid rgba(148, 163, 184, 0.14)' }}>
+        <header className="relative z-40 flex h-18 items-center gap-3 sm:gap-4 px-3 sm:px-4 lg:px-6" style={{ background: 'var(--color-header-bg)', backdropFilter: 'blur(20px) saturate(180%)', borderBottom: '1px solid rgba(148, 163, 184, 0.14)' }}>
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2.5 rounded-xl transition-all duration-300 hover:bg-white/5" style={{ color: 'var(--color-slate-body)' }}>
             <Menu size={20} />
           </button>
 
           {/* Logo - Mobile */}
           <div className="flex lg:hidden items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center overflow-hidden" style={{ borderRadius: '0.75rem', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.4)' }}>
+            <div className="flex h-9 w-9 items-center justify-center overflow-hidden" style={{ borderRadius: '0.75rem', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}>
               <img src="/finora_logo.jpeg" alt="Finora" className="h-full w-full object-cover" />
             </div>
             <span className="text-sm font-bold" style={{ color: 'var(--color-slate-heading)' }}>Finora</span>
@@ -150,9 +150,9 @@ export default function Layout() {
                 download={downloadFile}
                 className="hidden sm:flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105"
                 style={{
-                  background: 'linear-gradient(135deg, #059669, #10B981)',
+                  background: 'linear-gradient(135deg, #059669, #059669)',
                   color: '#fff',
-                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+                  boxShadow: '0 2px 8px rgba(15,23,42,0.12)',
                 }}
                 title={`Download ${downloadFile}`}
               >
@@ -168,7 +168,7 @@ export default function Layout() {
                 title="Kelola Feedback"
                 aria-label="Kelola Feedback"
                 className="flex h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 shrink-0 items-center justify-center rounded-full transition-all duration-300 hover:scale-105"
-                style={{ background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.25)', color: '#C4B5FD' }}
+                style={{ background: 'rgba(124, 58, 237, 0.12)', border: '1px solid rgba(124, 58, 237, 0.25)', color: '#C4B5FD' }}
               >
                 <ShieldCheck size={16} />
               </button>
@@ -207,7 +207,7 @@ export default function Layout() {
             </div>
 
             {/* Brand badge */}
-            <div className="hidden lg:flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold shrink-0" style={{ background: 'rgba(59, 130, 246, 0.14)', color: 'var(--color-accent-blue)', border: '1px solid rgba(96, 165, 250, 0.28)' }}>
+            <div className="hidden lg:flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold shrink-0" style={{ background: 'rgba(37, 99, 235, 0.14)', color: 'var(--color-accent-blue)', border: '1px solid rgba(96, 165, 250, 0.28)' }}>
               <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: 'var(--color-brand-soft)' }} />
               Finora
             </div>

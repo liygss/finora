@@ -98,7 +98,7 @@ export default function NotifAdminPage() {
       <div className="flex items-center gap-3">
         <div
           className="flex h-11 w-11 items-center justify-center rounded-2xl"
-          style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%)', boxShadow: '0 4px 14px rgba(59,130,246,0.4)' }}
+          style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
         >
           <Send size={20} className="text-white" />
         </div>

@@ -41,8 +41,6 @@ export default function ComplaintModal({ onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl animate-blob" style={{ background: 'rgba(59,130,246,0.15)' }} />
-          <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full blur-3xl animate-blob" style={{ background: 'rgba(16,185,129,0.12)', animationDelay: '4s' }} />
         </div>
 
         <button
@@ -58,7 +56,7 @@ export default function ComplaintModal({ onClose }) {
           <div className="flex items-center gap-3 mb-5">
             <div
               className="flex h-11 w-11 items-center justify-center rounded-2xl"
-              style={{ background: 'linear-gradient(135deg, #2563EB, #3B82F6)', boxShadow: '0 4px 14px rgba(59,130,246,0.4)' }}
+              style={{ background: 'linear-gradient(135deg, #2563EB, #2563EB)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
             >
               <Headphones size={20} className="text-white" />
             </div>

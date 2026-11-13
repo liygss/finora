@@ -65,7 +65,7 @@ export default function JurnalPage() {
         {r.detail.map((d, i) => (
           <div key={i} className="flex gap-2">
             <span className="font-mono">{d.kode_akun}</span>
-            {d.debit > 0 && <span style={{ color: '#34D399' }}>{formatRupiah(d.debit)}</span>}
+            {d.debit > 0 && <span style={{ color: '#10B981' }}>{formatRupiah(d.debit)}</span>}
             {d.kredit > 0 && <span style={{ color: '#F87171' }}>{formatRupiah(d.kredit)}</span>}
           </div>
         ))}
@@ -89,7 +89,7 @@ export default function JurnalPage() {
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)} style={{ background: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(8px)' }}>
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto card" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto card card-frost" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--color-slate-heading)' }}>Buat Jurnal Baru</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -144,7 +144,7 @@ export default function JurnalPage() {
               <div className="flex items-center justify-between rounded-xl p-3 text-sm" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148, 163, 184, 0.14)' }}>
                 <span className="text-[var(--color-slate-text)]">Total Debit: <strong className="text-[var(--color-slate-heading)]">{formatRupiah(totalDebit)}</strong></span>
                 <span className="text-[var(--color-slate-text)]">Total Kredit: <strong className="text-[var(--color-slate-heading)]">{formatRupiah(totalKredit)}</strong></span>
-                <span className="font-medium" style={{ color: isBalanced ? '#34D399' : '#F87171' }}>
+                <span className="font-medium" style={{ color: isBalanced ? '#10B981' : '#F87171' }}>
                   {isBalanced ? 'Balance' : 'Tidak Balance'}
                 </span>
               </div>

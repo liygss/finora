@@ -207,7 +207,7 @@ export default function GuidedTour({ open, onClose }) {
             height: rect.height + 8,
             borderRadius: 18,
             border: '2px solid rgba(96, 165, 250, 0.9)',
-            boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.25), 0 0 24px rgba(59, 130, 246, 0.4)',
+            boxShadow: '0 0 0 4px rgba(15,23,42,0.12), 0 0 24px rgba(15,23,42,0.12)',
             zIndex: 2,
             pointerEvents: 'none',
           }}
@@ -246,12 +246,12 @@ export default function GuidedTour({ open, onClose }) {
         )}
 
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden" style={{ background: 'rgba(59, 130, 246, 0.15)' }}>
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden" style={{ background: 'rgba(37, 99, 235, 0.15)' }}>
             <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-full w-full object-contain" />
           </div>
           <h3 className="text-sm font-bold" style={{ color: 'var(--color-slate-heading)' }}>{step.title}</h3>
           {step.adminOnly && (
-            <span className="ml-auto rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide" style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--color-accent-amber)' }}>
+            <span className="ml-auto rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide" style={{ background: 'rgba(217, 119, 6, 0.15)', color: 'var(--color-accent-amber)' }}>
               Khusus Admin
             </span>
           )}
@@ -285,7 +285,7 @@ export default function GuidedTour({ open, onClose }) {
             <button onClick={skipAll} className="rounded-lg px-3 py-1.5 text-xs font-medium transition hover:bg-[var(--color-hover)]" style={{ color: 'var(--color-slate-body)' }}>
               Lewati
             </button>
-            <button onClick={next} className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.4)' }}>
+            <button onClick={next} className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}>
               {isLast ? 'Selesai' : 'Berikutnya'} {isLast ? <Check size={13} /> : <ChevronRight size={13} />}
             </button>
           </div>

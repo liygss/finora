@@ -2,18 +2,16 @@ import { Play, Sparkles, LayoutDashboard, MessageSquare, FileText, BarChart3, X 
 
 export default function DemoWelcomeModal({ onClose, onLaunch }) {
   const perks = [
-    { icon: LayoutDashboard, label: 'Dashboard', color: '#3B82F6' },
-    { icon: MessageSquare, label: 'Chatbot', color: '#10B981' },
-    { icon: FileText, label: 'Jurnal', color: '#F59E0B' },
-    { icon: BarChart3, label: 'Laporan', color: '#8B5CF6' },
+    { icon: LayoutDashboard, label: 'Dashboard', color: '#2563EB' },
+    { icon: MessageSquare, label: 'Chatbot', color: '#059669' },
+    { icon: FileText, label: 'Jurnal', color: '#D97706' },
+    { icon: BarChart3, label: 'Laporan', color: '#7C3AED' },
   ]
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onClose} style={{ background: 'rgba(2, 6, 18, 0.7)', backdropFilter: 'blur(10px)' }}>
       <div className="relative w-full max-w-lg card overflow-hidden animate-bounce-in" onClick={(e) => e.stopPropagation()}>
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl animate-blob" style={{ background: 'rgba(37,99,235,0.25)' }} />
-          <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full blur-3xl animate-blob" style={{ background: 'rgba(139,92,246,0.18)', animationDelay: '4s' }} />
         </div>
 
         <button onClick={onClose} className="absolute top-4 right-4 z-10 p-2 rounded-xl transition-all duration-300 hover:bg-white/10" style={{ color: 'var(--color-slate-body)' }} aria-label="Tutup">
@@ -21,7 +19,7 @@ export default function DemoWelcomeModal({ onClose, onLaunch }) {
         </button>
 
         <div className="relative p-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl animate-float-gentle" style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 8px 32px rgba(59,130,246,0.55)', animationDelay: '0.3s' }}>
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl animate-float-gentle" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 8px 32px rgba(15,23,42,0.12)', animationDelay: '0.3s' }}>
             <Sparkles size={28} className="text-white" />
           </div>
 

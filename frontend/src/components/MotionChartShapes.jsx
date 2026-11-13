@@ -16,7 +16,7 @@ export function MotionBarShape(props) {
     height,
     fill,
     radius,
-    glowColor = 'rgba(0, 0, 0, 0.35)',
+    glowColor = 'rgba(15, 23, 42, 0.12)',
     index = 0,
     animate = true,
   } = props
@@ -36,7 +36,7 @@ export function MotionBarShape(props) {
           rx={rx}
           ry={ry}
           fill={fill}
-          filter={`drop-shadow(0 6px 14px ${glowColor})`}
+          filter={`drop-shadow(0 2px 6px ${glowColor})`}
         />
         {showSheen && (
           <rect
@@ -67,7 +67,7 @@ export function MotionBarShape(props) {
         rx={rx}
         ry={ry}
         fill={fill}
-        filter={`drop-shadow(0 6px 14px ${glowColor})`}
+        filter={`drop-shadow(0 2px 6px ${glowColor})`}
       />
       {showSheen && (
         <rect
@@ -91,7 +91,7 @@ export function MotionActiveBar(props) {
     height,
     fill,
     radius,
-    glowColor = 'rgba(96, 165, 250, 0.5)',
+    glowColor = 'rgba(15, 23, 42, 0.12)',
   } = props
   const { rx, ry } = barRadius(radius)
 
@@ -111,7 +111,7 @@ export function MotionActiveBar(props) {
         ry={ry}
         fill={fill}
         opacity={0.95}
-        filter={`drop-shadow(0 10px 22px ${glowColor})`}
+        filter={`drop-shadow(0 3px 8px ${glowColor})`}
       />
     </motion.g>
   )

@@ -27,9 +27,6 @@ export default function ForgotPasswordPage() {
   return (
     <div className="relative flex min-h-screen overflow-hidden items-center justify-center p-6" style={{ background: 'var(--color-surface-0)' }}>
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-[-15%] right-[-10%] h-[55vh] w-[55vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(37, 99, 235, 0.18)' }} />
-        <div className="absolute bottom-[-25%] left-[-10%] h-[55vh] w-[55vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(139, 92, 246, 0.1)', animationDelay: '5s' }} />
-        <div className="absolute top-[40%] left-[30%] h-[40vh] w-[40vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(16, 185, 129, 0.06)', animationDelay: '9s' }} />
         <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(148,163,184,0.05) 1px, transparent 0)', backgroundSize: '36px 36px' }} />
       </div>
 
@@ -44,7 +41,7 @@ export default function ForgotPasswordPage() {
         <div className="rounded-3xl p-8 animate-fade-in" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border-soft)', backdropFilter: 'blur(24px)', boxShadow: '0 24px 80px rgba(0, 0, 0, 0.2)' }}>
           {sent ? (
             <div className="text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl animate-float-gentle" style={{ background: 'linear-gradient(135deg, #059669, #10B981)', boxShadow: '0 8px 32px rgba(16,185,129,0.4)' }}>
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl animate-float-gentle" style={{ background: 'linear-gradient(135deg, #059669, #059669)', boxShadow: '0 8px 32px rgba(15,23,42,0.12)' }}>
                 <MailCheck size={28} className="text-white" />
               </div>
               <h2 className="mt-5 text-xl font-[900] tracking-tight" style={{ color: 'var(--color-slate-heading)' }}>Cek Email Anda</h2>
@@ -59,7 +56,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <>
               <div className="mb-8">
-                <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold mb-4" style={{ background: 'rgba(59,130,246,0.14)', color: 'var(--color-accent-blue)', border: '1px solid rgba(96,165,250,0.28)' }}>
+                <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold mb-4" style={{ background: 'rgba(37,99,235,0.14)', color: 'var(--color-accent-blue)', border: '1px solid rgba(96,165,250,0.28)' }}>
                   <Mail size={12} /> Lupa Kata Sandi
                 </div>
                 <h2 className="text-2xl font-[900] tracking-tight" style={{ color: 'var(--color-slate-heading)' }}>Reset Kata Sandi</h2>

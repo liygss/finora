@@ -6,28 +6,30 @@ import { fadeUp, staggerContainer, itemStagger, EASE_GENTLE } from '../utils/mot
 import MotionNumber from '../components/MotionNumber'
 import toast from 'react-hot-toast'
 import { extractError } from '../api/extractError'
-import { Calculator, Receipt, Percent, Info, CheckCircle2, Building2, CircleUser, LoaderCircle, ShieldCheck, ListChecks, PiggyBank } from 'lucide-react'
+import { Calculator, Receipt, Percent, Info, CheckCircle2, Building2, CircleUser, LoaderCircle, ListChecks, PiggyBank, MessageCircle } from 'lucide-react'
+import TaxDisclaimerPopup from '../components/TaxDisclaimerPopup'
+import { openTaxConsultation } from '../utils/chatbotEvents'
 
 const PPH_COLORS = {
-  gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-  shadow: '0 8px 24px rgba(245, 158, 11, 0.3)',
-  accent: '#F59E0B',
-  soft: '#FBBF24',
+  gradient: 'linear-gradient(135deg, #D97706 0%, #D97706 100%)',
+  shadow: '0 8px 24px rgba(217, 119, 6, 0.3)',
+  accent: '#D97706',
+  soft: '#F59E0B',
   deep: '#D97706',
-  bg: 'rgba(245, 158, 11, 0.07)',
-  border: 'rgba(245, 158, 11, 0.22)',
-  chipBg: 'rgba(245, 158, 11, 0.14)',
+  bg: 'rgba(217, 119, 6, 0.07)',
+  border: 'rgba(217, 119, 6, 0.22)',
+  chipBg: 'rgba(217, 119, 6, 0.14)',
 }
 
 const PPN_COLORS = {
-  gradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
-  shadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
-  accent: '#3B82F6',
-  soft: '#7DB4FF',
+  gradient: 'linear-gradient(135deg, #2563EB 0%, #2563EB 100%)',
+  shadow: '0 8px 24px rgba(37, 99, 235, 0.3)',
+  accent: '#2563EB',
+  soft: '#60A5FA',
   deep: '#2563EB',
-  bg: 'rgba(59, 130, 246, 0.07)',
-  border: 'rgba(59, 130, 246, 0.22)',
-  chipBg: 'rgba(59, 130, 246, 0.14)',
+  bg: 'rgba(37, 99, 235, 0.07)',
+  border: 'rgba(37, 99, 235, 0.22)',
+  chipBg: 'rgba(37, 99, 235, 0.14)',
 }
 
 export default function TaxPage() {
@@ -37,7 +39,12 @@ export default function TaxPage() {
         <h1 className="text-3xl font-extrabold">
           <span className="gradient-text">Kalkulator Pajak</span>
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--color-slate-body)' }}>Hitung PPh Final UMKM dan PPN secara cepat untuk usaha Anda</p>
+        <div className="flex flex-wrap items-center gap-3 mt-1">
+          <p className="text-sm" style={{ color: 'var(--color-slate-body)' }}>Hitung PPh Final UMKM dan PPN secara cepat untuk usaha Anda</p>
+          <button type="button" onClick={openTaxConsultation} className="btn-ghost !py-2 !px-3 text-xs">
+            <MessageCircle size={14} /> Tanya Asisten Pajak
+          </button>
+        </div>
       </motion.div>
 
       <motion.div
@@ -49,8 +56,6 @@ export default function TaxPage() {
         <PPhFinalCard />
         <PPNCard />
       </motion.div>
-
-      <Disclaimer />
     </div>
   )
 }
@@ -150,6 +155,7 @@ function PPhFinalCard() {
   const [isOrangPribadi, setIsOrangPribadi] = useState(true)
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [showDisclaimer, setShowDisclaimer] = useState(false)
 
   const hitung = async (e) => {
     e.preventDefault()
@@ -174,6 +180,7 @@ function PPhFinalCard() {
   const bebasPajak = result && result.pph_final_terutang <= 0
 
   return (
+    <>
     <motion.div
       variants={itemStagger}
       whileHover={{ y: -4, transition: EASE_GENTLE }}
@@ -194,16 +201,24 @@ function PPhFinalCard() {
             <Receipt size={20} />
           </motion.div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h3 className="font-bold" style={{ color: 'var(--color-slate-heading)' }}>PPh Final UMKM</h3>
-              <InfoTooltip text={
-                <>
-                  <strong>WP Orang Pribadi:</strong> bebas PPh sampai Rp500 juta/tahun; bagian di atasnya kena tarif 0,5%.<br /><br />
-                  <strong>WP Badan (PT/CV):</strong> kena 0,5% sejak omzet pertama.<br /><br />
-                  Berlaku untuk omzet s/d Rp4,8 miliar/tahun.
-                </>
-              } />
-            </div>
+<div className="flex items-center gap-1.5">
+               <h3 className="font-bold" style={{ color: 'var(--color-slate-heading)' }}>PPh Final UMKM</h3>
+               <InfoTooltip text={
+                 <>
+                   <strong>WP Orang Pribadi:</strong> bebas PPh sampai Rp500 juta/tahun; bagian di atasnya kena tarif 0,5%.<br /><br />
+                   <strong>WP Badan (PT/CV):</strong> kena 0,5% sejak omzet pertama.<br /><br />
+                   Berlaku untuk omzet s/d Rp4,8 miliar/tahun.
+                 </>
+               } />
+               <button
+                 onClick={() => setShowDisclaimer(true)}
+                 className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg transition ml-1"
+                 style={{ color: PPH_COLORS.accent, background: PPH_COLORS.chipBg }}
+               >
+                 <Info size={11} />
+                 Peringatan
+               </button>
+             </div>
             <p className="text-xs mt-0.5" style={{ color: 'var(--color-slate-body)' }}>Omzet bruto × 0,5%</p>
           </div>
         </div>
@@ -231,7 +246,7 @@ function PPhFinalCard() {
                     style={{
                       background: active ? PPH_COLORS.gradient : 'transparent',
                       color: active ? '#fff' : 'var(--color-slate-body)',
-                      boxShadow: active ? '0 2px 10px rgba(245, 158, 11, 0.4)' : 'none',
+                      boxShadow: active ? '0 2px 10px rgba(217, 119, 6, 0.4)' : 'none',
                       border: `1px solid ${active ? 'transparent' : 'transparent'}`,
                     }}
                   >
@@ -292,7 +307,7 @@ function PPhFinalCard() {
               {/* Total banner */}
               <div
                 className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 mt-1"
-                style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(217, 119, 6, 0.1))', border: '1px solid rgba(245, 158, 11, 0.3)' }}
+                style={{ background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.18), rgba(217, 119, 6, 0.1))', border: '1px solid rgba(217, 119, 6, 0.3)' }}
               >
                 <span className="flex items-center gap-1.5 font-bold text-sm" style={{ color: 'var(--color-slate-heading)' }}>
                   <CheckCircle2 size={15} style={{ color: PPH_COLORS.soft }} />
@@ -306,7 +321,7 @@ function PPhFinalCard() {
               <div className="flex items-center justify-between gap-3 pt-0.5">
                 <span className="text-xs" style={{ color: 'var(--color-slate-muted)' }}>Status</span>
                 {bebasPajak ? (
-                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: 'rgba(52, 211, 153, 0.14)', color: '#34D399', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: 'rgba(52, 211, 153, 0.14)', color: '#10B981', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
                     Bebas Pajak
                   </span>
                 ) : (
@@ -326,6 +341,31 @@ function PPhFinalCard() {
         </div>
       </div>
     </motion.div>
+
+    <TaxDisclaimerPopup
+      isOpen={showDisclaimer}
+      onClose={() => setShowDisclaimer(false)}
+      title="Disclaimer PPh Final UMKM"
+      accentColor={PPH_COLORS.accent}
+    >
+      <p>
+        <strong style={{ color: 'var(--color-slate-text)' }}>Perhatian:</strong> hasil ini adalah alat bantu berdasarkan ketentuan yang berlaku saat ini.
+        Tarif &amp; aturan pajak dapat berubah sewaktu-waktu.
+      </p>
+      <ul className="list-disc list-inside space-y-1 mt-2">
+        <li>Tarif PPh Final UMKM: <strong>0,5%</strong> untuk omzet hingga Rp4,8 miliar/tahun</li>
+        <li><strong>WP Orang Pribadi:</strong> bebas PPh sampai Rp500 juta/tahun, bagian di atasnya kena 0,5%</li>
+        <li><strong>WP Badan (PT/CV):</strong> kena 0,5% sejak omzet pertama</li>
+      </ul>
+      <p className="mt-2">
+        Silakan verifikasi ke{' '}
+        <a href="https://pajak.go.id" target="_blank" rel="noreferrer" style={{ color: PPH_COLORS.soft, fontWeight: 600 }}>
+          pajak.go.id
+        </a>{' '}
+        atau konsultan pajak bersertifikat sebelum digunakan untuk pelaporan resmi.
+      </p>
+    </TaxDisclaimerPopup>
+    </>
   )
 }
 
@@ -338,6 +378,7 @@ function PPNCard() {
   const [mewah, setMewah] = useState(false)
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [showDisclaimer, setShowDisclaimer] = useState(false)
 
   const hitung = async (e) => {
     e.preventDefault()
@@ -361,6 +402,7 @@ function PPNCard() {
   const handleMewah = (v) => { setMewah(v); setResult(null) }
 
   return (
+    <>
     <motion.div
       variants={itemStagger}
       whileHover={{ y: -4, transition: EASE_GENTLE }}
@@ -381,15 +423,23 @@ function PPNCard() {
             <Percent size={20} />
           </motion.div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h3 className="font-bold" style={{ color: 'var(--color-slate-heading)' }}>PPN (VAT)</h3>
-              <InfoTooltip text={
-                <>
-                  PPN umum 11% (mekanisme DPP nilai lain 11/12 × tarif 12%).<br />
-                  Barang mewah (PPnBM) kena 12% penuh (PMK 131/2024).
-                </>
-              } />
-            </div>
+<div className="flex items-center gap-1.5">
+               <h3 className="font-bold" style={{ color: 'var(--color-slate-heading)' }}>PPN (VAT)</h3>
+               <InfoTooltip text={
+                 <>
+                   PPN umum 11% (mekanisme DPP nilai lain 11/12 × tarif 12%).<br />
+                   Barang mewah (PPnBM) kena 12% penuh (PMK 131/2024).
+                 </>
+               } />
+               <button
+                 onClick={() => setShowDisclaimer(true)}
+                 className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg transition ml-1"
+                 style={{ color: PPN_COLORS.deep, background: PPN_COLORS.chipBg }}
+               >
+                 <Info size={11} />
+                 Peringatan
+               </button>
+             </div>
             <p className="text-xs mt-0.5" style={{ color: 'var(--color-slate-body)' }}>PPN atas transaksi barang/jasa</p>
           </div>
         </div>
@@ -447,7 +497,7 @@ function PPNCard() {
               <Row label="Dasar Pengenaan Pajak (DPP)" value={formatRupiah(result.dasar_pengenaan_pajak)} />
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm" style={{ color: 'var(--color-slate-body)' }}>Tarif</span>
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ background: mewah ? 'rgba(239, 68, 68, 0.14)' : PPN_COLORS.chipBg, color: mewah ? '#EF4444' : PPN_COLORS.deep }}>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ background: mewah ? 'rgba(220, 38, 38, 0.14)' : PPN_COLORS.chipBg, color: mewah ? '#DC2626' : PPN_COLORS.deep }}>
                   {(result.tarif_digunakan * 100).toFixed(0)}%{mewah ? ' (PPnBM)' : ''}
                 </span>
               </div>
@@ -455,7 +505,7 @@ function PPNCard() {
               {/* Total banner */}
               <div
                 className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 mt-1"
-                style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(37, 99, 235, 0.1))', border: '1px solid rgba(59, 130, 246, 0.3)' }}
+                style={{ background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(37, 99, 235, 0.1))', border: '1px solid rgba(37, 99, 235, 0.3)' }}
               >
                 <span className="flex items-center gap-1.5 font-bold text-sm" style={{ color: 'var(--color-slate-heading)' }}>
                   <CheckCircle2 size={15} style={{ color: PPN_COLORS.soft }} />
@@ -481,28 +531,29 @@ function PPNCard() {
         </div>
       </div>
     </motion.div>
-  )
-}
 
-/* ------------------------------------------------------------------ */
-/*  Disclaimer                                                         */
-/* ------------------------------------------------------------------ */
-function Disclaimer() {
-  return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      animate="visible"
-      className="flex items-start gap-2.5 rounded-2xl p-4 text-xs leading-relaxed"
-      style={{ background: 'var(--color-surface-card)', border: '1px dashed rgba(148, 163, 184, 0.22)', color: 'var(--color-slate-body)' }}
+    <TaxDisclaimerPopup
+      isOpen={showDisclaimer}
+      onClose={() => setShowDisclaimer(false)}
+      title="Disclaimer PPN (VAT)"
+      accentColor={PPN_COLORS.accent}
     >
-      <ShieldCheck size={16} className="shrink-0 mt-0.5" style={{ color: 'var(--color-brand-soft)' }} />
-      <span>
+      <p>
         <strong style={{ color: 'var(--color-slate-text)' }}>Perhatian:</strong> hasil ini adalah alat bantu berdasarkan ketentuan yang berlaku saat ini.
-        Tarif & aturan pajak dapat berubah sewaktu-waktu. Silakan verifikasi ke{' '}
-        <a href="https://pajak.go.id" target="_blank" rel="noreferrer" style={{ color: 'var(--color-brand-soft)', fontWeight: 600 }}>pajak.go.id</a>{' '}
+        Tarif &amp; aturan pajak dapat berubah sewaktu-waktu.
+      </p>
+      <ul className="list-disc list-inside space-y-1 mt-2">
+        <li><strong>PPN umum:</strong> 11% (mekanisme DPP nilai lain 11/12 × tarif 12%)</li>
+        <li><strong>Barang mewah (PPnBM):</strong> kena 12% penuh (PMK 131/2024)</li>
+      </ul>
+      <p className="mt-2">
+        Silakan verifikasi ke{' '}
+        <a href="https://pajak.go.id" target="_blank" rel="noreferrer" style={{ color: PPN_COLORS.soft, fontWeight: 600 }}>
+          pajak.go.id
+        </a>{' '}
         atau konsultan pajak bersertifikat sebelum digunakan untuk pelaporan resmi.
-      </span>
-    </motion.div>
+      </p>
+    </TaxDisclaimerPopup>
+    </>
   )
 }

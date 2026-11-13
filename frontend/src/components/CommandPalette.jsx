@@ -125,7 +125,7 @@ export default function CommandPalette({ open, onClose }) {
                   className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150 ${i === index ? 'bg-[var(--color-hover)]' : ''}`}
                   style={i === index ? { color: 'var(--color-accent-blue)' } : { color: 'var(--color-slate-text)' }}
                 >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: 'rgba(59,130,246,0.12)', color: 'var(--color-accent-blue)' }}>
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: 'rgba(37,99,235,0.12)', color: 'var(--color-accent-blue)' }}>
                     <cmd.icon size={16} />
                   </span>
                   <span className="flex-1 text-sm font-medium">{cmd.label}</span>

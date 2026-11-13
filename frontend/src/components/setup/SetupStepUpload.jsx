@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+
 import { motion } from 'motion/react'
 import client from '../../api/client'
 import { formatDateTime } from '../../utils/formatters'
@@ -9,13 +9,13 @@ import LoadingSpinner from '../LoadingSpinner'
 import { Upload, FileText, CheckCircle, XCircle, Clock, UploadCloud, ChevronLeft, Trash2, Sparkles, FileSpreadsheet, MessageCircle } from 'lucide-react'
 
 const STATUS_ICON = {
-  UPLOADED: <Clock size={14} style={{ color: '#F59E0B' }} />,
-  STAGED: <Clock size={14} style={{ color: '#F59E0B' }} />,
+  UPLOADED: <Clock size={14} style={{ color: '#D97706' }} />,
+  STAGED: <Clock size={14} style={{ color: '#D97706' }} />,
   PROCESSING: <LoadingSpinner size="sm" />,
   NORMALIZED: <LoadingSpinner size="sm" />,
-  INGESTED: <CheckCircle size={14} style={{ color: '#10B981' }} />,
-  POSTED: <CheckCircle size={14} style={{ color: '#10B981' }} />,
-  FAILED: <XCircle size={14} style={{ color: '#EF4444' }} />,
+  INGESTED: <CheckCircle size={14} style={{ color: '#059669' }} />,
+  POSTED: <CheckCircle size={14} style={{ color: '#059669' }} />,
+  FAILED: <XCircle size={14} style={{ color: '#DC2626' }} />,
 }
 
 const STATUS_LABEL = {
@@ -29,12 +29,12 @@ const STATUS_LABEL = {
 }
 
 const STATUS_COLOR = {
-  UPLOADED: '#FBBF24',
-  STAGED: '#FBBF24',
-  PROCESSING: '#FBBF24',
-  NORMALIZED: '#FBBF24',
-  INGESTED: '#34D399',
-  POSTED: '#34D399',
+  UPLOADED: '#F59E0B',
+  STAGED: '#F59E0B',
+  PROCESSING: '#F59E0B',
+  NORMALIZED: '#F59E0B',
+  INGESTED: '#10B981',
+  POSTED: '#10B981',
   FAILED: '#F87171',
 }
 
@@ -49,7 +49,6 @@ const SUGGESTIONS = [
 ]
 
 export default function SetupStepUpload({ onBack, onFinish }) {
-  const navigate = useNavigate()
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(true)
   const [dragging, setDragging] = useState(false)
@@ -69,7 +68,7 @@ export default function SetupStepUpload({ onBack, onFinish }) {
   const stagedCount = files.filter(f => STAGED_STATUS.includes(f.status)).length
   const doneCount = files.filter(f => DONE_STATUS.includes(f.status)).length
   const failedCount = files.filter(f => f.status === 'FAILED').length
-  const stagedFile = files.find(f => STAGED_STATUS.includes(f.status))
+
 
   // Polling status
   useEffect(() => {
@@ -96,12 +95,12 @@ export default function SetupStepUpload({ onBack, onFinish }) {
   const upload = async (file) => {
     const fd = new FormData()
     fd.append('file', file)
+    fd.append('context', 'setup')
     setUploading(true)
     try {
-      const { data } = await client.post('/upload/file', fd)
-      toast.success(`${file.name} terupload! Siap dianalisis.`)
+      await client.post('/upload/file', fd)
+      toast.success(`${file.name} terupload dan diproses! Data langsung masuk jurnal.`)
       load()
-      navigate(`/dashboard?upload_id=${data.id}`)
     } catch (err) {
       toast.error(extractError(err, `Gagal upload ${file.name}`))
     } finally {
@@ -132,12 +131,8 @@ export default function SetupStepUpload({ onBack, onFinish }) {
     }
   }
 
-  const handleSuggestion = (text) => {
-    if (stagedFile) {
-      navigate(`/dashboard?upload_id=${stagedFile.id}`)
-    } else {
-      toast('Upload file dulu ya, nanti aku bantu analisis! 💡', { icon: '📎' })
-    }
+  const handleSuggestion = () => {
+    toast('Upload file dulu ya, nanti aku bantu analisis! 💡', { icon: '📎' })
   }
 
   const handleFinish = async () => {
@@ -182,12 +177,12 @@ export default function SetupStepUpload({ onBack, onFinish }) {
         transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.1 }}
         className="card relative overflow-hidden"
       >
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #10B981 100%)' }} />
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ background: 'linear-gradient(135deg, #2563EB 0%, #059669 100%)' }} />
         <div className="relative flex items-start gap-4 py-5 px-5">
           {/* Buddy avatar + pulse */}
           <div className="relative shrink-0">
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="h-20 w-20 rounded-full animate-pulse-ring" style={{ border: '2px solid rgba(59, 130, 246, 0.2)' }} />
+              <span className="h-20 w-20 rounded-full animate-pulse-ring" style={{ border: '2px solid rgba(37, 99, 235, 0.2)' }} />
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="h-16 w-16 rounded-full animate-pulse-ring" style={{ border: '1.5px solid rgba(96, 165, 250, 0.15)', animationDelay: '0.5s' }} />
@@ -198,7 +193,7 @@ export default function SetupStepUpload({ onBack, onFinish }) {
               transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.2 }}
               className="relative z-10"
             >
-              <div className="rounded-2xl p-2.5 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.25), rgba(59,130,246,0.1))', border: '1px solid rgba(96, 165, 250, 0.3)', boxShadow: '0 8px 30px rgba(59, 130, 246, 0.15)' }}>
+              <div className="rounded-2xl p-2.5 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.25), rgba(37,99,235,0.1))', border: '1px solid rgba(96, 165, 250, 0.3)', boxShadow: '0 8px 30px rgba(15,23,42,0.12)' }}>
                 <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-10 w-10 object-contain" />
               </div>
             </motion.div>
@@ -231,7 +226,7 @@ export default function SetupStepUpload({ onBack, onFinish }) {
                     background: 'var(--color-surface-faint)',
                     border: '1px solid var(--color-border-subtle)',
                     color: 'var(--color-brand-soft)',
-                    boxShadow: '0 2px 8px rgba(59, 130, 246, 0.08)',
+                    boxShadow: '0 2px 8px rgba(15,23,42,0.12)',
                   }}
                 >
                   <s.icon size={11} />
@@ -263,11 +258,11 @@ export default function SetupStepUpload({ onBack, onFinish }) {
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               className="relative"
             >
-              <div className="rounded-2xl p-5 transition-all duration-300" style={{ background: dragging ? 'rgba(37, 99, 235, 0.18)' : 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(16,185,129,0.1))', boxShadow: dragging ? '0 8px 32px rgba(59, 130, 246, 0.2)' : '0 4px 16px rgba(59, 130, 246, 0.08)' }}>
+              <div className="rounded-2xl p-5 transition-all duration-300" style={{ background: dragging ? 'rgba(37, 99, 235, 0.18)' : 'linear-gradient(135deg, rgba(37,99,235,0.15), rgba(5,150,105,0.1))', boxShadow: dragging ? '0 8px 32px rgba(37, 99, 235, 0.2)' : '0 4px 16px rgba(37, 99, 235, 0.08)' }}>
                 <UploadCloud size={36} style={{ color: dragging ? '#2563EB' : 'var(--color-brand-soft)' }} />
               </div>
               {dragging && (
-                <span className="absolute -inset-1 rounded-3xl animate-pulse-ring" style={{ border: '2px solid rgba(59, 130, 246, 0.3)' }} />
+                <span className="absolute -inset-1 rounded-3xl animate-pulse-ring" style={{ border: '2px solid rgba(37, 99, 235, 0.3)' }} />
               )}
             </motion.div>
             <div className="text-center">
@@ -294,7 +289,7 @@ export default function SetupStepUpload({ onBack, onFinish }) {
             )}
             {uploading && (
               <div className="w-48 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-card)' }}>
-                <div className="h-full rounded-full animate-pulse" style={{ background: 'linear-gradient(90deg, #3B82F6, #10B981)', width: '60%' }} />
+                <div className="h-full rounded-full animate-pulse" style={{ background: 'linear-gradient(90deg, #2563EB, #059669)', width: '60%' }} />
               </div>
             )}
           </label>
@@ -303,20 +298,16 @@ export default function SetupStepUpload({ onBack, onFinish }) {
 
       {/* Staged banner */}
       {stagedCount > 0 && (
-        <div className="card flex items-center gap-3 text-sm" style={{ color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+        <div className="card flex items-center gap-3 text-sm" style={{ color: '#2563EB', border: '1px solid rgba(37, 99, 235, 0.3)' }}>
           <MessageCircle size={14} />
           <span>{stagedCount} file siap dianalisis. <strong>Buka chat</strong> untuk mengeksplorasi datanya sebelum masuk jurnal.</span>
-          {stagedFile && (
-            <a href={`/dashboard?upload_id=${stagedFile.id}`} className="ml-auto shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:scale-105" style={{ color: '#fff', background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}>
-              💬 Chat
-            </a>
-          )}
+
         </div>
       )}
 
       {/* Processing indicator */}
       {pendingCount > 0 && (
-        <div className="card flex items-center gap-3 text-sm" style={{ color: '#FBBF24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+        <div className="card flex items-center gap-3 text-sm" style={{ color: '#F59E0B', border: '1px solid rgba(217, 119, 6, 0.3)' }}>
           <LoadingSpinner size="sm" />
           <span className="text-xs">Sedang memproses {pendingCount} file...</span>
         </div>
@@ -326,17 +317,17 @@ export default function SetupStepUpload({ onBack, onFinish }) {
       {(doneCount > 0 || failedCount > 0) && (
         <div className="flex items-center gap-3 text-xs">
           {doneCount > 0 && (
-            <span className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10B981' }}>
+            <span className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ background: 'rgba(5, 150, 105, 0.12)', color: '#059669' }}>
               <CheckCircle size={12} /> {doneCount} berhasil
             </span>
           )}
           {failedCount > 0 && (
-            <span className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#EF4444' }}>
+            <span className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ background: 'rgba(220, 38, 38, 0.12)', color: '#DC2626' }}>
               <XCircle size={12} /> {failedCount} gagal
             </span>
           )}
           {pendingCount > 0 && (
-            <span className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#F59E0B' }}>
+            <span className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ background: 'rgba(217, 119, 6, 0.12)', color: '#D97706' }}>
               <Clock size={12} /> {pendingCount} diproses
             </span>
           )}
@@ -358,15 +349,7 @@ export default function SetupStepUpload({ onBack, onFinish }) {
                 {STATUS_ICON[f.status]}
                 <span style={{ color: STATUS_COLOR[f.status] || '#D97706' }}>{STATUS_LABEL[f.status] || f.status}</span>
               </div>
-              {STAGED_STATUS.includes(f.status) && (
-                <a
-                  href={`/dashboard?upload_id=${f.id}`}
-                  className="shrink-0 flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition-all hover:scale-105"
-                  style={{ color: '#fff', background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}
-                >
-                  💬 Chat
-                </a>
-              )}
+
               <button onClick={() => deleteFile(f.id, f.original_filename)} className="shrink-0 p-1 rounded-lg transition hover:bg-red-500/10" style={{ color: 'var(--color-slate-muted)' }}>
                 <Trash2 size={12} />
               </button>
@@ -400,7 +383,7 @@ export default function SetupStepUpload({ onBack, onFinish }) {
           onClick={handleFinish}
           disabled={completing || pendingCount > 0}
           className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
-          style={{ background: 'linear-gradient(135deg, #059669, #10B981)', boxShadow: '0 6px 20px rgba(16, 185, 129, 0.3)' }}
+          style={{ background: 'linear-gradient(135deg, #059669, #059669)', boxShadow: '0 6px 20px rgba(15,23,42,0.12)' }}
         >
           {completing ? 'Menyelesaikan...' : <><Sparkles size={16} /> Masuk ke Dashboard</>}
         </button>

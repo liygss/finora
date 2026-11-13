@@ -10,7 +10,7 @@ export function getInitialTheme() {
   } catch {
     /* ignore */
   }
-  return 'dark'
+  return 'light'
 }
 
 export function applyThemeClass(mode) {

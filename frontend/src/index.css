@@ -3,77 +3,39 @@
 @theme {
   --font-sans: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-  /* ── Premium Dark Palette (Refined Blue-Navy) ── */
+  /* ── Light Corporate Palette (Default) ── */
   --color-brand-deep: #1E3A8A;
-  --color-brand-primary: #3B82F6;
-  --color-brand-soft: #7DB4FF;
-  --color-brand-glow: rgba(96, 165, 250, 0.4);
+  --color-brand-primary: #1D4ED8;
+  --color-brand-soft: #1E40AF;
+  --color-brand-glow: rgba(16, 24, 40, 0.08);
 
-  --color-surface-0: #050A14;
-  --color-surface-1: #0A1322;
-  --color-surface-2: #0E1A2E;
-  --color-surface-3: #15233C;
-  --color-surface-deep: #0A1220;
-  --color-surface-card: rgba(71, 108, 175, 0.1);
-  --color-surface-faint: rgba(148, 163, 184, 0.03);
-
-  --color-border-subtle: rgba(148, 163, 184, 0.14);
-  --color-border-soft: rgba(148, 163, 184, 0.22);
-
-  --color-slate-heading: #F4F8FD;
-  --color-slate-text: #C7D6EE;
-  --color-slate-body: #8FA9CC;
-  --color-slate-muted: #5B6B85;
-
-  --color-glass-bg: rgba(9, 16, 30, 0.72);
-  --color-glass-border: rgba(148, 163, 184, 0.14);
-  --color-shadow: rgba(0, 0, 0, 0.55);
-  --color-hover: rgba(96, 165, 250, 0.08);
-  --color-tooltip-bg: rgba(10, 18, 34, 0.96);
-  --color-tooltip-border: rgba(148, 163, 184, 0.22);
-  --color-header-bg: linear-gradient(180deg, rgba(13, 22, 40, 0.85), rgba(6, 11, 22, 0.88));
-  --color-sidebar-bg: linear-gradient(180deg, rgba(13, 22, 40, 0.9), rgba(6, 11, 22, 0.92));
-
-  --color-accent-blue: #9CCBFF;
-  --color-accent-emerald: #34D399;
-  --color-accent-green: #6EE7B7;
-  --color-accent-amber: #FCD34D;
-  --color-accent-orange: #FDBA74;
-  --color-accent-purple: #D8B4FE;
-  --color-accent-red: #FDA4AF;
-  --color-accent-cyan: #22D3EE;
-}
-
-html.light {
-  color-scheme: light;
-  --color-brand-soft: #2563EB;
-  --color-surface-0: #F1F5F9;
-  --color-surface-1: #F8FAFC;
+  --color-surface-0: #F7F8FA;
+  --color-surface-1: #FFFFFF;
   --color-surface-2: #FFFFFF;
-  --color-surface-3: #E2E8F0;
+  --color-surface-3: #F1F3F5;
   --color-surface-deep: #FFFFFF;
-  --color-surface-card: rgba(255, 255, 255, 0.9);
+  --color-surface-card: rgba(255, 255, 255, 0.98);
   --color-surface-faint: rgba(15, 23, 42, 0.03);
 
-  --color-border-subtle: rgba(15, 23, 42, 0.08);
-  --color-border-soft: rgba(15, 23, 42, 0.14);
+  --color-border-subtle: rgba(15, 23, 42, 0.07);
+  --color-border-soft: rgba(15, 23, 42, 0.12);
 
   --color-slate-heading: #0F172A;
   --color-slate-text: #334155;
   --color-slate-body: #475569;
-  --color-slate-muted: #64748B;
+  --color-slate-muted: #5B6675;
 
-  --color-glass-bg: rgba(248, 250, 252, 0.75);
+  --color-glass-bg: rgba(255, 255, 255, 0.9);
   --color-glass-border: rgba(15, 23, 42, 0.1);
-  --color-shadow: rgba(15, 23, 42, 0.18);
-  --color-hover: rgba(15, 23, 42, 0.05);
-  --color-tooltip-bg: rgba(255, 255, 255, 0.97);
+  --color-shadow: rgba(15, 23, 42, 0.08);
+  --color-hover: rgba(15, 23, 42, 0.04);
+  --color-tooltip-bg: rgba(255, 255, 255, 0.98);
   --color-tooltip-border: rgba(15, 23, 42, 0.12);
-  --color-header-bg: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.94));
-  --color-sidebar-bg: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(255, 255, 255, 0.98));
+  --color-header-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.96));
+  --color-sidebar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.98));
 
-  --color-accent-blue: #2563EB;
-  --color-accent-emerald: #059669;
+  --color-accent-blue: #1D4ED8;
+  --color-accent-emerald: #047857;
   --color-accent-green: #047857;
   --color-accent-amber: #B45309;
   --color-accent-orange: #C2410C;
@@ -82,8 +44,60 @@ html.light {
   --color-accent-cyan: #0891B2;
 }
 
+html.dark {
+  color-scheme: dark;
+
+  /* Brand — GitHub accent blue, refined */
+  --color-brand-deep: #1B2C4F;
+  --color-brand-primary: #3D7EFF;
+  --color-brand-soft: #9CC4FF;
+  --color-brand-glow: rgba(61, 126, 255, 0.22);
+
+  /* Surfaces — GitHub Dark canvas ladder */
+  --color-surface-0: #0D1117;
+  --color-surface-1: #10151C;
+  --color-surface-2: #161B22;
+  --color-surface-3: #1C2128;
+  --color-surface-deep: #080B10;
+  --color-surface-card: rgba(22, 27, 34, 0.86);
+  --color-surface-faint: rgba(139, 148, 158, 0.06);
+
+  /* Borders — neutral steel, blue reserved for interactive states */
+  --color-border-subtle: rgba(139, 148, 158, 0.14);
+  --color-border-soft: rgba(139, 148, 158, 0.26);
+
+  /* Text — GitHub fg ladder, brightened */
+  --color-slate-heading: #F0F3F6;
+  --color-slate-text: #C9D1D9;
+  --color-slate-body: #ADBAC7;
+  --color-slate-muted: #8B949E;
+
+  /* Glass & overlays */
+  --color-glass-bg: rgba(13, 17, 23, 0.8);
+  --color-glass-border: rgba(139, 148, 158, 0.2);
+  --color-shadow: rgba(1, 4, 9, 0.55);
+  --color-hover: rgba(139, 148, 158, 0.1);
+  --color-tooltip-bg: rgba(22, 27, 34, 0.98);
+  --color-tooltip-border: rgba(139, 148, 158, 0.28);
+  --color-header-bg: linear-gradient(180deg, rgba(13, 17, 23, 0.92), rgba(13, 17, 23, 0.97));
+  --color-sidebar-bg: linear-gradient(180deg, rgba(13, 17, 23, 0.97), rgba(8, 11, 16, 0.98));
+
+  /* Accents — GitHub Dark, more vivid */
+  --color-accent-blue: #58A6FF;
+  --color-accent-emerald: #3FD68C;
+  --color-accent-green: #56D364;
+  --color-accent-amber: #E3B341;
+  --color-accent-orange: #FFA657;
+  --color-accent-purple: #BC8CFF;
+  --color-accent-red: #FF7B72;
+  --color-accent-cyan: #39C5CF;
+}
+
 @layer base {
   html {
+    color-scheme: light;
+  }
+  html.dark {
     color-scheme: dark;
   }
 
@@ -96,28 +110,23 @@ html.light {
     min-height: 100vh;
   }
 
-  /* Ambient aurora backdrop for the whole app */
+  /* Subtle corporate backdrop for the whole app */
   .app-bg {
     position: relative;
     background:
-      radial-gradient(1200px 600px at 80% -10%, rgba(59, 130, 246, 0.1), transparent 60%),
-      radial-gradient(900px 500px at -10% 20%, rgba(30, 58, 138, 0.14), transparent 55%),
-      radial-gradient(700px 500px at 55% 110%, rgba(96, 165, 250, 0.05), transparent 60%),
+      radial-gradient(1200px 500px at 50% -10%, rgba(29, 78, 216, 0.05), transparent 60%),
       var(--color-surface-0);
   }
 
   html.dark .app-bg {
     background:
-      radial-gradient(1200px 600px at 80% -10%, rgba(59, 130, 246, 0.14), transparent 60%),
-      radial-gradient(900px 500px at -10% 20%, rgba(30, 58, 138, 0.18), transparent 55%),
-      radial-gradient(700px 500px at 55% 110%, rgba(96, 165, 250, 0.08), transparent 60%),
-      linear-gradient(180deg, rgba(9, 16, 30, 0.6), transparent 40%),
+      radial-gradient(1200px 500px at 50% -10%, rgba(88, 166, 255, 0.05), transparent 60%),
       var(--color-surface-0);
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(125, 180, 255, 0.4) transparent;
+    scrollbar-color: rgba(139, 148, 158, 0.3) transparent;
   }
 
   *::-webkit-scrollbar {
@@ -130,12 +139,12 @@ html.light {
   }
 
   *::-webkit-scrollbar-thumb {
-    background: rgba(125, 180, 255, 0.4);
+    background: rgba(139, 148, 158, 0.3);
     border-radius: 999px;
   }
 
   *::-webkit-scrollbar-thumb:hover {
-    background: var(--color-brand-primary);
+    background: rgba(110, 118, 129, 0.55);
   }
 
   select option {
@@ -148,12 +157,12 @@ html.light {
   /* ===== BUTTONS ===== */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300;
-    background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 45%, #3B82F6 100%);
-    box-shadow: 0 8px 24px var(--color-brand-glow), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+    background: linear-gradient(135deg, var(--color-brand-deep) 0%, var(--color-brand-primary) 100%);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.1), 0 1px 3px rgba(16, 24, 40, 0.12);
   }
   .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 36px rgba(59, 130, 246, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 24, 40, 0.16), 0 2px 4px rgba(16, 24, 40, 0.1);
   }
   .btn-primary:active {
     transform: translateY(0);
@@ -174,17 +183,17 @@ html.light {
     @apply -translate-y-0.5;
     background: var(--color-surface-3);
     border-color: var(--color-brand-primary);
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 4px 12px rgba(16, 24, 40, 0.1);
   }
 
   .btn-danger {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300;
-    background: linear-gradient(135deg, #B91C1C 0%, #E11D48 100%);
-    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    background: linear-gradient(135deg, #B42318 0%, #D92D20 100%);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.1), 0 1px 3px rgba(16, 24, 40, 0.12);
   }
   .btn-danger:hover {
     @apply -translate-y-0.5;
-    box-shadow: 0 12px 32px rgba(239, 68, 68, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(180, 35, 24, 0.25);
   }
 
   .btn-ghost {
@@ -202,7 +211,7 @@ html.light {
     border-color: var(--color-border-soft);
     background: var(--color-surface-2);
     color: var(--color-slate-heading);
-    box-shadow: 0 2px 8px rgba(3, 7, 18, 0.5);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
     overflow: hidden;
   }
   .input-field::placeholder {
@@ -211,7 +220,7 @@ html.light {
   .input-field:focus {
     @apply outline-none;
     border-color: var(--color-brand-primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18), 0 4px 16px rgba(59, 130, 246, 0.14);
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
   }
 
   .label {
@@ -224,20 +233,29 @@ html.light {
     @apply rounded-2xl p-6 transition-all duration-300;
     background: var(--color-surface-card);
     border: 1px solid var(--color-border-subtle);
-    box-shadow: 0 8px 24px -4px var(--color-shadow), inset 0 1px 0 rgba(148, 163, 184, 0.06);
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
     min-width: 0;
   }
   .card:hover {
     border-color: var(--color-border-soft);
-    box-shadow: 0 16px 40px -8px rgba(59, 130, 246, 0.22), 0 4px 16px -4px var(--color-shadow), inset 0 1px 0 rgba(148, 163, 184, 0.08);
+    box-shadow: 0 6px 20px -6px rgba(16, 24, 40, 0.12), 0 2px 6px -2px rgba(16, 24, 40, 0.06);
   }
 
   .card-glass {
     @apply rounded-2xl p-6;
     background: var(--color-glass-bg);
     border: 1px solid var(--color-glass-border);
-    backdrop-filter: blur(20px) saturate(160%);
-    box-shadow: 0 8px 32px var(--color-shadow);
+    backdrop-filter: blur(16px) saturate(120%);
+    box-shadow: 0 4px 20px rgba(16, 24, 40, 0.08);
+  }
+
+  /* Card lebih transparan + blur kaca HANYA saat mode gelap */
+  html.dark .card-frost {
+    background: rgba(22, 27, 34, 0.5);
+    border-color: rgba(139, 148, 158, 0.12);
+    backdrop-filter: blur(16px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
+    box-shadow: 0 8px 32px -8px rgba(1, 4, 9, 0.55);
   }
 
   /* ===== TEXT ===== */
@@ -246,6 +264,12 @@ html.light {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+  html.dark .gradient-text {
+    background-image: linear-gradient(135deg, #9CC4FF 0%, #3D7EFF 55%, #A8D0FF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   /* ===== BADGES ===== */
@@ -287,13 +311,14 @@ html.light {
   /* ===== SKELETON ===== */
   .skeleton {
     @apply rounded-2xl;
-    /* Warna dasar harus terlihat, shimmer hanya tambahan. Versi lama memakai
-       rgba(148,163,184,0.1) yang nyaris transparan sehingga di tema gelap
-       halaman terlihat seperti layar hitam kosong selama data dimuat. */
     background-color: rgba(148, 163, 184, 0.16);
-    background-image: linear-gradient(90deg, rgba(148, 163, 184, 0.16) 25%, rgba(125, 180, 255, 0.38) 50%, rgba(148, 163, 184, 0.16) 75%);
+    background-image: linear-gradient(90deg, rgba(148, 163, 184, 0.16) 25%, rgba(203, 213, 225, 0.4) 50%, rgba(148, 163, 184, 0.16) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
+  }
+  html.dark .skeleton {
+    background-color: rgba(139, 148, 158, 0.1);
+    background-image: linear-gradient(90deg, rgba(139, 148, 158, 0.1) 25%, rgba(201, 209, 217, 0.2) 50%, rgba(139, 148, 158, 0.1) 75%);
   }
 
   /* ===== GLASS PANEL ===== */
@@ -301,8 +326,8 @@ html.light {
     @apply rounded-2xl;
     background: var(--color-glass-bg);
     border: 1px solid var(--color-glass-border);
-    backdrop-filter: blur(20px) saturate(160%);
-    box-shadow: 0 8px 32px var(--color-shadow);
+    backdrop-filter: blur(16px) saturate(120%);
+    box-shadow: 0 4px 20px rgba(16, 24, 40, 0.08);
   }
 
   /* ===== DATE PICKER ===== */
@@ -310,7 +335,7 @@ html.light {
     background: var(--color-surface-2) !important;
     border: 1px solid var(--color-border-soft) !important;
     border-radius: 1rem !important;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 12px 32px rgba(16, 24, 40, 0.16) !important;
     overflow: hidden;
     font-family: inherit !important;
   }
@@ -361,7 +386,7 @@ html.light {
     background: linear-gradient(135deg, #1D4ED8, #2563EB) !important;
     color: white !important;
     font-weight: 700 !important;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+    box-shadow: 0 2px 6px rgba(29, 78, 216, 0.25) !important;
   }
   .react-datepicker__day--today {
     border: 2px solid var(--color-brand-primary) !important;
@@ -385,11 +410,24 @@ html.light {
     background: var(--color-surface-2) !important;
     border: 1px solid var(--color-border-soft) !important;
     border-radius: 12px !important;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 12px 32px rgba(16, 24, 40, 0.16) !important;
   }
   .react-datepicker__year-dropdown-container--with-year-dropdown .react-datepicker__year-select {
     background: var(--color-surface-2) !important;
     color: var(--color-slate-heading) !important;
+  }
+
+  /* Datepicker premium dark: header & selected day memakai gradient GitHub accent */
+  html.dark .react-datepicker {
+    box-shadow: 0 12px 32px rgba(1, 4, 9, 0.55), 0 0 0 1px rgba(139, 148, 158, 0.12) !important;
+  }
+  html.dark .react-datepicker__header {
+    background: linear-gradient(135deg, #1F6FEB, #3D7EFF) !important;
+  }
+  html.dark .react-datepicker__day--selected,
+  html.dark .react-datepicker__day--keyboard-selected {
+    background: linear-gradient(135deg, #1F6FEB, #3D7EFF) !important;
+    box-shadow: 0 2px 8px rgba(61, 126, 255, 0.35) !important;
   }
 
   /* ===== PILL NAV ===== */
@@ -397,7 +435,7 @@ html.light {
     @apply rounded-full;
     background: var(--color-surface-card);
     border: 1px solid var(--color-border-subtle);
-    box-shadow: 0 4px 24px var(--color-shadow);
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
   }
 }
 
@@ -443,8 +481,8 @@ html.light {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  0%, 100% { opacity: 0.75; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
 }
 
 @keyframes typing-dot {
@@ -463,8 +501,8 @@ html.light {
 }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.2); }
-  50% { box-shadow: 0 0 40px rgba(37, 99, 235, 0.4); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.88; }
 }
 
 @keyframes float-gentle {
@@ -910,16 +948,12 @@ html.light {
 .chat-canvas-bg {
   position: relative;
   background:
-    radial-gradient(900px 500px at 50% 0%, rgba(59, 130, 246, 0.1), transparent 55%),
-    radial-gradient(600px 400px at 20% 80%, rgba(30, 58, 138, 0.12), transparent 50%),
-    radial-gradient(500px 400px at 80% 60%, rgba(96, 165, 250, 0.06), transparent 50%),
+    radial-gradient(900px 500px at 50% 0%, rgba(29, 78, 216, 0.05), transparent 55%),
     var(--color-surface-0);
 }
 html.dark .chat-canvas-bg {
   background:
-    radial-gradient(900px 500px at 50% 0%, rgba(59, 130, 246, 0.16), transparent 55%),
-    radial-gradient(600px 400px at 20% 80%, rgba(30, 58, 138, 0.2), transparent 50%),
-    radial-gradient(500px 400px at 80% 60%, rgba(96, 165, 250, 0.1), transparent 50%),
+    radial-gradient(900px 500px at 50% 0%, rgba(88, 166, 255, 0.05), transparent 55%),
     var(--color-surface-0);
 }
 .chat-canvas-bg::after {
@@ -931,16 +965,16 @@ html.dark .chat-canvas-bg {
   pointer-events: none;
 }
 html.dark .chat-canvas-bg::after {
-  background-image: radial-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(139, 148, 158, 0.05) 1px, transparent 1px);
 }
 
-/* ── Full-page composer glow ── */
+/* ── Full-page composer focus ── */
 .chat-composer-full {
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .chat-composer-full:focus-within {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25), 0 8px 32px rgba(0, 0, 0, 0.3);
-  border-color: rgba(59, 130, 246, 0.4) !important;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15), 0 4px 16px rgba(16, 24, 40, 0.08);
+  border-color: rgba(29, 78, 216, 0.4) !important;
 }
 
 /* ── Message area fade overlays ── */
@@ -949,4 +983,70 @@ html.dark .chat-canvas-bg::after {
 }
 .chat-fade-bottom {
   background: linear-gradient(to top, var(--color-surface-1), transparent);
+}
+
+/* ── Chat answer typography ── */
+.chat-answer > :first-child {
+  margin-top: 0;
+}
+.chat-answer > :last-child {
+  margin-bottom: 0;
+}
+.chat-answer p,
+.chat-answer li {
+  overflow-wrap: anywhere;
+}
+
+/* ── Landing hero mock (dark mode adjustments) ── */
+html.dark .landing-hero-mock {
+  background: linear-gradient(180deg, rgba(22, 27, 34, 0.98), rgba(13, 17, 23, 0.94)) !important;
+  border-color: rgba(88, 166, 255, 0.28) !important;
+  box-shadow: 0 32px 90px -40px rgba(1, 4, 9, 0.85), 0 0 0 1px rgba(88, 166, 255, 0.12), 0 0 40px -20px rgba(88,166,255,0.25) !important;
+}
+html.dark .landing-hero-mock__bar,
+html.dark .landing-hero-mock__chat-header {
+  background: rgba(28, 33, 40, 0.98) !important;
+  border-color: rgba(88, 166, 255, 0.18) !important;
+}
+html.dark .landing-hero-mock__url,
+html.dark .landing-hero-mock__chat-input {
+  background: rgba(28, 33, 40, 0.95) !important;
+  border-color: rgba(88, 166, 255, 0.22) !important;
+}
+html.dark .landing-hero-mock__tile {
+  background: linear-gradient(180deg, rgba(28, 33, 40, 0.96), rgba(28, 33, 40, 0.88)) !important;
+  border-color: rgba(139, 148, 158, 0.2) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -16px rgba(1,4,9,0.6);
+}
+html.dark .landing-hero-mock__tile--highlight {
+  background: linear-gradient(180deg, rgba(31, 111, 235, 0.35), rgba(27, 44, 79, 0.2)) !important;
+  border-color: rgba(88, 166, 255, 0.45) !important;
+  box-shadow: inset 0 1px 0 rgba(156,196,255,0.08), 0 0 0 1px rgba(88,166,255,0.08);
+}
+html.dark .landing-hero-mock__label {
+  color: #E6EDF3 !important;
+}
+html.dark .landing-hero-mock__bar-item {
+  background: linear-gradient(180deg, #A8D0FF 0%, #58A6FF 55%, rgba(61,126,255,0.45) 100%) !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 12px -4px rgba(88,166,255,0.55);
+}
+html.dark .landing-hero-mock__chat {
+  background: linear-gradient(180deg, rgba(28, 33, 40, 0.96), rgba(28, 33, 40, 0.9)) !important;
+  border-color: rgba(88, 166, 255, 0.35) !important;
+  box-shadow: 0 20px 50px -24px rgba(1, 4, 9, 0.75), 0 0 0 1px rgba(88,166,255,0.08) !important;
+}
+html.dark .landing-hero-mock__chat-body {
+  background: rgba(13, 17, 23, 0.45);
+}
+html.dark .landing-hero-mock__chat-bubble {
+  background: rgba(28, 33, 40, 0.98) !important;
+  border-color: rgba(88, 166, 255, 0.22) !important;
+  color: #F0F3F6 !important;
+  box-shadow: 0 8px 20px -12px rgba(1,4,9,0.6);
+}
+html.dark .landing-hero-mock__badge {
+  background: rgba(86, 211, 100, 0.18) !important;
+  color: #56D364 !important;
+  border: 1px solid rgba(86, 211, 100, 0.3);
 }

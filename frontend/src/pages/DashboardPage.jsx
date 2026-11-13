@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'motion/react'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -11,7 +11,7 @@ import { formatRupiah, formatRupiahCompact, formatDate } from '../utils/formatte
 import DateRangeField from '../components/DateRangeField'
 import { getDashboardState, setDashboardState, clearDashboard } from '../utils/dashboardStore'
 import { fadeUp, fadeIn, staggerContainer, itemStagger, EASE_GENTLE } from '../utils/motionPresets'
-import { Banknote, TrendingUp, TrendingDown, Wallet, MessageSquare, Upload, Plus, ArrowRight, Activity, Calendar, RefreshCw } from 'lucide-react'
+import { Banknote, TrendingUp, TrendingDown, Wallet, MessageSquare, Upload, Plus, ArrowRight, Activity, Calendar, RefreshCw, FileText } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Sector } from 'recharts'
 import InsightCard from '../components/InsightCard'
 import KategoriPengeluaran from '../components/KategoriPengeluaran'
@@ -19,14 +19,14 @@ import ProdukBarang from '../components/ProdukBarang'
 import TemuanPenting from '../components/TemuanPenting'
 import RingkasanPiutangUtang from '../components/RingkasanPiutangUtang'
 
-const COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444']
-const NEGATIVE_COLOR = '#EF4444'
+const COLORS = ['#2563EB', '#059669', '#D97706', '#DC2626']
+const NEGATIVE_COLOR = '#DC2626'
 
 const BAR_LEGEND = [
-  { name: 'Pendapatan', color: '#10B981', glow: 'rgba(16, 185, 129, 0.5)' },
-  { name: 'Beban', color: '#EF4444', glow: 'rgba(239, 68, 68, 0.5)' },
+  { name: 'Pendapatan', color: '#059669', glow: 'rgba(5, 150, 105, 0.18)' },
+  { name: 'Beban', color: '#DC2626', glow: 'rgba(220, 38, 38, 0.18)' },
 ]
-const SERIES_COLORS = { Pendapatan: '#34D399', Beban: '#F87171' }
+const SERIES_COLORS = { Pendapatan: '#10B981', Beban: '#F87171' }
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -38,8 +38,8 @@ function getGreeting() {
 
 const QUICK_ACTIONS = [
   { action: 'open-chatbot', label: 'Tanya AI', icon: MessageSquare, color: '#2563EB', bg: 'rgba(37, 99, 235, 0.1)', textColor: '#2563EB' },
-  { to: '/upload', label: 'Upload File', icon: Upload, color: '#10B981', bg: 'rgba(16, 185, 129, 0.1)', textColor: '#10B981' },
-  { to: '/jurnal', label: 'Jurnal Baru', icon: Plus, color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.1)', textColor: '#F59E0B' },
+  { to: '/upload', label: 'Upload File', icon: Upload, color: '#059669', bg: 'rgba(5, 150, 105, 0.1)', textColor: '#059669' },
+  { to: '/jurnal', label: 'Jurnal Baru', icon: Plus, color: '#D97706', bg: 'rgba(217, 119, 6, 0.1)', textColor: '#D97706' },
 ]
 
 function CustomTooltip({ active, payload, label }) {
@@ -57,7 +57,7 @@ function CustomTooltip({ active, payload, label }) {
           ))}
           <div className="mt-1.5 pt-1.5 flex items-center justify-between gap-4" style={{ borderTop: '1px solid rgba(148, 163, 184, 0.15)' }}>
             <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-slate-body)' }}>Laba/Rugi</span>
-            <span className="text-sm font-extrabold" style={{ color: net >= 0 ? '#34D399' : '#F87171' }}>{formatRupiah(net)}</span>
+            <span className="text-sm font-extrabold" style={{ color: net >= 0 ? '#10B981' : '#F87171' }}>{formatRupiah(net)}</span>
           </div>
         </div>
       </MotionTooltip>
@@ -146,7 +146,7 @@ function renderActiveShape(props) {
       fill={fill}
       stroke={isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(15, 23, 42, 0.9)'}
       strokeWidth={2}
-      filter={isLight ? undefined : 'drop-shadow(0 0 14px rgba(96, 165, 250, 0.45))'}
+      filter={isLight ? undefined : 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35))'}
     />
   )
 }
@@ -182,7 +182,7 @@ function BarTrendCardInner({ monthly, monthLabel, isLight, barAnimDone }) {
   const totalBebanPeriode = useMemo(() => monthly.reduce((s, m) => s + m.beban, 0), [monthly])
   const totalPendapatanPeriode = useMemo(() => monthly.reduce((s, m) => s + m.pendapatan, 0), [monthly])
   return (
-    <motion.div variants={fadeUp} whileHover={{ y: -4, transition: EASE_GENTLE }} className="card lg:col-span-2 overflow-hidden">
+    <motion.div variants={fadeUp} whileHover={{ y: -4, transition: EASE_GENTLE }} className="card overflow-hidden">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-bold" style={{ color: 'var(--color-slate-heading)' }}>Pendapatan vs Beban</h3>
         <span className="text-xs px-2 py-1 rounded-xl" style={{ color: 'var(--color-slate-body)', background: 'var(--color-surface-card)' }}>
@@ -212,8 +212,8 @@ function BarTrendCardInner({ monthly, monthLabel, isLight, barAnimDone }) {
                 maxBarSize={52}
                 label={(p) => <BarValueLabel {...p} isLight={isLight} allData={barData} />}
                 isAnimationActive={false}
-                shape={<MotionBarShape animate={!barAnimDone} glowColor={isLight ? 'rgba(16, 185, 129, 0.12)' : 'rgba(16, 185, 129, 0.35)'} />}
-                activeBar={<MotionActiveBar glowColor={isLight ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.55)'} />}
+                shape={<MotionBarShape animate={!barAnimDone} glowColor={isLight ? 'rgba(5, 150, 105, 0.12)' : 'rgba(15, 23, 42, 0.22)'} />}
+                activeBar={<MotionActiveBar glowColor={isLight ? 'rgba(5, 150, 105, 0.18)' : 'rgba(15, 23, 42, 0.22)'} />}
               />
               <Bar
                 dataKey="Beban"
@@ -222,25 +222,25 @@ function BarTrendCardInner({ monthly, monthLabel, isLight, barAnimDone }) {
                 maxBarSize={52}
                 label={(p) => <BarValueLabel {...p} isLight={isLight} allData={barData} />}
                 isAnimationActive={false}
-                shape={<MotionBarShape animate={!barAnimDone} glowColor={isLight ? 'rgba(239, 68, 68, 0.12)' : 'rgba(239, 68, 68, 0.35)'} />}
-                activeBar={<MotionActiveBar glowColor={isLight ? 'rgba(239, 68, 68, 0.25)' : 'rgba(239, 68, 68, 0.55)'} />}
+                shape={<MotionBarShape animate={!barAnimDone} glowColor={isLight ? 'rgba(220, 38, 38, 0.12)' : 'rgba(15, 23, 42, 0.22)'} />}
+                activeBar={<MotionActiveBar glowColor={isLight ? 'rgba(220, 38, 38, 0.18)' : 'rgba(15, 23, 42, 0.22)'} />}
               />
               <defs>
                 <linearGradient id="gradEmerald" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#4ADE80" />
-                  <stop offset="45%" stopColor="#10B981" />
+                  <stop offset="45%" stopColor="#059669" />
                   <stop offset="100%" stopColor="#047857" />
                 </linearGradient>
                 <linearGradient id="gradRose" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#F87171" />
-                  <stop offset="45%" stopColor="#EF4444" />
+                  <stop offset="45%" stopColor="#DC2626" />
                   <stop offset="100%" stopColor="#B91C1C" />
                 </linearGradient>
               </defs>
             </BarChart>
           </ResponsiveContainer>
           {totalPendapatanPeriode > 0 && totalBebanPeriode === 0 && (
-            <p className="text-xs mt-3" style={{ color: '#FBBF24', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '8px 12px', borderRadius: 12 }}>
+            <p className="text-xs mt-3" style={{ color: '#F59E0B', background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.2)', padding: '8px 12px', borderRadius: 12 }}>
               Belum ada <strong>beban</strong> tercatat pada periode ini — bar beban tidak tampil karena nilainya 0.
               Upload juga data pengeluaran (mis. pembelian bahan, gaji, sewa) supaya perbandingan pendapatan vs beban terlihat lengkap.
             </p>
@@ -414,14 +414,16 @@ function KasBankPieCardInner({ data, monthLabel, isLight }) {
                   className="rounded-xl px-3.5 py-2.5 transition-all duration-200 hover:bg-white/[0.03]"
                   style={{ background: 'rgba(148, 163, 184, 0.06)', border: '1px solid rgba(148, 163, 184, 0.1)' }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2.5 text-sm font-semibold" style={{ color: 'var(--color-slate-text)' }}>
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ background: color, boxShadow: `0 0 10px ${color}66` }} />
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="flex items-center gap-2 text-sm font-semibold shrink-0" style={{ color: 'var(--color-slate-text)' }}>
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: color, boxShadow: `0 0 10px ${color}66` }} />
                       {entry.name}{entry.isNegative ? ' (Overdraft)' : ''}
                     </span>
-                    <span className="text-sm font-extrabold" style={{ color: entry.isNegative ? 'var(--color-accent-red)' : 'var(--color-slate-heading)' }}>
-                      {entry.isNegative ? '-' : ''}{formatRupiah(Math.abs(entry.value))}
-                      <span className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: `${color}1f`, color }}>
+                    <span className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-sm font-extrabold truncate" style={{ color: entry.isNegative ? 'var(--color-accent-red)' : 'var(--color-slate-heading)' }}>
+                        {entry.isNegative ? '-' : ''}{formatRupiah(Math.abs(entry.value))}
+                      </span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: `${color}1f`, color }}>
                         {entry.pct.toFixed(0)}%
                       </span>
                     </span>
@@ -452,14 +454,35 @@ export default function DashboardPage() {
   const { user } = useAuth()
   const { mode } = useTheme()
   const { panelOpen } = useChatPanel()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [uploadedFiles, setUploadedFiles] = useState([])
+  const [selectedUploadId, setSelectedUploadId] = useState(searchParams.get('upload_id') || '')
   const isLight = mode === 'light'
+
+  useEffect(() => {
+    client.get('/upload/')
+      .then((response) => {
+        const posted = (response.data || []).filter((file) => file.status === 'POSTED')
+        setUploadedFiles(posted)
+        const uploadIdFromUrl = searchParams.get('upload_id')
+        if (uploadIdFromUrl && !posted.some((file) => file.id === uploadIdFromUrl)) {
+          uploadNavRef.current = true
+          setSelectedUploadId('')
+          const nextParams = new URLSearchParams(searchParams)
+          nextParams.delete('upload_id')
+          setSearchParams(nextParams, { replace: true })
+        }
+      })
+      .catch(() => setUploadedFiles([]))
+  }, [searchParams, setSearchParams])
+
   // Satu response /dashboard/overview berisi summary + monthly + alerts +
   // piutang/utang + kategori → 1 request saja (yang dulu 5 paralel).
   // State di-hidrasi dari cache level-modul supaya balik dari halaman lain
   // langsung tampil tanpa skeleton & tanpa fetch ulang (kecuali data baru).
   const cachedInit = useRef(null)
   if (cachedInit.current === null) cachedInit.current = getDashboardState()
-  const cachedData = cachedInit.current?.data ?? null
+  const cachedData = cachedInit.current?.uploadId === selectedUploadId ? cachedInit.current?.data ?? null : null
   const [overview, setOverview] = useState(cachedData)
   const data = overview?.summary ?? null
   const [loading, setLoading] = useState(!cachedData)
@@ -484,6 +507,7 @@ export default function DashboardPage() {
   // Tandai navigasi periode dari aksi user (ganti bulan / Otomatis / Bulan Ini) —
   // dipakai memutuskan apakah fetch perlu jalan saat debouncedMonth berubah.
   const monthNavRef = useRef(false)
+  const uploadNavRef = useRef(false)
   const initDoneRef = useRef(false)
   // Animasi grow bar hanya diputar sekali saat data pertama tampil;
   // auto-refresh diam (interval/fokus tab) tidak boleh mengulang animasinya.
@@ -498,6 +522,21 @@ export default function DashboardPage() {
   // Date range state untuk custom period view
   const [rangeStartDate, setRangeStartDate] = useState('')
   const [rangeEndDate, setRangeEndDate] = useState('')
+
+  const handleUploadChange = (event) => {
+    const uploadId = event.target.value
+    uploadNavRef.current = true
+    setSelectedUploadId(uploadId)
+    const nextParams = new URLSearchParams(searchParams)
+    if (uploadId) nextParams.set('upload_id', uploadId)
+    else nextParams.delete('upload_id')
+    setSearchParams(nextParams, { replace: true })
+    clearDashboard()
+    setOverview(null)
+    setLoading(true)
+  }
+
+  const selectedUpload = uploadedFiles.find((file) => file.id === selectedUploadId)
 
   const handleDateChange = (newMonth) => {
     monthNavRef.current = true
@@ -559,6 +598,7 @@ export default function DashboardPage() {
     } else if (debouncedMonth) {
       params = { tanggal_per: monthEnd(debouncedMonth) }
     }
+    if (selectedUploadId) params.upload_id = selectedUploadId
     client.get('/dashboard/overview', { params })
       .then(r => {
         setOverview(r.data)
@@ -571,7 +611,8 @@ export default function DashboardPage() {
         if (autoRef.current) setSelectedMonth(autoMonth)
         // Simpan ke cache supaya balik dari halaman lain tidak perlu fetch ulang.
         setDashboardState({
-          key: debouncedMonth || 'auto',
+          key: `${selectedUploadId || 'all'}:${debouncedMonth || 'auto'}`,
+          uploadId: selectedUploadId,
           data: r.data,
           isAuto: autoRef.current,
           selectedMonth: autoRef.current ? autoMonth : (debouncedMonth || ''),
@@ -580,7 +621,7 @@ export default function DashboardPage() {
       })
       .catch(() => setConnecting(true))
       .finally(() => { if (!silent) setLoading(false) })
-  }, [debouncedMonth, rangeStartDate, rangeEndDate])
+  }, [debouncedMonth, rangeStartDate, rangeEndDate, selectedUploadId])
 
   // Mount sekali: kalau cache periode tersedia (balik dari halaman lain),
   // jangan fetch ulang sama sekali. Fetch hanya saat belum ada cache
@@ -604,6 +645,11 @@ export default function DashboardPage() {
     if (monthNavRef.current) fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedMonth])
+
+  useEffect(() => {
+    if (uploadNavRef.current) fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUploadId])
 
   // Retry otomatis saat koneksi gagal: backend kadang baru hidup, jangan
   // langsung tampilkan "gagal muat". Setelah batas percobaan habis barulah
@@ -657,11 +703,11 @@ export default function DashboardPage() {
   // Tanggal penuh yang dikirim ke backend (akhir bulan saat manual).
   const periodDateKey = debouncedMonth ? monthEnd(debouncedMonth) : null
   const isRangeActive = !!(rangeStartDate && rangeEndDate)
-  const periodCaption = isAuto
+  const periodCaption = `${selectedUpload ? `Sumber: ${selectedUpload.original_filename} · ` : ''}${isAuto
     ? `Periode otomatis · ringkasan s/d ${data ? formatDate(data.tanggal_per) : '…'}`
     : isRangeActive
       ? `Periode: ${formatDate(rangeStartDate)} - ${formatDate(rangeEndDate)}`
-      : `Periode: ${monthLabel}`
+      : `Periode: ${monthLabel}`}`
 
   // Perbandingan bulan ini vs bulan lalu (%), dari data monthly yang sudah di-fetch.
   const { deltaPendapatan, deltaBeban, deltaLaba } = useMemo(() => {
@@ -732,6 +778,21 @@ export default function DashboardPage() {
         </div>
         <div className="flex flex-col items-end gap-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 w-full justify-end">
+            <div className="flex items-center gap-2 rounded-xl px-3 py-2 shadow-sm min-w-0" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148, 163, 184, 0.16)', backdropFilter: 'blur(12px)' }}>
+              <FileText size={14} className="shrink-0" style={{ color: 'var(--color-brand-soft)' }} />
+              <select
+                value={selectedUploadId}
+                onChange={handleUploadChange}
+                className="max-w-[220px] bg-transparent text-xs font-semibold outline-none cursor-pointer"
+                style={{ color: 'var(--color-slate-text)' }}
+                aria-label="Pilih sumber data dashboard"
+              >
+                <option value="">Semua data</option>
+                {uploadedFiles.map((file) => (
+                  <option key={file.id} value={file.id}>{file.original_filename}</option>
+                ))}
+              </select>
+            </div>
             <div className="flex items-center gap-2 rounded-xl px-3 py-2 shadow-sm" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148, 163, 184, 0.16)', backdropFilter: 'blur(12px)' }}>
               <Calendar size={14} className="shrink-0" style={{ color: 'var(--color-brand-soft)' }} />
               <DateRangeField
@@ -744,7 +805,7 @@ export default function DashboardPage() {
               <button
                 onClick={handleApplyRange}
                 className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:scale-105 shrink-0"
-                style={{ color: '#fff', background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}
+                style={{ color: '#fff', background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', boxShadow: '0 2px 8px rgba(15,23,42,0.12)' }}
               >
                 Oke
               </button>
@@ -753,7 +814,7 @@ export default function DashboardPage() {
               onClick={handleAuto}
               className="text-xs font-medium px-2 py-1 rounded-lg transition-all duration-200"
               style={isAuto
-                ? { color: 'var(--color-brand-soft)', background: 'rgba(59, 130, 246, 0.16)', border: '1px solid rgba(125, 180, 255, 0.4)' }
+                ? { color: 'var(--color-brand-soft)', background: 'rgba(37, 99, 235, 0.16)', border: '1px solid rgba(125, 180, 255, 0.4)' }
                 : { color: 'var(--color-slate-body)', background: 'transparent' }}
             >
               Otomatis
@@ -761,7 +822,7 @@ export default function DashboardPage() {
             <button
               onClick={handleToday}
               className="text-xs font-medium px-2 py-1 rounded-lg transition-all duration-200"
-              style={{ color: 'var(--color-brand-soft)', background: 'rgba(59, 130, 246, 0.14)' }}
+              style={{ color: 'var(--color-brand-soft)', background: 'rgba(37, 99, 235, 0.14)' }}
             >
               Bulan Ini
             </button>
@@ -841,7 +902,7 @@ export default function DashboardPage() {
         variants={staggerContainer(0.08, 0.1)}
         initial="hidden"
         animate="visible"
-        className={`grid grid-cols-2 sm:grid-cols-3 ${panelOpen ? 'md:grid-cols-3' : 'md:grid-cols-5'} gap-3 sm:gap-4`}
+        className={`grid grid-cols-2 sm:grid-cols-3 ${panelOpen ? 'lg:grid-cols-3 xl:grid-cols-5' : 'md:grid-cols-5'} gap-3 sm:gap-4 min-w-0`}
       >
         <StatCard title="Saldo Kas" value={data.saldo_kas} format={formatRupiahCompact} icon={Wallet} color="indigo" />
         <StatCard
@@ -865,7 +926,7 @@ export default function DashboardPage() {
       >
         <motion.div variants={itemStagger} whileHover={{ y: -5, transition: EASE_GENTLE }} className="card">
           <p className="text-sm font-medium" style={{ color: 'var(--color-slate-body)' }}>Total Pendapatan Tahun Berjalan</p>
-          <p className="mt-2 text-xl font-extrabold" style={{ color: '#34D399' }}>{formatRupiah(data.total_pendapatan_tahun_berjalan)}</p>
+          <p className="mt-2 text-xl font-extrabold" style={{ color: '#10B981' }}>{formatRupiah(data.total_pendapatan_tahun_berjalan)}</p>
         </motion.div>
         <motion.div variants={itemStagger} whileHover={{ y: -5, transition: EASE_GENTLE }} className="card">
           <p className="text-sm font-medium" style={{ color: 'var(--color-slate-body)' }}>Total Beban Tahun Berjalan</p>
@@ -873,7 +934,7 @@ export default function DashboardPage() {
         </motion.div>
         <motion.div variants={itemStagger} whileHover={{ y: -5, transition: EASE_GENTLE }} className="card">
           <p className="text-sm font-medium" style={{ color: 'var(--color-slate-body)' }}>Laba/Rugi Tahun Berjalan</p>
-          <p className="mt-2 text-xl font-extrabold" style={{ color: data.laba_rugi_tahun_berjalan >= 0 ? '#34D399' : '#F87171' }}>
+          <p className="mt-2 text-xl font-extrabold" style={{ color: data.laba_rugi_tahun_berjalan >= 0 ? '#10B981' : '#F87171' }}>
             {formatRupiah(data.laba_rugi_tahun_berjalan)}
           </p>
         </motion.div>
@@ -885,9 +946,11 @@ export default function DashboardPage() {
         variants={staggerContainer(0.1, 0.05)}
         initial="hidden"
         animate="visible"
-        className={`grid grid-cols-1 md:grid-cols-2 ${panelOpen ? '' : 'lg:grid-cols-3'} gap-4`}
+        className={`grid grid-cols-1 ${panelOpen ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'} gap-4 min-w-0`}
       >
-        <BarTrendCard monthly={monthly} monthLabel={monthLabel} isLight={isLight} barAnimDone={barAnimDone} />
+        <div className={panelOpen ? '' : 'lg:col-span-2'}>
+          <BarTrendCard monthly={monthly} monthLabel={monthLabel} isLight={isLight} barAnimDone={barAnimDone} />
+        </div>
         <KasBankPieCard data={data} monthLabel={monthLabel} isLight={isLight} />
       </motion.div>
 
@@ -896,7 +959,7 @@ export default function DashboardPage() {
         variants={staggerContainer(0.1, 0.15)}
         initial="hidden"
         animate="visible"
-        className={`grid grid-cols-1 md:grid-cols-2 ${panelOpen ? '' : 'lg:grid-cols-3'} gap-4`}
+        className={`grid grid-cols-1 ${panelOpen ? 'lg:grid-cols-2 xl:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-3'} gap-4 min-w-0`}
       >
         <RingkasanPiutangUtang data={piutangUtang} />
         <KategoriPengeluaran debouncedDate={periodDateKey} items={kategori} />
@@ -908,10 +971,10 @@ export default function DashboardPage() {
         variants={staggerContainer(0.1, 0.15)}
         initial="hidden"
         animate="visible"
-        className={`grid grid-cols-1 md:grid-cols-2 ${panelOpen ? '' : 'lg:grid-cols-3'} gap-4`}
+        className={`grid grid-cols-1 ${panelOpen ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'} gap-4 min-w-0`}
       >
         <TemuanPenting alerts={alerts} />
-        <InsightCard debouncedDate={periodDateKey} />
+        <InsightCard debouncedDate={periodDateKey} uploadId={selectedUploadId} />
       </motion.div>
     </div>
   )

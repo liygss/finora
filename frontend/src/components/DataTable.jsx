@@ -80,7 +80,7 @@ export default function DataTable({ columns, data, emptyMessage = 'Tidak ada dat
                   style={page === pageNum ? {
                     background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)',
                     color: 'white',
-                    boxShadow: '0 4px 14px rgba(59, 130, 246, 0.4)',
+                    boxShadow: '0 4px 14px rgba(15,23,42,0.12)',
                   } : {
                     color: 'var(--color-slate-body)',
                   }}

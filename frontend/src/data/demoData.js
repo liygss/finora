@@ -14,8 +14,8 @@ export const DEMO_DASHBOARD = {
     { name: 'Jul', Pendapatan: 108, Beban: 63 },
   ],
   pieData: [
-    { name: 'Saldo Kas', value: 18450000, color: '#3B82F6' },
-    { name: 'Saldo Bank', value: 86500000, color: '#10B981' },
+    { name: 'Saldo Kas', value: 18450000, color: '#2563EB' },
+    { name: 'Saldo Bank', value: 86500000, color: '#059669' },
   ],
 }
 

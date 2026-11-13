@@ -11,15 +11,15 @@ import {
 import toast from 'react-hot-toast'
 
 const CATEGORIES = [
-  { value: 'COMPLAINT', label: 'Komplain', color: '#EF4444' },
-  { value: 'QUESTION', label: 'Pertanyaan', color: '#3B82F6' },
-  { value: 'SUGGESTION', label: 'Saran', color: '#10B981' },
-  { value: 'OTHER', label: 'Lainnya', color: '#8B5CF6' },
+  { value: 'COMPLAINT', label: 'Komplain', color: '#DC2626' },
+  { value: 'QUESTION', label: 'Pertanyaan', color: '#2563EB' },
+  { value: 'SUGGESTION', label: 'Saran', color: '#059669' },
+  { value: 'OTHER', label: 'Lainnya', color: '#7C3AED' },
 ]
 
 const STATUS_CONFIG = {
-  OPEN: { label: 'Menunggu', icon: Clock, color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-  REPLIED: { label: 'Dijawab', icon: CheckCircle2, color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
+  OPEN: { label: 'Menunggu', icon: Clock, color: '#D97706', bg: 'rgba(217,119,6,0.12)' },
+  REPLIED: { label: 'Dijawab', icon: CheckCircle2, color: '#2563EB', bg: 'rgba(37,99,235,0.12)' },
   CLOSED: { label: 'Selesai', icon: XCircle, color: '#6B7280', bg: 'rgba(107,114,128,0.12)' },
 }
 
@@ -97,12 +97,12 @@ function FeedbackItem({ item }) {
           {item.admin_reply && (
             <div
               className="rounded-xl p-4 text-sm"
-              style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}
+              style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}
             >
               <div className="flex items-center gap-2 mb-2">
                 <div
                   className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
-                  style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)' }}
+                  style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)' }}
                 >
                   A
                 </div>
@@ -171,7 +171,7 @@ export default function FeedbackPage() {
       <motion.div variants={fadeUp} initial="hidden" animate="visible" className="flex items-center gap-3">
         <div
           className="flex h-11 w-11 items-center justify-center rounded-2xl"
-          style={{ background: 'linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%)', boxShadow: '0 4px 14px rgba(124,58,237,0.4)' }}
+          style={{ background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
         >
           <MessageSquareWarning size={20} className="text-white" />
         </div>
@@ -187,8 +187,8 @@ export default function FeedbackPage() {
       <motion.div variants={fadeUp} initial="hidden" animate="visible" transition={{ delay: 0.05 }} className="grid grid-cols-3 gap-3">
         {[
           { label: 'Total', value: items.length, color: 'var(--color-slate-heading)' },
-          { label: 'Menunggu', value: openCount, color: '#F59E0B' },
-          { label: 'Dijawab', value: repliedCount, color: '#3B82F6' },
+          { label: 'Menunggu', value: openCount, color: '#D97706' },
+          { label: 'Dijawab', value: repliedCount, color: '#2563EB' },
         ].map((s) => (
           <div key={s.label} className="card p-4 text-center">
             <div className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</div>

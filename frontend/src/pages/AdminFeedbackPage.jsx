@@ -11,15 +11,15 @@ import {
 import toast from 'react-hot-toast'
 
 const CATEGORIES = {
-  COMPLAINT: { label: 'Komplain', color: '#EF4444' },
-  QUESTION: { label: 'Pertanyaan', color: '#3B82F6' },
-  SUGGESTION: { label: 'Saran', color: '#10B981' },
-  OTHER: { label: 'Lainnya', color: '#8B5CF6' },
+  COMPLAINT: { label: 'Komplain', color: '#DC2626' },
+  QUESTION: { label: 'Pertanyaan', color: '#2563EB' },
+  SUGGESTION: { label: 'Saran', color: '#059669' },
+  OTHER: { label: 'Lainnya', color: '#7C3AED' },
 }
 
 const STATUS_CONFIG = {
-  OPEN: { label: 'Menunggu', icon: Clock, color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-  REPLIED: { label: 'Dijawab', icon: CheckCircle2, color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
+  OPEN: { label: 'Menunggu', icon: Clock, color: '#D97706', bg: 'rgba(217,119,6,0.12)' },
+  REPLIED: { label: 'Dijawab', icon: CheckCircle2, color: '#2563EB', bg: 'rgba(37,99,235,0.12)' },
   CLOSED: { label: 'Selesai', icon: XCircle, color: '#6B7280', bg: 'rgba(107,114,128,0.12)' },
 }
 
@@ -112,7 +112,7 @@ function DetailModal({ item, onClose, onReply }) {
 
         {/* Previous Reply */}
         {item.admin_reply && (
-          <div className="rounded-xl p-4 text-sm" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
+          <div className="rounded-xl p-4 text-sm" style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>
             <div className="flex items-center gap-2 mb-2">
               <MessageCircle size={13} style={{ color: 'var(--color-accent-blue)' }} />
               <span className="text-xs font-bold" style={{ color: 'var(--color-accent-blue)' }}>
@@ -197,7 +197,7 @@ export default function AdminFeedbackPage() {
       <motion.div variants={fadeUp} initial="hidden" animate="visible" className="flex items-center gap-3">
         <div
           className="flex h-11 w-11 items-center justify-center rounded-2xl"
-          style={{ background: 'linear-gradient(135deg, #DC2626 0%, #F87171 100%)', boxShadow: '0 4px 14px rgba(220,38,38,0.4)' }}
+          style={{ background: 'linear-gradient(135deg, #DC2626 0%, #F87171 100%)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
         >
           <MessageSquareWarning size={20} className="text-white" />
         </div>
@@ -211,8 +211,8 @@ export default function AdminFeedbackPage() {
       <motion.div variants={fadeUp} initial="hidden" animate="visible" transition={{ delay: 0.05 }} className="grid grid-cols-4 gap-3">
         {[
           { label: 'Total', value: stats.total, color: 'var(--color-slate-heading)', icon: MessageSquareWarning },
-          { label: 'Menunggu', value: stats.open, color: '#F59E0B', icon: Clock },
-          { label: 'Dijawab', value: stats.replied, color: '#3B82F6', icon: CheckCircle2 },
+          { label: 'Menunggu', value: stats.open, color: '#D97706', icon: Clock },
+          { label: 'Dijawab', value: stats.replied, color: '#2563EB', icon: CheckCircle2 },
           { label: 'Selesai', value: stats.closed, color: '#6B7280', icon: XCircle },
         ].map((s) => (
           <div key={s.label} className="card p-4">
@@ -246,7 +246,7 @@ export default function AdminFeedbackPage() {
                 onClick={() => setStatusFilter(f.value)}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                 style={{
-                  background: statusFilter === f.value ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-2)',
+                  background: statusFilter === f.value ? 'rgba(37,99,235,0.15)' : 'var(--color-surface-2)',
                   color: statusFilter === f.value ? 'var(--color-accent-blue)' : 'var(--color-slate-muted)',
                 }}
               >

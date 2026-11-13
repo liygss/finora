@@ -46,8 +46,6 @@ export default function LogoutFeedbackModal({ onClose, onSkip }) {
       >
         {/* decorative blobs */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl animate-blob" style={{ background: 'rgba(245,158,11,0.2)' }} />
-          <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full blur-3xl animate-blob" style={{ background: 'rgba(59,130,246,0.15)', animationDelay: '4s' }} />
         </div>
 
         <button
@@ -62,7 +60,7 @@ export default function LogoutFeedbackModal({ onClose, onSkip }) {
         <div className="relative p-8 text-center">
           <div
             className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl animate-float-gentle"
-            style={{ background: 'linear-gradient(135deg, #F59E0B, #FBBF24)', boxShadow: '0 8px 32px rgba(245,158,11,0.45)' }}
+            style={{ background: 'linear-gradient(135deg, #D97706, #F59E0B)', boxShadow: '0 8px 32px rgba(15,23,42,0.12)' }}
           >
             <LogOut size={24} className="text-white" />
           </div>
@@ -89,8 +87,8 @@ export default function LogoutFeedbackModal({ onClose, onSkip }) {
                   size={36}
                   className="transition-colors duration-200"
                   style={{
-                    color: star <= (hovered || rating) ? '#FBBF24' : 'var(--color-slate-muted)',
-                    fill: star <= (hovered || rating) ? '#FBBF24' : 'transparent',
+                    color: star <= (hovered || rating) ? '#F59E0B' : 'var(--color-slate-muted)',
+                    fill: star <= (hovered || rating) ? '#F59E0B' : 'transparent',
                     filter: star <= (hovered || rating) ? 'drop-shadow(0 0 6px rgba(251,191,36,0.5))' : 'none',
                   }}
                 />
@@ -98,7 +96,7 @@ export default function LogoutFeedbackModal({ onClose, onSkip }) {
             ))}
           </div>
           {(hovered || rating) > 0 && (
-            <p className="mt-2 text-xs font-semibold animate-fade-in" style={{ color: '#FBBF24' }}>
+            <p className="mt-2 text-xs font-semibold animate-fade-in" style={{ color: '#F59E0B' }}>
               {labels[hovered || rating]}
             </p>
           )}

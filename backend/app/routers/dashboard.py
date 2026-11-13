@@ -20,7 +20,7 @@ from app.accounting.laporan_laba_rugi import get_laporan_laba_rugi
 from app.accounting.laporan_posisi_keuangan import get_laporan_posisi_keuangan
 from app.config.logging import get_logger
 from app.database.database import get_db
-from app.database.models import JurnalUmum, User
+from app.database.models import JurnalUmum, StatusUpload, UploadedFile, User
 from app.llm.ollama_service import OllamaError, chat_completion
 from app.middleware.auth import require_active_user
 from app.schemas.report_schema import (
@@ -48,28 +48,43 @@ def health() -> dict:
     return {"status": "ok", "module": "dashboard"}
 
 
-def _latest_data_date(db: Session, user_id: str) -> date:
-    """Tanggal transaksi terbaru milik user. Dipakai sebagai default dashboard
-    supaya langsung menyesuaikan dengan data yang baru diupload."""
-    latest = (
-        db.query(func.max(JurnalUmum.tanggal))
-        .filter(JurnalUmum.created_by_id == user_id)
-        .scalar()
+def _resolve_upload_scope(db: Session, user_id: str, upload_id: str | None) -> UploadedFile | None:
+    if not upload_id:
+        return None
+    uploaded_file = (
+        db.query(UploadedFile)
+        .filter(
+            UploadedFile.id == upload_id,
+            UploadedFile.uploaded_by_id == user_id,
+            UploadedFile.status == StatusUpload.POSTED,
+        )
+        .first()
     )
-    return latest or date.today()
+    if uploaded_file is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File upload tidak ditemukan atau belum committed")
+    return uploaded_file
+
+
+def _latest_data_date(db: Session, user_id: str, upload_id: str | None = None) -> date:
+    """Tanggal transaksi terbaru milik user atau upload terpilih."""
+    query = db.query(func.max(JurnalUmum.tanggal)).filter(JurnalUmum.created_by_id == user_id)
+    if upload_id:
+        query = query.filter(JurnalUmum.sumber_upload_id == upload_id)
+    return query.scalar() or date.today()
 
 
 @router.get("/summary", response_model=DashboardSummaryResponse)
 def summary(
     tanggal_per: date | None = None,
+    upload_id: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> DashboardSummaryResponse:
-    # Kalau tidak ada tanggal yang dipilih, otomatis ikut data terbaru user
-    # supaya data yang baru diupload langsung terlihat di dashboard.
+    _resolve_upload_scope(db, current_user.id, upload_id)
+    # Kalau tidak ada tanggal yang dipilih, otomatis ikut data terbaru user/upload.
     if tanggal_per is None:
-        tanggal_per = _latest_data_date(db, current_user.id)
-    hasil = get_dashboard_summary(db, tanggal_per, user_id=current_user.id)
+        tanggal_per = _latest_data_date(db, current_user.id, upload_id)
+    hasil = get_dashboard_summary(db, tanggal_per, user_id=current_user.id, upload_id=upload_id)
     return DashboardSummaryResponse(
         tanggal_per=hasil.tanggal_per,
         saldo_kas=hasil.saldo_kas,
@@ -90,14 +105,17 @@ def monthly(
     tanggal_per: date | None = None,
     tanggal_mulai: date | None = None,
     jumlah_bulan: int = 6,
+    upload_id: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> list[MonthlyTrendResponse]:
     """Pendapatan vs beban per bulan (default 6 bulan terakhir) untuk chart."""
+    _resolve_upload_scope(db, current_user.id, upload_id)
     if tanggal_per is None:
-        tanggal_per = _latest_data_date(db, current_user.id)
+        tanggal_per = _latest_data_date(db, current_user.id, upload_id)
     hasil = get_pendapatan_beban_bulanan(
-        db, tanggal_per, user_id=current_user.id, jumlah_bulan=jumlah_bulan, tanggal_mulai=tanggal_mulai
+        db, tanggal_per, user_id=current_user.id, jumlah_bulan=jumlah_bulan,
+        tanggal_mulai=tanggal_mulai, upload_id=upload_id,
     )
     return [
         MonthlyTrendResponse(
@@ -117,6 +135,7 @@ def _beban_per_akun_bulan_ini(
     user_id: str,
     limit: int = 10,
     tanggal_mulai: date | None = None,
+    upload_id: str | None = None,
 ) -> list[KategoriBreakdown]:
     """Beban periode per akun = kumulatif s/d tanggal_per dikurangi kumulatif
     s/d sehari sebelum awal periode. Tanpa tanggal_mulai, awal periode = tanggal 1
@@ -130,8 +149,8 @@ def _beban_per_akun_bulan_ini(
     def _map(lr):
         return {b.kode_akun: (b.nama_akun, b.nilai) for b in (lr.hpp + lr.beban_operasional)}
 
-    sekarang = _map(get_laporan_laba_rugi(db, tanggal_per, user_id=user_id))
-    sebelum_periode = _map(get_laporan_laba_rugi(db, akhir_sebelum_awal, user_id=user_id))
+    sekarang = _map(get_laporan_laba_rugi(db, tanggal_per, user_id=user_id, upload_id=upload_id))
+    sebelum_periode = _map(get_laporan_laba_rugi(db, akhir_sebelum_awal, user_id=user_id, upload_id=upload_id))
 
     hasil = []
     for kode, (nama_akun, nilai) in sekarang.items():
@@ -147,14 +166,18 @@ def _beban_per_akun_bulan_ini(
 def kategori(
     tanggal_per: date | None = None,
     tanggal_mulai: date | None = None,
+    upload_id: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> list[KategoriBreakdown]:
     """Top pengeluaran periode per akun (HPP + beban operasional), mengikuti
     rentang tanggal_mulai s/d tanggal_per bila diberikan."""
+    _resolve_upload_scope(db, current_user.id, upload_id)
     if tanggal_per is None:
-        tanggal_per = _latest_data_date(db, current_user.id)
-    return _beban_per_akun_bulan_ini(db, tanggal_per, current_user.id, tanggal_mulai=tanggal_mulai)
+        tanggal_per = _latest_data_date(db, current_user.id, upload_id)
+    return _beban_per_akun_bulan_ini(
+        db, tanggal_per, current_user.id, tanggal_mulai=tanggal_mulai, upload_id=upload_id,
+    )
 
 
 def _fmt_rp(value: float) -> str:
@@ -163,8 +186,13 @@ def _fmt_rp(value: float) -> str:
     return f"Rp {value:,.2f}".replace(",", ".")
 
 
-def _build_insight_context(db: Session, tanggal_per: date, user_id: str) -> str:
-    summary = get_dashboard_summary(db, tanggal_per, user_id=user_id)
+def _build_insight_context(
+    db: Session,
+    tanggal_per: date,
+    user_id: str,
+    upload_id: str | None = None,
+) -> str:
+    summary = get_dashboard_summary(db, tanggal_per, user_id=user_id, upload_id=upload_id)
     label_bulan = tanggal_per.strftime("%B %Y")
 
     lines = [
@@ -177,13 +205,15 @@ def _build_insight_context(db: Session, tanggal_per: date, user_id: str) -> str:
         f"- Jumlah transaksi bulan ini: {summary.jumlah_transaksi_bulan_ini}",
     ]
 
-    rincian = _beban_per_akun_bulan_ini(db, tanggal_per, user_id, limit=5)
+    rincian = _beban_per_akun_bulan_ini(db, tanggal_per, user_id, limit=5, upload_id=upload_id)
     if rincian:
         lines.append("- Beban terbesar bulan ini: " + "; ".join(
             f"{b.nama_akun} ({_fmt_rp(b.nilai)})" for b in rincian
         ))
 
-    tren = get_pendapatan_beban_bulanan(db, tanggal_per, user_id=user_id, jumlah_bulan=3)
+    tren = get_pendapatan_beban_bulanan(
+        db, tanggal_per, user_id=user_id, jumlah_bulan=3, upload_id=upload_id,
+    )
     if len(tren) >= 2:
         laju_last, laju_prev = tren[-1], tren[-2]
         if laju_prev.pendapatan > 0:
@@ -203,6 +233,7 @@ def _build_insight_context(db: Session, tanggal_per: date, user_id: str) -> str:
 @router.get("/insight", response_model=DashboardInsightResponse)
 async def insight(
     tanggal_per: date | None = None,
+    upload_id: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> DashboardInsightResponse:
@@ -211,10 +242,11 @@ async def insight(
     Tidak memanggil LLM bila belum ada data sama sekali — return pesan statis
     supaya tidak membuang waktu/kuota saat dashboard masih kosong.
     """
+    _resolve_upload_scope(db, current_user.id, upload_id)
     if tanggal_per is None:
-        tanggal_per = _latest_data_date(db, current_user.id)
+        tanggal_per = _latest_data_date(db, current_user.id, upload_id)
 
-    summary = get_dashboard_summary(db, tanggal_per, user_id=current_user.id)
+    summary = get_dashboard_summary(db, tanggal_per, user_id=current_user.id, upload_id=upload_id)
     if summary.jumlah_transaksi_bulan_ini == 0 and summary.total_kas_dan_bank == 0:
         return DashboardInsightResponse(
             insight=(
@@ -226,7 +258,7 @@ async def insight(
             has_data=False,
         )
 
-    context = _build_insight_context(db, tanggal_per, current_user.id)
+    context = _build_insight_context(db, tanggal_per, current_user.id, upload_id=upload_id)
     messages = [
         {
             "role": "system",
@@ -278,7 +310,7 @@ def _geser_bulan(bulan: date, delta: int) -> date:
 
 
 def _hitung_piutang_utang(
-    db: Session, tanggal_per: date, user_id: str
+    db: Session, tanggal_per: date, user_id: str, upload_id: str | None = None
 ) -> PiutangUtangResponse:
     """Pilah saldo piutang & utang dari laporan posisi keuangan.
 
@@ -287,7 +319,7 @@ def _hitung_piutang_utang(
       - Utang    : akun liabilitas; "Utang Pajak..." → pajak,
                    "... Bank" → utang bank, selebihnya → utang usaha.
     """
-    laporan = get_laporan_posisi_keuangan(db, tanggal_per, user_id=user_id)
+    laporan = get_laporan_posisi_keuangan(db, tanggal_per, user_id=user_id, upload_id=upload_id)
 
     def _jumlah(baris_list, pred):
         return round(sum(b.nilai for b in baris_list if pred(b)), 2)
@@ -321,18 +353,21 @@ def _hitung_piutang_utang(
 @router.get("/piutang-utang", response_model=PiutangUtangResponse)
 def piutang_utang(
     tanggal_per: date | None = None,
+    upload_id: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> PiutangUtangResponse:
     """Ringkasan piutang & utang (usaha, pajak, bank) dari laporan posisi keuangan."""
+    _resolve_upload_scope(db, current_user.id, upload_id)
     if tanggal_per is None:
-        tanggal_per = _latest_data_date(db, current_user.id)
-    return _hitung_piutang_utang(db, tanggal_per, current_user.id)
+        tanggal_per = _latest_data_date(db, current_user.id, upload_id)
+    return _hitung_piutang_utang(db, tanggal_per, current_user.id, upload_id=upload_id)
 
 
 @router.get("/proyeksi", response_model=ProyeksiResponse)
 def proyeksi(
     tanggal_per: date | None = None,
+    upload_id: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> ProyeksiResponse:
@@ -341,15 +376,16 @@ def proyeksi(
     Proyeksi laba bulanan memakai rata-rata laba bersih 3 bulan terakhir;
     saldo kas akhir bulan = saldo kas/bank sekarang + akumulasi proyeksi.
     """
+    _resolve_upload_scope(db, current_user.id, upload_id)
     if tanggal_per is None:
-        tanggal_per = _latest_data_date(db, current_user.id)
+        tanggal_per = _latest_data_date(db, current_user.id, upload_id)
 
-    summary = get_dashboard_summary(db, tanggal_per, user_id=current_user.id)
+    summary = get_dashboard_summary(db, tanggal_per, user_id=current_user.id, upload_id=upload_id)
     if summary.jumlah_transaksi_bulan_ini == 0 and summary.total_kas_dan_bank == 0:
         return ProyeksiResponse(tanggal_per=tanggal_per, proyeksi=[])
 
     tren = get_pendapatan_beban_bulanan(
-        db, tanggal_per, user_id=current_user.id, jumlah_bulan=3
+        db, tanggal_per, user_id=current_user.id, jumlah_bulan=3, upload_id=upload_id,
     )
     # Rata-rata memakai bulan yang benar-benar punya aktivitas (maksimal 3),
     # supaya bulan kosong di awal tidak melemahkan estimasi.
@@ -380,6 +416,7 @@ def _build_alerts(
     db: Session,
     summary: DashboardSummary,
     user_id: str,
+    upload_id: str | None = None,
 ) -> list[AlertItem]:
     """Temuan penting (smart alerts) berbasis aturan sederhana pada akuntansi.
 
@@ -393,7 +430,7 @@ def _build_alerts(
         return hasil
 
     tren = get_pendapatan_beban_bulanan(
-        db, tanggal_per, user_id=user_id, jumlah_bulan=4
+        db, tanggal_per, user_id=user_id, jumlah_bulan=4, upload_id=upload_id,
     )
 
     # danger: laba negatif 2 bulan beruntun
@@ -425,7 +462,7 @@ def _build_alerts(
         )
 
     # warning: pendapatan ada tapi HPP tidak tercatat -> margin tidak realistis
-    laporan_rugi = get_laporan_laba_rugi(db, tanggal_per, user_id=user_id)
+    laporan_rugi = get_laporan_laba_rugi(db, tanggal_per, user_id=user_id, upload_id=upload_id)
     total_hpp = laporan_rugi.total_hpp
     if summary.pendapatan_bulan_ini > 0 and total_hpp <= 0:
         hasil.append(
@@ -490,7 +527,7 @@ def _build_alerts(
         )
 
     # info: satu kategori beban mendominasi >40%
-    rincian = _beban_per_akun_bulan_ini(db, tanggal_per, user_id, limit=10)
+    rincian = _beban_per_akun_bulan_ini(db, tanggal_per, user_id, limit=10, upload_id=upload_id)
     total_beban = sum(b.nilai for b in rincian)
     if rincian and total_beban > 0:
         top = rincian[0]
@@ -508,7 +545,7 @@ def _build_alerts(
             )
 
     # info: ada kewajiban utang pajak
-    piutang_utang = _hitung_piutang_utang(db, tanggal_per, user_id)
+    piutang_utang = _hitung_piutang_utang(db, tanggal_per, user_id, upload_id=upload_id)
     if piutang_utang.utang_pajak > 0:
         hasil.append(
             AlertItem(
@@ -527,15 +564,19 @@ def _build_alerts(
 @router.get("/alerts", response_model=DashboardAlertsResponse)
 def alerts(
     tanggal_per: date | None = None,
+    upload_id: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> DashboardAlertsResponse:
     """Temuan penting (smart alerts). Ringkasan dihitung sekali per request."""
+    _resolve_upload_scope(db, current_user.id, upload_id)
     if tanggal_per is None:
-        tanggal_per = _latest_data_date(db, current_user.id)
+        tanggal_per = _latest_data_date(db, current_user.id, upload_id)
 
-    summary = get_dashboard_summary(db, tanggal_per, user_id=current_user.id)
-    return DashboardAlertsResponse(alerts=_build_alerts(db, summary, current_user.id))
+    summary = get_dashboard_summary(db, tanggal_per, user_id=current_user.id, upload_id=upload_id)
+    return DashboardAlertsResponse(
+        alerts=_build_alerts(db, summary, current_user.id, upload_id=upload_id),
+    )
 
 
 @router.get("/overview", response_model=DashboardOverviewResponse)
@@ -543,6 +584,7 @@ def overview(
     tanggal_per: date | None = None,
     tanggal_mulai: date | None = None,
     jumlah_bulan: int = 6,
+    upload_id: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> DashboardOverviewResponse:
@@ -552,12 +594,17 @@ def overview(
     endpoint paralel. Semua perhitungan berbagi memo neraca saldo per request,
     jadi query database yang sama tidak dihitung ulang.
     """
+    _resolve_upload_scope(db, current_user.id, upload_id)
     if tanggal_per is None:
-        tanggal_per = _latest_data_date(db, current_user.id)
+        tanggal_per = _latest_data_date(db, current_user.id, upload_id)
 
-    summary = get_dashboard_summary(db, tanggal_per, user_id=current_user.id, tanggal_mulai=tanggal_mulai)
+    summary = get_dashboard_summary(
+        db, tanggal_per, user_id=current_user.id,
+        tanggal_mulai=tanggal_mulai, upload_id=upload_id,
+    )
     tren = get_pendapatan_beban_bulanan(
-        db, tanggal_per, user_id=current_user.id, jumlah_bulan=jumlah_bulan, tanggal_mulai=tanggal_mulai
+        db, tanggal_per, user_id=current_user.id, jumlah_bulan=jumlah_bulan,
+        tanggal_mulai=tanggal_mulai, upload_id=upload_id,
     )
 
     return DashboardOverviewResponse(
@@ -584,11 +631,14 @@ def overview(
             )
             for h in tren
         ],
-        alerts=_build_alerts(db, summary, current_user.id),
-        piutang_utang=_hitung_piutang_utang(db, tanggal_per, current_user.id),
-        kategori=_beban_per_akun_bulan_ini(db, tanggal_per, current_user.id, tanggal_mulai=tanggal_mulai),
+        alerts=_build_alerts(db, summary, current_user.id, upload_id=upload_id),
+        piutang_utang=_hitung_piutang_utang(db, tanggal_per, current_user.id, upload_id=upload_id),
+        kategori=_beban_per_akun_bulan_ini(
+            db, tanggal_per, current_user.id,
+            tanggal_mulai=tanggal_mulai, upload_id=upload_id,
+        ),
         produk=[
             StatistikProdukItem(produk=p.produk, nilai=p.nilai, jumlah=p.jumlah)
-            for p in get_statistik_produk(db, tanggal_per, current_user.id)
+            for p in get_statistik_produk(db, tanggal_per, current_user.id, upload_id=upload_id)
         ],
     )

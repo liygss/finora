@@ -20,7 +20,7 @@ import re
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Request, UploadFile, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -131,6 +131,7 @@ def _release_file_bytes(db: Session, uploaded_file: UploadedFile) -> None:
 async def upload_file(
     request: Request,
     file: UploadFile,
+    context: str | None = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> UploadedFile:
@@ -138,6 +139,10 @@ async def upload_file(
     validation = validate_upload(file.filename, len(content))
     if not validation.is_valid:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=validation.error)
+
+    upload_context = (context or request.query_params.get("context") or "chat").lower()
+    if upload_context not in ("chat", "setup"):
+        upload_context = "chat"
 
     # Isi file disimpan di database (file_bytes) karena inilah sumber kebenaran
     # saat commit. Penulisan ke disk hanya bonus untuk mode desktop/lokal.
@@ -156,12 +161,27 @@ async def upload_file(
         file_size_bytes=len(content),
         uploaded_by_id=current_user.id,
         status=StatusUpload.STAGED,
+        context=upload_context,
     )
     db.add(uploaded_file)
     db.commit()
     db.refresh(uploaded_file)
 
-    logger.info("File '%s' diterima, status STAGED (menunggu konfirmasi user).", file.filename)
+    if upload_context == "setup":
+        # Auto-process & commit untuk upload dari setup page
+        try:
+            uploaded_file = process_uploaded_file(db, uploaded_file)
+            _release_file_bytes(db, uploaded_file)
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("Auto-process upload setup id=%s gagal", uploaded_file.id)
+            db.refresh(uploaded_file)
+            detail = uploaded_file.error_message or "Gagal memproses file. Coba lagi atau periksa format file."
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Gagal memproses file: {detail}",
+            ) from exc
+    else:
+        logger.info("File '%s' diterima, status STAGED (menunggu konfirmasi user).", file.filename)
 
     return uploaded_file
 

@@ -21,8 +21,8 @@ function parseInsight(text) {
   return { bullets, saran }
 }
 
-export default function InsightCard({ debouncedDate }) {
-  const cacheKey = debouncedDate || 'auto'
+export default function InsightCard({ debouncedDate, uploadId }) {
+  const cacheKey = `${uploadId || 'all'}:${debouncedDate || 'auto'}`
   // Balik dari halaman lain: tampilkan insight periode ini dari cache tanpa
   // fetch ulang (tidak ada skeleton). Perbarui tetap bisa fetch manual.
   const cachedInsight = getInsight(cacheKey)
@@ -38,6 +38,7 @@ export default function InsightCard({ debouncedDate }) {
     setLoading(true)
     setError(false)
     const params = debouncedDate ? { tanggal_per: debouncedDate } : {}
+    if (uploadId) params.upload_id = uploadId
     client.get('/dashboard/insight', { params })
       .then((r) => {
         setInsight(r.data)
@@ -45,7 +46,7 @@ export default function InsightCard({ debouncedDate }) {
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false))
-  }, [debouncedDate, cacheKey])
+  }, [debouncedDate, uploadId, cacheKey])
 
   const handleFetch = useCallback(() => {
     startedRef.current = true
@@ -86,11 +87,11 @@ export default function InsightCard({ debouncedDate }) {
 
   return (
     <motion.div ref={cardRef} variants={fadeUp} whileHover={{ y: -4, transition: EASE_GENTLE }} className="card flex flex-col">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-start justify-between gap-2 mb-4 flex-wrap">
         <div className="flex items-center gap-2.5">
           <div
             className="rounded-xl p-2 text-white"
-            style={{ background: 'linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)', boxShadow: '0 8px 24px rgba(124, 58, 237, 0.3)' }}
+            style={{ background: 'linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}
           >
             <Sparkles size={16} />
           </div>
@@ -104,7 +105,7 @@ export default function InsightCard({ debouncedDate }) {
           disabled={loading}
           title="Perbarui insight"
           className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200 hover:bg-violet-500/10 disabled:opacity-50"
-          style={{ color: '#A78BFA', background: 'var(--color-surface-card)', border: '1px solid rgba(148, 163, 184, 0.14)' }}
+          style={{ color: '#8B5CF6', background: 'var(--color-surface-card)', border: '1px solid rgba(148, 163, 184, 0.14)' }}
         >
           <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
           Perbarui
@@ -140,7 +141,7 @@ export default function InsightCard({ debouncedDate }) {
             <ul className="space-y-2">
               {bullets.map((b, i) => (
                 <li key={i} className="flex gap-2 text-sm leading-relaxed" style={{ color: 'var(--color-slate-text)' }}>
-                  <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'linear-gradient(135deg, #A78BFA, #7DB4FF)' }} />
+                  <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'linear-gradient(135deg, #8B5CF6, #60A5FA)' }} />
                   <span>{b}</span>
                 </li>
               ))}
@@ -149,9 +150,9 @@ export default function InsightCard({ debouncedDate }) {
           {saran && (
             <div
               className="rounded-xl p-3 text-sm leading-relaxed"
-              style={{ background: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.2)' }}
+              style={{ background: 'rgba(124, 58, 237, 0.08)', border: '1px solid rgba(124, 58, 237, 0.2)' }}
             >
-              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide" style={{ color: '#A78BFA' }}>
+              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide" style={{ color: '#8B5CF6' }}>
                 <Lightbulb size={12} /> Saran
               </span>
               <p className="mt-1" style={{ color: 'var(--color-slate-text)' }}>{saran}</p>

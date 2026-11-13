@@ -27,6 +27,35 @@ class ChatResponse(BaseModel):
     sources: list[RetrievedSource] = []
     has_financial_data: bool = False  # True jika jawaban menggunakan data keuangan user
 
+class TaxConsultRequest(BaseModel):
+    session_id: str | None = None
+    wp_orang_pribadi: bool = True
+    omzet_bulan_ini: float
+    omzet_kumulatif_sebelum_bulan_ini: float = 0
+    include_ppn: bool = False
+    nilai_transaksi: float | None = None
+    sudah_termasuk_ppn: bool = False
+    barang_mewah: bool = False
+    pertanyaan: str | None = None
+    page: str | None = "Kalkulator Pajak"
+
+class TaxConsultResponse(BaseModel):
+    session_id: str
+    answer: str
+    pph: dict
+    ppn: dict | None = None
+    sources: list[RetrievedSource] = []
+
+class TaxChatRequest(BaseModel):
+    session_id: str | None = None
+    message: str
+    page: str | None = "Kalkulator Pajak"
+
+class TaxChatResponse(BaseModel):
+    session_id: str
+    answer: str
+    calculation: dict | None = None
+    sources: list[RetrievedSource] = []
 
 class ChatMessageResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

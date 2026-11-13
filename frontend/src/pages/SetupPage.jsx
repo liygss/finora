@@ -72,7 +72,7 @@ export default function SetupPage() {
             whileHover={{ scale: 1.05, rotate: -2 }}
             whileTap={{ scale: 0.95 }}
             className="flex h-10 w-10 items-center justify-center overflow-hidden"
-            style={{ borderRadius: '0.75rem', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.4)' }}
+            style={{ borderRadius: '0.75rem', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
           >
             <img src="/finora_logo.jpeg" alt="Finora" className="h-full w-full object-cover" />
           </motion.div>
@@ -83,7 +83,7 @@ export default function SetupPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
               className="ml-2 text-xs font-medium px-2 py-0.5 rounded-full"
-              style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--color-accent-blue)' }}
+              style={{ background: 'rgba(37, 99, 235, 0.12)', color: 'var(--color-accent-blue)' }}
             >
               Setup
             </motion.span>

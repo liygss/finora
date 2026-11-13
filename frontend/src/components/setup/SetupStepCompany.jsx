@@ -113,7 +113,7 @@ export default function SetupStepCompany({ onNext }) {
     <div className="space-y-6">
       {/* Welcome banner */}
       <div className="card relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #10B981 100%)' }} />
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ background: 'linear-gradient(135deg, #2563EB 0%, #059669 100%)' }} />
         <div className="relative">
           <h1 className="text-2xl font-extrabold" style={{ color: 'var(--color-slate-heading)' }}>
             Selamat Datang di <span className="gradient-text">Finora</span>!
@@ -132,7 +132,7 @@ export default function SetupStepCompany({ onNext }) {
         </h2>
 
         <div>
-          <label className="label">Nama Usaha <span style={{ color: '#EF4444' }}>*</span></label>
+          <label className="label">Nama Usaha <span style={{ color: '#DC2626' }}>*</span></label>
           <input
             required
             data-hint="company-name"
@@ -153,7 +153,7 @@ export default function SetupStepCompany({ onNext }) {
                 className="rounded-xl px-3 py-2.5 text-left transition-all duration-200"
                 style={{
                   background: company.business_type === bt.value
-                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(59, 130, 246, 0.08))'
+                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(37, 99, 235, 0.08))'
                     : 'var(--color-surface-card)',
                   border: company.business_type === bt.value
                     ? '2px solid var(--color-brand-soft)'
@@ -215,7 +215,7 @@ export default function SetupStepCompany({ onNext }) {
                     className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all duration-200"
                     style={{
                       background: isSelected
-                        ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(59, 130, 246, 0.08))'
+                        ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(37, 99, 235, 0.08))'
                         : 'var(--color-surface-card)',
                       border: isSelected
                         ? '2px solid var(--color-brand-soft)'
@@ -223,7 +223,7 @@ export default function SetupStepCompany({ onNext }) {
                     }}
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{
-                      background: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'rgba(148, 163, 184, 0.1)',
+                      background: isSelected ? 'rgba(37, 99, 235, 0.15)' : 'rgba(148, 163, 184, 0.1)',
                       color: isSelected ? 'var(--color-brand-soft)' : 'var(--color-slate-muted)',
                     }}>
                       <Icon size={18} />
@@ -233,7 +233,7 @@ export default function SetupStepCompany({ onNext }) {
                       <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-slate-muted)' }}>{tmpl.description}</p>
                     </div>
                     <span className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0" style={{
-                      background: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'rgba(148, 163, 184, 0.1)',
+                      background: isSelected ? 'rgba(37, 99, 235, 0.15)' : 'rgba(148, 163, 184, 0.1)',
                       color: isSelected ? 'var(--color-brand-soft)' : 'var(--color-slate-muted)',
                     }}>{tmpl.account_count} akun</span>
                     {isSelected && <Check size={16} style={{ color: 'var(--color-brand-soft)' }} />}
@@ -280,24 +280,24 @@ export default function SetupStepCompany({ onNext }) {
               className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all duration-200"
               style={{
                 background: customMode
-                  ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.08))'
+                  ? 'linear-gradient(135deg, rgba(5, 150, 105, 0.12), rgba(5, 150, 105, 0.08))'
                   : 'var(--color-surface-card)',
                 border: customMode
-                  ? '2px solid #10B981'
+                  ? '2px solid #059669'
                   : '1px solid var(--color-border-subtle)',
               }}
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{
-                background: customMode ? 'rgba(16, 185, 129, 0.15)' : 'rgba(148, 163, 184, 0.1)',
-                color: customMode ? '#10B981' : 'var(--color-slate-muted)',
+                background: customMode ? 'rgba(5, 150, 105, 0.15)' : 'rgba(148, 163, 184, 0.1)',
+                color: customMode ? '#059669' : 'var(--color-slate-muted)',
               }}>
                 <Plus size={18} />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-bold" style={{ color: customMode ? '#10B981' : 'var(--color-slate-heading)' }}>Buat COA Manual</p>
+                <p className="text-sm font-bold" style={{ color: customMode ? '#059669' : 'var(--color-slate-heading)' }}>Buat COA Manual</p>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-slate-muted)' }}>Buat daftar akun sendiri sesuai kebutuhan bisnismu</p>
               </div>
-              {customMode && <Check size={16} style={{ color: '#10B981' }} />}
+              {customMode && <Check size={16} style={{ color: '#059669' }} />}
             </button>
 
             {/* Custom COA form */}
@@ -306,11 +306,11 @@ export default function SetupStepCompany({ onNext }) {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="rounded-xl p-4 space-y-3"
-                style={{ background: 'var(--color-surface-faint)', border: '1px solid rgba(16, 185, 129, 0.2)' }}
+                style={{ background: 'var(--color-surface-faint)', border: '1px solid rgba(5, 150, 105, 0.2)' }}
               >
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold" style={{ color: 'var(--color-slate-heading)' }}>Daftar Akun Custom</p>
-                  <button onClick={addCustomAccount} className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg transition" style={{ color: '#10B981', background: 'rgba(16, 185, 129, 0.1)' }}>
+                  <button onClick={addCustomAccount} className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg transition" style={{ color: '#059669', background: 'rgba(5, 150, 105, 0.1)' }}>
                     <Plus size={12} /> Tambah Akun
                   </button>
                 </div>
@@ -334,7 +334,7 @@ export default function SetupStepCompany({ onNext }) {
                           <option>DEBIT</option><option>KREDIT</option>
                         </select>
                       </div>
-                      <button onClick={() => removeCustomAccount(idx)} className="mt-1 p-1 rounded-lg transition hover:bg-red-500/10" style={{ color: '#EF4444' }}>
+                      <button onClick={() => removeCustomAccount(idx)} className="mt-1 p-1 rounded-lg transition hover:bg-red-500/10" style={{ color: '#DC2626' }}>
                         <X size={12} />
                       </button>
                     </div>

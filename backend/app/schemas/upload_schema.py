@@ -18,6 +18,7 @@ class UploadedFileResponse(BaseModel):
     error_message: str | None = None
     created_at: datetime
     processed_at: datetime | None = None
+    context: str | None = None
 
 
 class KnowledgeInput(BaseModel):
@@ -38,6 +39,7 @@ class KnowledgeResponse(BaseModel):
     created_at: datetime
     processed_at: datetime | None = None
     chunk_count: int = 0
+    context: str | None = None
 
 
 class CommitResponse(BaseModel):

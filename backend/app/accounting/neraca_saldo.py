@@ -41,6 +41,7 @@ def get_neraca_saldo(
     user_id: str | None = None,
     tanggal_mulai: date | None = None,
     tanggal_akhir: date | None = None,
+    upload_id: str | None = None,
 ) -> NeracaSaldo:
     """
     Hitung neraca saldo per tanggal tertentu (default: semua transaksi s/d hari ini).
@@ -56,7 +57,7 @@ def get_neraca_saldo(
     jadi cache tidak pernah basi di dalam satu request.
     """
     cache = db.info.setdefault("neraca_saldo_cache", {})
-    key = (tanggal_per, user_id, tanggal_mulai, tanggal_akhir)
+    key = (tanggal_per, user_id, tanggal_mulai, tanggal_akhir, upload_id)
     if key in cache:
         return cache[key]
 
@@ -78,6 +79,8 @@ def get_neraca_saldo(
         query = query.filter(
             (JurnalUmum.created_by_id == user_id) | (JurnalUmum.created_by_id.is_(None))
         )
+    if upload_id:
+        query = query.filter(JurnalUmum.sumber_upload_id == upload_id)
     if tanggal_mulai:
         query = query.filter((JurnalUmum.tanggal >= tanggal_mulai) | (JurnalUmum.tanggal.is_(None)))
     if tanggal_akhir:

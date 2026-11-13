@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import client from '../api/client'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -7,16 +7,16 @@ import { formatRupiah, formatDateTime } from '../utils/formatters'
 import { notifyDataChanged } from '../utils/dashboardStore'
 import toast from 'react-hot-toast'
 import { extractError } from '../api/extractError'
-import { Upload, FileText, CheckCircle, XCircle, Clock, UploadCloud, Trash2, LayoutDashboard, TrendingUp, TrendingDown, Banknote, BarChart3, Sparkles, FileSpreadsheet, MessageCircle } from 'lucide-react'
+import { Upload, FileText, CheckCircle, XCircle, Clock, UploadCloud, Trash2, LayoutDashboard, TrendingUp, TrendingDown, Banknote, BarChart3, Sparkles, FileSpreadsheet } from 'lucide-react'
 
 const STATUS_ICON = {
-  UPLOADED: <Clock size={14} style={{ color: '#F59E0B' }} />,
-  STAGED: <Clock size={14} style={{ color: '#F59E0B' }} />,
+  UPLOADED: <Clock size={14} style={{ color: '#D97706' }} />,
+  STAGED: <Clock size={14} style={{ color: '#D97706' }} />,
   PROCESSING: <LoadingSpinner size="sm" />,
   NORMALIZED: <LoadingSpinner size="sm" />,
-  INGESTED: <CheckCircle size={14} style={{ color: '#10B981' }} />,
-  POSTED: <CheckCircle size={14} style={{ color: '#10B981' }} />,
-  FAILED: <XCircle size={14} style={{ color: '#EF4444' }} />,
+  INGESTED: <CheckCircle size={14} style={{ color: '#059669' }} />,
+  POSTED: <CheckCircle size={14} style={{ color: '#059669' }} />,
+  FAILED: <XCircle size={14} style={{ color: '#DC2626' }} />,
 }
 
 const STATUS_LABEL = {
@@ -30,12 +30,12 @@ const STATUS_LABEL = {
 }
 
 const STATUS_COLOR = {
-  UPLOADED: '#FBBF24',
-  STAGED: '#FBBF24',
-  PROCESSING: '#FBBF24',
-  NORMALIZED: '#FBBF24',
-  INGESTED: '#34D399',
-  POSTED: '#34D399',
+  UPLOADED: '#F59E0B',
+  STAGED: '#F59E0B',
+  PROCESSING: '#F59E0B',
+  NORMALIZED: '#F59E0B',
+  INGESTED: '#10B981',
+  POSTED: '#10B981',
   FAILED: '#F87171',
 }
 
@@ -66,7 +66,7 @@ function SummaryCard({ summary }) {
 
   return (
     <div className="card relative overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ background: 'linear-gradient(135deg, #10B981 0%, #2563EB 100%)' }} />
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ background: 'linear-gradient(135deg, #059669 0%, #2563EB 100%)' }} />
       <div className="relative">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--color-slate-heading)' }}>
@@ -79,29 +79,29 @@ function SummaryCard({ summary }) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="rounded-2xl p-4" style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(5, 150, 105, 0.08)', border: '1px solid rgba(5, 150, 105, 0.25)' }}>
             <div className="flex items-center gap-2 text-xs font-medium" style={{ color: '#6EE7B7' }}>
               <TrendingUp size={13} /> Pendapatan Tahun Berjalan
             </div>
-            <p className="mt-1.5 text-xl font-extrabold tabular-nums" style={{ color: '#34D399' }}>{formatRupiah(summary.total_pendapatan_tahun_berjalan)}</p>
+            <p className="mt-1.5 text-xl font-extrabold tabular-nums" style={{ color: '#10B981' }}>{formatRupiah(summary.total_pendapatan_tahun_berjalan)}</p>
           </div>
-          <div className="rounded-2xl p-4" style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.25)' }}>
             <div className="flex items-center gap-2 text-xs font-medium" style={{ color: '#FCA5A5' }}>
               <TrendingDown size={13} /> Beban Tahun Berjalan
             </div>
             <p className="mt-1.5 text-xl font-extrabold tabular-nums" style={{ color: '#F87171' }}>{formatRupiah(summary.total_beban_tahun_berjalan)}</p>
           </div>
-          <div className="rounded-2xl p-4" style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.25)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.25)' }}>
             <div className="flex items-center gap-2 text-xs font-medium" style={{ color: 'var(--color-accent-blue)' }}>
               <Banknote size={13} /> Laba/Rugi Tahun Berjalan
             </div>
             <p className="mt-1.5 text-xl font-extrabold tabular-nums" style={{ color: labaTahun >= 0 ? 'var(--color-brand-soft)' : '#F87171' }}>{formatRupiah(labaTahun)}</p>
           </div>
-          <div className="rounded-2xl p-4" style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.25)' }}>
             <div className="flex items-center gap-2 text-xs font-medium" style={{ color: '#FCD34D' }}>
               <Sparkles size={13} /> Laba/Rugi {bulanLabel}
             </div>
-            <p className="mt-1.5 text-xl font-extrabold tabular-nums" style={{ color: labaBulan >= 0 ? '#FBBF24' : '#F87171' }}>{formatRupiah(labaBulan)}</p>
+            <p className="mt-1.5 text-xl font-extrabold tabular-nums" style={{ color: labaBulan >= 0 ? '#F59E0B' : '#F87171' }}>{formatRupiah(labaBulan)}</p>
           </div>
         </div>
 
@@ -130,7 +130,6 @@ export default function UploadPage() {
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [summary, setSummary] = useState(null)
-  const navigate = useNavigate()
 
   const load = () => {
     client.get('/upload/')
@@ -199,23 +198,23 @@ export default function UploadPage() {
     }
   }
 
-  const upload = async (file) => {
+  const upload = useCallback(async (file) => {
     const fd = new FormData()
     fd.append('file', file)
+    fd.append('context', 'setup')
     setUploading(true)
     try {
-      const { data } = await client.post('/upload/file', fd)
-      toast.success(`${file.name} terupload! Siap dianalisis.`)
+      await client.post('/upload/file', fd)
+      toast.success(`${file.name} terupload dan diproses! Data langsung masuk jurnal.`)
       notifyDataChanged()
+      fetchSummary()
       load()
-      // Redirect ke chat dengan upload_id supaya user bisa ngechat data dulu
-      navigate(`/dashboard?upload_id=${data.id}`)
     } catch (err) {
       toast.error(extractError(err, `Gagal upload ${file.name}`))
     } finally {
       setUploading(false)
     }
-  }
+  }, [fetchSummary])
 
   const resetAll = async () => {
     if (!confirm('Hapus SEMUA data Anda (semua file upload, jurnal, dan data dashboard)? Tindakan ini tidak bisa dibatalkan.')) return
@@ -235,7 +234,7 @@ export default function UploadPage() {
     setDragging(false)
     const file = e.dataTransfer.files[0]
     if (file) upload(file)
-  }, [])
+  }, [upload])
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0]
@@ -264,7 +263,7 @@ export default function UploadPage() {
           <button
             onClick={resetAll}
             className="flex items-center gap-1.5 rounded-lg text-xs font-medium px-2 py-2 transition-all duration-200 hover:bg-red-500/10"
-            style={{ color: '#F87171', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)' }}
+            style={{ color: '#F87171', background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.25)' }}
           >
             <Trash2 size={13} /> Hapus Semua
           </button>
@@ -278,12 +277,12 @@ export default function UploadPage() {
         transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.1 }}
         className="card relative overflow-hidden"
       >
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #10B981 100%)' }} />
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ background: 'linear-gradient(135deg, #2563EB 0%, #059669 100%)' }} />
         <div className="relative flex items-start gap-4 py-5 px-5">
           {/* Buddy avatar + pulse */}
           <div className="relative shrink-0">
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="h-20 w-20 rounded-full animate-pulse-ring" style={{ border: '2px solid rgba(59, 130, 246, 0.2)' }} />
+              <span className="h-20 w-20 rounded-full animate-pulse-ring" style={{ border: '2px solid rgba(37, 99, 235, 0.2)' }} />
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="h-16 w-16 rounded-full animate-pulse-ring" style={{ border: '1.5px solid rgba(96, 165, 250, 0.15)', animationDelay: '0.5s' }} />
@@ -294,7 +293,7 @@ export default function UploadPage() {
               transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.2 }}
               className="relative z-10"
             >
-              <div className="rounded-2xl p-2.5 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.25), rgba(59,130,246,0.1))', border: '1px solid rgba(96, 165, 250, 0.3)', boxShadow: '0 8px 30px rgba(59, 130, 246, 0.15)' }}>
+              <div className="rounded-2xl p-2.5 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.25), rgba(37,99,235,0.1))', border: '1px solid rgba(96, 165, 250, 0.3)', boxShadow: '0 8px 30px rgba(15,23,42,0.12)' }}>
                 <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-10 w-10 object-contain" />
               </div>
             </motion.div>
@@ -333,11 +332,11 @@ export default function UploadPage() {
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               className="relative"
             >
-              <div className="rounded-2xl p-5 transition-all duration-300" style={{ background: dragging ? 'rgba(37, 99, 235, 0.18)' : 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(16,185,129,0.1))', boxShadow: dragging ? '0 8px 32px rgba(59, 130, 246, 0.2)' : '0 4px 16px rgba(59, 130, 246, 0.08)' }}>
+              <div className="rounded-2xl p-5 transition-all duration-300" style={{ background: dragging ? 'rgba(37, 99, 235, 0.18)' : 'linear-gradient(135deg, rgba(37,99,235,0.15), rgba(5,150,105,0.1))', boxShadow: dragging ? '0 8px 32px rgba(37, 99, 235, 0.2)' : '0 4px 16px rgba(37, 99, 235, 0.08)' }}>
                 <UploadCloud size={36} style={{ color: dragging ? '#2563EB' : 'var(--color-brand-soft)' }} />
               </div>
               {dragging && (
-                <span className="absolute -inset-1 rounded-3xl animate-pulse-ring" style={{ border: '2px solid rgba(59, 130, 246, 0.3)' }} />
+                <span className="absolute -inset-1 rounded-3xl animate-pulse-ring" style={{ border: '2px solid rgba(37, 99, 235, 0.3)' }} />
               )}
             </motion.div>
             <div className="text-center">
@@ -364,7 +363,7 @@ export default function UploadPage() {
             )}
             {uploading && (
               <div className="w-48 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-card)' }}>
-                <div className="h-full rounded-full animate-pulse" style={{ background: 'linear-gradient(90deg, #3B82F6, #10B981)', width: '60%' }} />
+                <div className="h-full rounded-full animate-pulse" style={{ background: 'linear-gradient(90deg, #2563EB, #059669)', width: '60%' }} />
               </div>
             )}
           </label>
@@ -372,14 +371,14 @@ export default function UploadPage() {
       </motion.div>
 
       {pendingCount > 0 && (
-        <div className="card flex items-center gap-3 text-sm" style={{ color: '#FBBF24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+        <div className="card flex items-center gap-3 text-sm" style={{ color: '#F59E0B', border: '1px solid rgba(217, 119, 6, 0.3)' }}>
           <LoadingSpinner size="sm" />
           <span>Sedang memproses {pendingCount} file... Tunggu sampai status berubah.</span>
         </div>
       )}
 
       {stagedCount > 0 && (
-        <div className="card flex items-center gap-3 text-sm" style={{ color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+        <div className="card flex items-center gap-3 text-sm" style={{ color: '#2563EB', border: '1px solid rgba(37, 99, 235, 0.3)' }}>
           <Sparkles size={14} />
           <span>{stagedCount} file sedang menunggu analisis. <strong>Buka chat</strong> untuk mengeksplorasi datanya sebelum masuk jurnal.</span>
         </div>
@@ -406,7 +405,7 @@ export default function UploadPage() {
                   {f.error_message && (
                     <p
                       className="text-xs mt-0.5"
-                      style={{ color: DONE_STATUS.includes(f.status) ? '#FBBF24' : '#F87171' }}
+                      style={{ color: DONE_STATUS.includes(f.status) ? '#F59E0B' : '#F87171' }}
                     >
                       {f.error_message}
                     </p>
@@ -418,11 +417,20 @@ export default function UploadPage() {
                     {STATUS_LABEL[f.status] || f.status}
                   </span>
                 </div>
+                {f.status === 'POSTED' && (
+                  <Link
+                    to={`/dashboard?upload_id=${f.id}`}
+                    className="shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:scale-105"
+                    style={{ color: '#fff', background: 'linear-gradient(135deg, #059669, #047857)', boxShadow: '0 2px 8px rgba(15,23,42,0.12)' }}
+                  >
+                    <BarChart3 size={13} /> Dashboard
+                  </Link>
+                )}
                 {STAGED_STATUS.includes(f.status) && (
                   <Link
                     to={`/dashboard?upload_id=${f.id}`}
                     className="shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:scale-105"
-                    style={{ color: '#fff', background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}
+                    style={{ color: '#fff', background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', boxShadow: '0 2px 8px rgba(15,23,42,0.12)' }}
                   >
                     💬 Chat
                   </Link>

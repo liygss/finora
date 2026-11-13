@@ -7,6 +7,8 @@ const SUGGESTIONS = [
   { text: 'Apa itu SAK EMKM?', icon: FileText, tone: 'blue' },
   { text: 'Cara membuat jurnal penjualan?', icon: ReceiptText, tone: 'sky' },
   { text: 'Bagaimana menghitung PPh Final UMKM?', icon: Calculator, tone: 'amber' },
+  { text: 'Apa syarat UMKM bebas pajak Rp500 juta?', icon: Shield, tone: 'amber' },
+  { text: 'Kapan batas lapor SPT?', icon: FileSpreadsheet, tone: 'blue' },
   { text: 'Fitur apa saja yang ada di Finora?', icon: HelpCircle, tone: 'emerald' },
 ]
 
@@ -23,10 +25,10 @@ const CAPABILITIES = [
 ]
 
 const TONE_STYLES = {
-  blue: { bg: 'rgba(59, 130, 246, 0.12)', color: 'var(--color-brand-soft)', border: 'rgba(59, 130, 246, 0.25)' },
+  blue: { bg: 'rgba(37, 99, 235, 0.12)', color: 'var(--color-brand-soft)', border: 'rgba(37, 99, 235, 0.25)' },
   sky: { bg: 'rgba(34, 211, 238, 0.1)', color: 'var(--color-accent-cyan)', border: 'rgba(34, 211, 238, 0.22)' },
   amber: { bg: 'rgba(251, 191, 36, 0.1)', color: 'var(--color-accent-amber)', border: 'rgba(251, 191, 36, 0.22)' },
-  emerald: { bg: 'rgba(16, 185, 129, 0.1)', color: 'var(--color-accent-emerald)', border: 'rgba(16, 185, 129, 0.22)' },
+  emerald: { bg: 'rgba(5, 150, 105, 0.1)', color: 'var(--color-accent-emerald)', border: 'rgba(5, 150, 105, 0.22)' },
 }
 
 const ACCEPT_TYPES = '.csv,.xlsx,.xls,.pdf'
@@ -51,6 +53,9 @@ export default function AssistantChat({
   onFollowUp,
   onConfirmTransaction,
   onRejectTransaction,
+  taxConsult = null,
+  onStartTaxConsultation,
+  onCancelTaxConsultation,
   variant = 'panel',
   pendingFile = null,
   onRemovePendingFile,
@@ -123,7 +128,7 @@ export default function AssistantChat({
   return (
     <div className={`relative flex flex-col ${className}`}>
       {/* Top brand glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-24" style={{ background: 'linear-gradient(180deg, rgba(59,130,246,0.15), transparent)' }} />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.15), transparent)' }} />
 
       {/* Header — panel mode only */}
       {!hideHeader && (
@@ -132,14 +137,14 @@ export default function AssistantChat({
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl overflow-hidden" style={{ boxShadow: '0 6px 20px var(--color-brand-glow)' }}>
               <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-full w-full object-contain" />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2" style={{ background: '#10B981', borderColor: 'var(--color-surface-2)' }}>
-              <span className="absolute h-full w-full rounded-full animate-ping" style={{ background: 'rgba(16,185,129,0.4)' }} />
+            <div className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2" style={{ background: '#059669', borderColor: 'var(--color-surface-2)' }}>
+              <span className="absolute h-full w-full rounded-full animate-ping" style={{ background: 'rgba(5,150,105,0.4)' }} />
             </div>
           </div>
           <div className="min-w-0">
             <div className="text-[15px] font-bold leading-tight" style={{ color: 'var(--color-slate-heading)' }}>Asisten Finora</div>
             <div className="flex items-center gap-1.5 text-[11px] font-medium" style={{ color: 'var(--color-accent-emerald)' }}>
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#10B981' }} />
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#059669' }} />
               Online · Siap membantu
             </div>
           </div>
@@ -160,7 +165,6 @@ export default function AssistantChat({
 
       {/* Messages */}
       <div ref={scrollRef} onScroll={onScroll} className="relative flex-1 min-h-0 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
-        <div className="pointer-events-none sticky top-0 z-[6] h-9 shrink-0 chat-fade-top" />
         <div className={`mx-auto w-full px-4 py-4 space-y-4 ${isFull ? 'max-w-3xl' : 'max-w-3xl'}`}>
 
           {/* ===== EMPTY STATE — Full page hero ===== */}
@@ -171,7 +175,7 @@ export default function AssistantChat({
                 <div className="relative">
                   {/* Outer pulse ring */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="h-24 w-24 rounded-full animate-pulse-ring" style={{ border: '2px solid rgba(59, 130, 246, 0.2)' }} />
+                    <span className="h-24 w-24 rounded-full animate-pulse-ring" style={{ border: '2px solid rgba(37, 99, 235, 0.2)' }} />
                   </div>
                   {/* Inner pulse ring */}
                   <div className="absolute inset-0 flex items-center justify-center" style={{ animationDelay: '0.5s' }}>
@@ -184,7 +188,7 @@ export default function AssistantChat({
                     transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
                     className="relative z-10"
                   >
-                    <div className="rounded-2xl p-3 overflow-hidden animate-glow-pulse" style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.25), rgba(59,130,246,0.1))', border: '1px solid rgba(96, 165, 250, 0.3)', boxShadow: '0 12px 40px var(--color-brand-glow)' }}>
+                    <div className="rounded-2xl p-3 overflow-hidden" style={{ background: 'var(--color-surface-faint)', border: '1px solid var(--color-border-subtle)', boxShadow: '0 2px 8px rgba(16,24,40,0.08)' }}>
                       <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-12 w-12 object-contain" />
                     </div>
                   </motion.div>
@@ -218,10 +222,16 @@ export default function AssistantChat({
                 className="flex items-center gap-2"
               >
                 {CAPABILITIES.map((cap) => (
-                  <span key={cap.text} className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full" style={{ background: 'var(--color-surface-card)', color: 'var(--color-slate-muted)', border: '1px solid var(--color-border-subtle)' }}>
+                  <button
+                    key={cap.text}
+                    type="button"
+                    onClick={() => cap.text === 'Konsultasi pajak' ? onStartTaxConsultation?.() : null}
+                    className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full transition hover:scale-105"
+                    style={{ background: 'var(--color-surface-card)', color: 'var(--color-slate-muted)', border: '1px solid var(--color-border-subtle)' }}
+                  >
                     <cap.icon size={10} />
                     {cap.text}
-                  </span>
+                  </button>
                 ))}
               </motion.div>
             </div>
@@ -236,7 +246,7 @@ export default function AssistantChat({
                 transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.08 }}
                 className="mb-5"
               >
-                <div className="rounded-2xl p-2.5 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.2), rgba(59,130,246,0.08))', border: '1px solid rgba(96, 165, 250, 0.28)', boxShadow: '0 8px 26px var(--color-brand-glow)' }}>
+                <div className="rounded-2xl p-2.5 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.2), rgba(37,99,235,0.08))', border: '1px solid rgba(96, 165, 250, 0.28)', boxShadow: '0 8px 26px var(--color-brand-glow)' }}>
                   <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-8 w-8 object-contain" />
                 </div>
               </motion.div>
@@ -247,6 +257,13 @@ export default function AssistantChat({
                   <SuggestionChip key={s.text} {...s} onClick={() => { setInput(s.text); inputRef.current?.focus() }} />
                 ))}
               </div>
+            </div>
+          )}
+
+          {taxConsult?.active && (
+            <div className="flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-xs" style={{ background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.2)', color: 'var(--color-accent-amber)' }}>
+              <span className="font-semibold">Mode konsultasi pajak aktif</span>
+              <button type="button" onClick={onCancelTaxConsultation} className="font-medium hover:underline">Batal</button>
             </div>
           )}
 
@@ -275,14 +292,14 @@ export default function AssistantChat({
                   </div>
 
                   <div
-                    className={`group max-w-[82%] ${isFull ? 'max-w-[75%]' : ''} rounded-[20px] transition-colors duration-200 hover:bg-white/[0.03]`}
+                    className={`group min-w-0 max-w-[82%] ${isFull ? 'max-w-[75%]' : ''} rounded-[20px] transition-colors duration-200 hover:bg-white/[0.03]`}
                     style={{
                       background: 'var(--color-surface-card)',
                       border: '1px solid var(--color-border-subtle)',
                       color: 'var(--color-slate-text)',
                       boxShadow: isFull ? '0 4px 24px rgba(0, 0, 0, 0.22)' : '0 6px 18px rgba(0, 0, 0, 0.18)',
                       borderTopLeftRadius: 20, borderTopRightRadius: 20, borderBottomLeftRadius: 6, borderBottomRightRadius: 20,
-                      padding: isFull ? '12px 16px' : '10px 14px',
+                      padding: isFull ? '14px 18px' : '12px 16px',
                     }}
                   >
                     {msg.files && msg.files.length > 0 && (
@@ -292,7 +309,7 @@ export default function AssistantChat({
                     )}
 
                     {msg.content && (
-                      <div className={`whitespace-pre-wrap leading-relaxed ${isFull ? 'text-[14px]' : 'text-sm'}`}>
+                      <div className={`chat-answer break-words ${isFull ? 'text-[14px]' : 'text-sm'}`}>
                         {renderMarkdown(msg.content)}
                       </div>
                     )}
@@ -309,10 +326,31 @@ export default function AssistantChat({
                       />
                     )}
 
+                    {msg.summary && (
+                      <div className="mt-2">
+                        <SummaryCard title={msg.summary.title} metrics={msg.summary.metrics} />
+                      </div>
+                    )}
+
+                    {msg.taxResult && (
+                      <div className="mt-2">
+                        <SummaryCard
+                          title="Ringkasan Perhitungan Pajak"
+                          metrics={[
+                            ...(msg.taxResult.pph ? [
+                              { label: 'Omzet Kena Pajak', value: `Rp ${Number(msg.taxResult.pph.omzet_kena_pajak || 0).toLocaleString('id-ID')}`, color: 'var(--color-accent-amber)' },
+                              { label: 'PPh Final Terutang', value: `Rp ${Number(msg.taxResult.pph.pph_final_terutang || 0).toLocaleString('id-ID')}`, color: 'var(--color-accent-amber)' },
+                            ] : []),
+                            ...(msg.taxResult.ppn ? [{ label: 'PPN', value: `Rp ${Number(msg.taxResult.ppn.ppn || 0).toLocaleString('id-ID')}`, color: 'var(--color-accent-blue)' }] : []),
+                          ]}
+                        />
+                      </div>
+                    )}
+
                     {msg.has_financial_data && (
                       <div className="mt-2 pt-2" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-                        <span className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--color-accent-emerald)' }}>
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#10B981' }} />
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(5, 150, 105, 0.12)', color: 'var(--color-accent-emerald)' }}>
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#059669' }} />
                           Menggunakan data keuangan Anda
                         </span>
                       </div>
@@ -321,13 +359,17 @@ export default function AssistantChat({
                     {msg.actions && msg.actions.length > 0 && (
                       <ActionBar actions={msg.actions} onAction={(action) => {
                         if (action.prompt) {
-                          setInput(action.prompt)
-                          setTimeout(() => inputRef.current?.focus(), 60)
+                          if (taxConsult?.active && onFollowUp) {
+                            onFollowUp(action.prompt)
+                          } else {
+                            setInput(action.prompt)
+                            setTimeout(() => inputRef.current?.focus(), 60)
+                          }
                         }
                       }} />
                     )}
 
-                    <div className="flex items-center gap-2 mt-1.5 justify-between">
+                    <div className="mt-2.5 flex items-center justify-between gap-2 border-t pt-2" style={{ borderColor: 'var(--color-border-subtle)' }}>
                       <span className="text-[10px] opacity-70" style={{ color: 'var(--color-slate-muted)' }}>{msg.time}</span>
                       {msg.content && <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"><CopyButton text={msg.content} /></span>}
                     </div>
@@ -387,7 +429,7 @@ export default function AssistantChat({
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.4 + i * 0.08 }}
-                  whileHover={{ scale: 1.03, y: -1, boxShadow: '0 4px 16px rgba(59, 130, 246, 0.25)' }}
+                  whileHover={{ scale: 1.03, y: -1, boxShadow: '0 4px 16px rgba(15,23,42,0.12)' }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => onFollowUp ? onFollowUp(suggestion.text) : setInput(suggestion.text)}
                   className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-all duration-200"
@@ -395,7 +437,7 @@ export default function AssistantChat({
                     background: 'var(--color-surface-card)',
                     border: '1px solid var(--color-border-subtle)',
                     color: 'var(--color-brand-soft)',
-                    boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)',
+                    boxShadow: '0 2px 8px rgba(15,23,42,0.12)',
                   }}
                 >
                   <Zap size={11} />
@@ -417,10 +459,10 @@ export default function AssistantChat({
                 onClick={() => commitUpload && commitUpload(lastUploadId)}
                 className="w-full flex items-center justify-center gap-2 text-sm font-semibold px-4 py-3 rounded-xl transition-all duration-200 hover:scale-[1.01]"
                 style={{
-                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  background: 'linear-gradient(135deg, #059669 0%, #059669 100%)',
                   color: '#fff',
-                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.35)',
-                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  boxShadow: '0 4px 16px rgba(15,23,42,0.12)',
+                  border: '1px solid rgba(5, 150, 105, 0.4)',
                 }}
               >
                 <CheckCircle2 size={16} /> Simpan ke Jurnal
@@ -457,7 +499,7 @@ export default function AssistantChat({
             {/* Pending file chip */}
             {pendingFile && (
               <div className="flex items-center gap-2 mb-2 px-1">
-                <div className="inline-flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                <div className="inline-flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)' }}>
                   {pendingFile.name.endsWith('.pdf') ? <FileText size={15} style={{ color: 'var(--color-accent-blue)' }} /> : <FileSpreadsheet size={15} style={{ color: 'var(--color-accent-blue)' }} />}
                   <span className="text-xs font-medium truncate max-w-[180px]" style={{ color: 'var(--color-slate-heading)' }}>{pendingFile.name}</span>
                   <span className="text-[10px] font-medium" style={{ color: 'var(--color-accent-amber)' }}>Siap dikirim</span>
@@ -506,7 +548,7 @@ export default function AssistantChat({
                 type="submit"
                 disabled={loading || (!input.trim() && !pendingFile)}
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white disabled:opacity-35 transition-all duration-200 hover:scale-105"
-                style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 4px 14px var(--color-brand-glow)' }}
+                style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px var(--color-brand-glow)' }}
                 aria-label="Kirim"
               >
                 <Send size={17} />
@@ -526,7 +568,7 @@ export default function AssistantChat({
             {/* Pending file chip */}
             {pendingFile && (
               <div className="flex items-center gap-2 mb-2 px-1">
-                <div className="inline-flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                <div className="inline-flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)' }}>
                   {pendingFile.name.endsWith('.pdf') ? <FileText size={14} style={{ color: 'var(--color-accent-blue)' }} /> : <FileSpreadsheet size={14} style={{ color: 'var(--color-accent-blue)' }} />}
                   <span className="text-xs font-medium truncate max-w-[140px]" style={{ color: 'var(--color-slate-heading)' }}>{pendingFile.name}</span>
                   <span className="text-[10px] font-medium" style={{ color: 'var(--color-accent-amber)' }}>Siap dikirim</span>
@@ -572,7 +614,7 @@ export default function AssistantChat({
                 type="submit"
                 disabled={loading || (!input.trim() && !pendingFile)}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white disabled:opacity-35"
-                style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 4px 14px var(--color-brand-glow)' }}
+                style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px var(--color-brand-glow)' }}
                 aria-label="Kirim"
               >
                 <Send size={15} />

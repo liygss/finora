@@ -57,9 +57,10 @@ def get_laporan_posisi_keuangan(
     db: Session,
     tanggal_per: date | None = None,
     user_id: str | None = None,
+    upload_id: str | None = None,
 ) -> LaporanPosisiKeuangan:
-    neraca_saldo = get_neraca_saldo(db, tanggal_per, user_id=user_id)
-    laba_rugi = get_laporan_laba_rugi(db, tanggal_per, user_id=user_id)
+    neraca_saldo = get_neraca_saldo(db, tanggal_per, user_id=user_id, upload_id=upload_id)
+    laba_rugi = get_laporan_laba_rugi(db, tanggal_per, user_id=user_id, upload_id=upload_id)
 
     laporan = LaporanPosisiKeuangan(tanggal_per=tanggal_per, laba_rugi_berjalan=laba_rugi.laba_bersih)
 

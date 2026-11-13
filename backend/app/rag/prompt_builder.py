@@ -1,5 +1,7 @@
 """Rakit system prompt + konteks retrieval + histori chat + pertanyaan jadi messages untuk LLM."""
 
+import re
+
 from app.llm.prompt_template import (
     get_accounting_prompt_addon,
     get_system_prompt,
@@ -10,8 +12,14 @@ from app.rag.context_builder import BuiltContext
 MAX_FINANCIAL_CONTEXT_CHARS = 80_000  # batasi agar total prompt tidak melebihi context window model (131K tokens ~524K chars)
 
 TAX_KEYWORDS = [
-    "pajak", "pph", "ppn", "npwp", "faktur", "spt", "umkm final", "tarif",
-    "formulir", "lapor", "billing", "ntpn", "pph21", "pph23", "ppn12", "ppn 12",
+    "pajak", "pph", "ppn", "npwp", "faktur pajak", "spt", "spt masa", "spt tahunan",
+    "umkm final", "pph final", "tarif pajak", "formulir pajak", "lapor pajak",
+    "pelaporan pajak", "billing", "e-billing", "kode billing", "ntpn", "bpn", "coretax",
+    "djp", "pajak.go.id", "pph21", "pph 21", "pph23", "pph 23", "pph25", "pph 25",
+    "pph29", "pph 29", "ppn12", "ppn 12", "pkp", "pengusaha kena pajak", "bupot",
+    "e-bupot", "ebupot", "restitusi", "keberatan pajak", "banding pajak", "pemeriksaan pajak",
+    "sanksi pajak", "denda pajak", "bunga pajak", "ptkp", "kredit pajak", "omzet kena pajak",
+    "konsultasi pajak", "1770", "1770s", "1771",
 ]
 ACCOUNTING_KEYWORDS = [
     "jurnal", "neraca", "laba rugi", "buku besar", "akun", "penyusutan",
@@ -51,15 +59,25 @@ APP_KEYWORDS = [
 ALL_TOPIC_KEYWORDS = TAX_KEYWORDS + ACCOUNTING_KEYWORDS + FINANCE_KEYWORDS + APP_KEYWORDS + ANALYSIS_KEYWORDS
 
 
+def _contains_keyword(text: str, keyword: str) -> bool:
+    """Cocokkan keyword sebagai kata/frasa, bukan substring sembarang."""
+    pattern = rf"(?<!\w){re.escape(keyword.lower())}(?!\w)"
+    return re.search(pattern, text) is not None
+
+
+def _matches_any(text: str, keywords: list[str]) -> bool:
+    return any(_contains_keyword(text, keyword) for keyword in keywords)
+
+
 def detect_domain(pertanyaan: str) -> str:
     """Deteksi topik pertanyaan: "tax", "accounting", "app", atau "" (umum)."""
     lowered = pertanyaan.lower()
     # Prioritaskan domain spesifik (tax/accounting) sebelum umum (app)
-    if any(k in lowered for k in TAX_KEYWORDS):
+    if _matches_any(lowered, TAX_KEYWORDS):
         return "tax"
-    if any(k in lowered for k in ACCOUNTING_KEYWORDS):
+    if _matches_any(lowered, ACCOUNTING_KEYWORDS):
         return "accounting"
-    if any(k in lowered for k in APP_KEYWORDS):
+    if _matches_any(lowered, APP_KEYWORDS):
         return "app"
     return ""
 
@@ -69,7 +87,7 @@ def is_out_of_topic(pertanyaan: str) -> bool:
     lowered = pertanyaan.lower().strip()
     if not lowered:
         return False
-    return not any(k in lowered for k in ALL_TOPIC_KEYWORDS)
+    return not _matches_any(lowered, ALL_TOPIC_KEYWORDS)
 
 
 def _pilih_prompt_addon(pertanyaan: str) -> str:
@@ -87,6 +105,7 @@ def build_messages(
     histori_chat: list[dict[str, str]] | None = None,
     financial_context: str | None = None,
     page: str | None = None,
+    context_label: str | None = None,
 ) -> list[dict[str, str]]:
     """
     histori_chat: list of {"role": "user"|"assistant", "content": "..."} dari
@@ -118,7 +137,7 @@ def build_messages(
             )
         # Deteksi apakah ini konteks analisis upload
         is_upload_analysis = "Analisis File:" in financial_context
-        context_label = (
+        context_label = context_label or (
             "## Data File Upload Pengguna:\n\n"
             if is_upload_analysis
             else "## Data Keuangan Pengguna yang Tersedia:\n\n"

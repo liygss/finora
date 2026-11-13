@@ -18,8 +18,8 @@ function formatTanggal(v) {
 
 function BadgeClosed({ closed }) {
   const style = closed
-    ? { background: 'rgba(16, 185, 129, 0.12)', color: '#34D399', border: '1px solid rgba(16, 185, 129, 0.3)' }
-    : { background: 'rgba(245, 158, 11, 0.12)', color: '#FBBF24', border: '1px solid rgba(245, 158, 11, 0.3)' }
+    ? { background: 'rgba(5, 150, 105, 0.12)', color: '#10B981', border: '1px solid rgba(5, 150, 105, 0.3)' }
+    : { background: 'rgba(217, 119, 6, 0.12)', color: '#F59E0B', border: '1px solid rgba(217, 119, 6, 0.3)' }
   return (
     <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full" style={style}>
       {closed ? <Lock size={12} /> : <LockOpen size={12} />}
@@ -87,7 +87,7 @@ export default function TutupBukuPage() {
     <div className="animate-fade-in space-y-6">
       {/* Header */}
       <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.25)', color: 'var(--color-brand-soft)' }}>
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.25)', color: 'var(--color-brand-soft)' }}>
           <BookMarked size={22} />
         </div>
         <div>
@@ -117,7 +117,7 @@ export default function TutupBukuPage() {
           {sorted.map(row => (
             <div key={row.tahun} className="card flex flex-col sm:flex-row sm:items-center gap-3 !p-4" style={{ border: '1px solid var(--color-border-subtle)' }}>
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.35)' }}>
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}>
                   <span className="text-sm font-extrabold">{String(row.tahun).slice(2)}</span>
                 </div>
                 <div className="min-w-0">
@@ -137,14 +137,14 @@ export default function TutupBukuPage() {
                 {row.is_closed ? (
                   <div className="text-right">
                     <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-slate-muted)' }}>Laba Bersih</p>
-                    <p className="text-sm font-extrabold tabular-nums" style={{ color: (row.laba_bersih ?? 0) >= 0 ? '#34D399' : '#F87171' }}>
+                    <p className="text-sm font-extrabold tabular-nums" style={{ color: (row.laba_bersih ?? 0) >= 0 ? '#10B981' : '#F87171' }}>
                       {formatRupiah(row.laba_bersih ?? 0)}
                     </p>
                   </div>
                 ) : (
                   <div className="text-right">
                     <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-slate-muted)' }}>Status</p>
-                    <p className="text-sm font-semibold" style={{ color: '#FBBF24' }}>Siap ditutup</p>
+                    <p className="text-sm font-semibold" style={{ color: '#F59E0B' }}>Siap ditutup</p>
                   </div>
                 )}
                 {!row.is_closed && (
@@ -153,7 +153,7 @@ export default function TutupBukuPage() {
                     whileTap={{ scale: 0.96 }}
                     onClick={() => openModal(row.tahun)}
                     className="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl text-white"
-                    style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.35)' }}
+                    style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
                   >
                     <Lock size={14} />
                     Tutup Buku
@@ -167,7 +167,7 @@ export default function TutupBukuPage() {
 
       {/* Info penting */}
       {hasData && (
-        <div className="flex items-start gap-2.5 rounded-xl px-4 py-3 text-xs" style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', color: 'var(--color-slate-body)' }}>
+        <div className="flex items-start gap-2.5 rounded-xl px-4 py-3 text-xs" style={{ background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)', color: 'var(--color-slate-body)' }}>
           <Info size={15} className="shrink-0 mt-0.5" style={{ color: 'var(--color-brand-soft)' }} />
           <p>
             Tutup buku bersifat <b>permanen dan tidak bisa dibatalkan</b>. Setelah ditutup, semua jurnal di tahun tersebut dikunci —
@@ -197,7 +197,7 @@ export default function TutupBukuPage() {
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--color-brand-soft)' }}>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'rgba(37, 99, 235, 0.12)', color: 'var(--color-brand-soft)' }}>
                   <Lock size={16} />
                 </div>
                 <div className="flex-1">
@@ -215,17 +215,17 @@ export default function TutupBukuPage() {
                 ) : (
                   <>
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="rounded-xl px-3 py-2.5 text-center" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.22)' }}>
+                      <div className="rounded-xl px-3 py-2.5 text-center" style={{ background: 'rgba(5, 150, 105, 0.1)', border: '1px solid rgba(5, 150, 105, 0.22)' }}>
                         <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-accent-emerald)' }}>Pendapatan</p>
-                        <p className="text-sm font-extrabold tabular-nums" style={{ color: '#34D399' }}>{formatRupiah(review.total_pendapatan)}</p>
+                        <p className="text-sm font-extrabold tabular-nums" style={{ color: '#10B981' }}>{formatRupiah(review.total_pendapatan)}</p>
                       </div>
-                      <div className="rounded-xl px-3 py-2.5 text-center" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.22)' }}>
+                      <div className="rounded-xl px-3 py-2.5 text-center" style={{ background: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.22)' }}>
                         <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: '#F87171' }}>Beban</p>
                         <p className="text-sm font-extrabold tabular-nums" style={{ color: '#F87171' }}>{formatRupiah(review.total_beban)}</p>
                       </div>
-                      <div className="rounded-xl px-3 py-2.5 text-center" style={{ background: isRugi ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', border: `1px solid ${isRugi ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.25)'}` }}>
-                        <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: isRugi ? '#F87171' : '#34D399' }}>{isRugi ? 'Rugi' : 'Laba'}</p>
-                        <p className="text-sm font-extrabold tabular-nums" style={{ color: isRugi ? '#F87171' : '#34D399' }}>{formatRupiah(Math.abs(review.laba_bersih))}</p>
+                      <div className="rounded-xl px-3 py-2.5 text-center" style={{ background: isRugi ? 'rgba(220, 38, 38, 0.1)' : 'rgba(5, 150, 105, 0.1)', border: `1px solid ${isRugi ? 'rgba(220, 38, 38, 0.25)' : 'rgba(5, 150, 105, 0.25)'}` }}>
+                        <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: isRugi ? '#F87171' : '#10B981' }}>{isRugi ? 'Rugi' : 'Laba'}</p>
+                        <p className="text-sm font-extrabold tabular-nums" style={{ color: isRugi ? '#F87171' : '#10B981' }}>{formatRupiah(Math.abs(review.laba_bersih))}</p>
                       </div>
                     </div>
 
@@ -253,12 +253,12 @@ export default function TutupBukuPage() {
                     </div>
 
                     {review.prive > 0 && (
-                      <p className="text-xs rounded-lg px-3 py-2" style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)', color: 'var(--color-slate-body)' }}>
+                      <p className="text-xs rounded-lg px-3 py-2" style={{ background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.2)', color: 'var(--color-slate-body)' }}>
                         Prive sebesar <b>{formatRupiah(review.prive)}</b> akan ditutup ke Modal Pemilik.
                       </p>
                     )}
 
-                    <div className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-xs" style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', color: 'var(--color-slate-body)' }}>
+                    <div className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-xs" style={{ background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.2)', color: 'var(--color-slate-body)' }}>
                       <Sparkles size={14} className="shrink-0 mt-0.5" style={{ color: 'var(--color-brand-soft)' }} />
                       <p>
                         Sistem akan membuat <b>Jurnal Penutup</b> (nomor otomatis) yang memindahkan saldo ke Laba Ditahan,
@@ -283,7 +283,7 @@ export default function TutupBukuPage() {
                   onClick={confirm}
                   disabled={submitting || reviewLoading || !review}
                   className="flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl text-white disabled:opacity-40"
-                  style={{ background: 'linear-gradient(135deg, #047857, #10B981)', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)' }}
+                  style={{ background: 'linear-gradient(135deg, #047857, #059669)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
                 >
                   {submitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
                   {submitting ? 'Memproses...' : `Ya, Tutup Buku ${selected}`}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'motion/react'
 import {
   Bot, BookOpen, BarChart3, Upload, Shield, Star, HelpCircle, ChevronDown,
   ArrowRight, Zap, TrendingUp, MessageSquare, CheckCircle, Quote, Menu, X, PlayCircle,
@@ -15,6 +16,19 @@ const NAV_LINKS = [
   { label: 'FAQ', href: '#faq' },
   { label: 'Download', href: '#download' },
 ]
+
+const HERO_STAGGER = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
+}
+const HERO_ITEM = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+}
+const HERO_SLIDER = {
+  hidden: { opacity: 0, y: 40, scale: 0.98 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.3 } },
+}
 
 // Installer disajikan langsung oleh backend (folder downloads/) untuk file yang
 // sudah ada lokal, DAN dari GitHub Releases untuk platform yang belum dibangun
@@ -71,21 +85,21 @@ const TESTIMONIALS = [
     name: 'Nino Ahmadiy',
     role: 'Pemilik Kedai Kopi',
     avatar: 'NA',
-    color: '#3B82F6',
+    color: '#2563EB',
   },
   {
     text: 'AI chatbot-nya sangat membantu. Saya bertanya soal PPh Final UMKM dan langsung dijawab dengan penjelasan yang mudah dipahami.',
     name: 'Haidar Adlan',
     role: 'Owner Restoran',
     avatar: 'HD',
-    color: '#10B981',
+    color: '#059669',
   },
   {
     text: 'Dari yang tadinya catatan manual, sekarang semua rapi otomatis. Fitur upload CSV menghemat banyak waktu tim saya.',
     name: 'Dani Shofi',
     role: 'Founder Startup F&B',
     avatar: 'DS',
-    color: '#F59E0B',
+    color: '#D97706',
   },
 ]
 
@@ -223,12 +237,9 @@ export default function LandingPage() {
   return (
     <div className="relative min-h-screen overflow-x-hidden" style={{ background: 'var(--color-surface-0)', color: 'var(--color-slate-heading)' }}>
 
-      {/* ============ BACKGROUND AURORA ============ */}
+      {/* ============ BACKGROUND ============ */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-[-20%] right-[-10%] h-[60vh] w-[60vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(37,99,235,0.22)' }} />
-        <div className="absolute bottom-[-30%] left-[-15%] h-[60vh] w-[60vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(139,92,246,0.13)', animationDelay: '5s' }} />
-        <div className="absolute top-[45%] left-[35%] h-[45vh] w-[45vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(16,185,129,0.08)', animationDelay: '9s' }} />
-        <div className="absolute top-0 left-0 h-full w-full" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(148,163,184,0.05) 1px, transparent 0)', backgroundSize: '36px 36px' }} />
+        <div className="absolute top-0 left-0 h-full w-full" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(148,163,184,0.06) 1px, transparent 0)', backgroundSize: '36px 36px' }} />
       </div>
 
       {/* ============ NAVBAR ============ */}
@@ -244,10 +255,9 @@ export default function LandingPage() {
             <Link to="/" className="flex items-center gap-3">
               <div
                 className="relative flex h-11 w-11 items-center justify-center overflow-hidden"
-                style={{ borderRadius: '1rem', boxShadow: '0 8px 24px rgba(59,130,246,0.4)' }}
+                style={{ borderRadius: '1rem', boxShadow: '0 2px 8px rgba(16,24,40,0.12)' }}
               >
                 <img src="/finora_logo.jpeg" alt="Finora" className="h-full w-full object-cover relative z-10" />
-                <div className="absolute inset-0 rounded-2xl opacity-50 animate-pulse" style={{ background: 'linear-gradient(135deg, #2563EB, #7DB4FF)', filter: 'blur(12px)' }} />
               </div>
               <div className="leading-tight">
                 <div className="text-lg font-[900] tracking-tight" style={{ color: 'var(--color-slate-heading)' }}>
@@ -287,7 +297,7 @@ export default function LandingPage() {
                   <Link
                     to="/dashboard"
                     className="px-6 py-2.5 text-sm font-bold rounded-full text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
-                    style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 8px 24px rgba(59,130,246,0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}
                   >
                     Buka Dashboard
                   </Link>
@@ -304,7 +314,7 @@ export default function LandingPage() {
                   <Link
                     to="/register"
                     className="px-6 py-2.5 text-sm font-bold rounded-full text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
-                    style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 8px 24px rgba(59,130,246,0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}
                   >
                     Daftar Gratis
                   </Link>
@@ -374,40 +384,62 @@ export default function LandingPage() {
       </header>
 
       {/* ============ HERO ============ */}
-      <section ref={heroRef} className="relative px-6 pt-36 pb-20 lg:px-12 lg:pt-32 lg:pb-16">
-        <div className="relative mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left column - copy */}
-          <div className="text-center lg:text-left">
-            {/* Trust badge */}
-            <div
-              className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold mb-6 transition-all duration-700 ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-              style={{ background: 'rgba(59,130,246,0.1)', color: 'var(--color-accent-blue)', border: '1px solid rgba(59,130,246,0.2)' }}
-            >
-              Solusi Terpercaya untuk Pembukuan & Pajak UMKM
-            </div>
+      <section ref={heroRef} className="relative overflow-hidden px-6 pt-36 pb-20 lg:px-12 lg:pt-32 lg:pb-16">
+        {/* Atmosphere */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-[-14%] h-[560px] w-[860px] -translate-x-1/2 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.12), transparent 70%)' }} />
+          <div className="absolute bottom-0 left-0 right-0 h-40" style={{ background: 'linear-gradient(180deg, transparent, var(--color-surface-0))' }} />
+        </div>
 
-            <h1
-              className={`text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-[900] leading-[1.05] tracking-tight mb-8 transition-all duration-700 delay-100 ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+        <div className="relative mx-auto max-w-[88rem] grid grid-cols-1 lg:grid-cols-[0.88fr_1.12fr] gap-12 lg:gap-14 items-center">
+          {/* Left column - copy */}
+          <motion.div
+            className="text-center lg:text-left"
+            variants={HERO_STAGGER}
+            initial="hidden"
+            animate={heroVisible ? 'show' : 'hidden'}
+          >
+            {/* Trust badge */}
+            <motion.div variants={HERO_ITEM} className="mb-6">
+              <div
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
+                style={{ background: 'rgba(37,99,235,0.08)', color: 'var(--color-accent-blue)', border: '1px solid rgba(37,99,235,0.18)', boxShadow: '0 2px 8px rgba(16,24,40,0.05)' }}
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: 'var(--color-accent-emerald)' }} />
+                  <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: 'var(--color-accent-emerald)' }} />
+                </span>
+                Solusi Terpercaya untuk Pembukuan & Pajak UMKM
+              </div>
+            </motion.div>
+
+            <motion.h1
+              variants={HERO_ITEM}
+              className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-[900] leading-[1.05] tracking-tight mb-8"
               style={{ color: 'var(--color-slate-heading)', letterSpacing: '-0.03em' }}
             >
               Kelola Keuangan UMKM dengan <span className="gradient-text">Kecerdasan</span> Finora
-            </h1>
+            </motion.h1>
 
-            <p
-              className={`text-lg lg:text-xl max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed transition-all duration-700 delay-200 ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+            <motion.p
+              variants={HERO_ITEM}
+              className="text-lg lg:text-xl max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed"
               style={{ color: 'var(--color-slate-body)' }}
             >
               Asisten pembukuan, pajak, dan laporan keuangan berbasis AI dalam satu platform.
               Biarkan Finora bekerja, Anda fokus mengembangkan bisnis.
-            </p>
+            </motion.p>
 
             {/* Hero buttons */}
-            <div className={`flex flex-col sm:flex-row sm:flex-nowrap justify-center lg:justify-start items-center gap-2.5 lg:gap-3 transition-all duration-700 delay-300 ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <motion.div
+              variants={HERO_ITEM}
+              className="flex flex-col sm:flex-row sm:flex-nowrap justify-center lg:justify-start items-center gap-2.5 lg:gap-3"
+            >
               {user ? (
                 <Link
                   to="/dashboard"
-                  className="group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 lg:px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-1.5 w-full sm:w-auto"
-                  style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 12px 40px rgba(59,130,246,0.5)' }}
+                  className="group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 lg:px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
+                  style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 2px 8px rgba(16,24,40,0.14)' }}
                 >
                   Buka Dashboard
                   <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1.5" />
@@ -415,112 +447,132 @@ export default function LandingPage() {
               ) : (
                 <Link
                   to="/register"
-                  className="group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 lg:px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-1.5 w-full sm:w-auto"
-                  style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 12px 40px rgba(59,130,246,0.5)' }}
+                  className="group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 lg:px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
+                  style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 2px 8px rgba(16,24,40,0.14)' }}
                 >
                   Mulai Sekarang
                   <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1.5" />
                 </Link>
               )}
-              <button
-                onClick={() => scrollTo('#cara-kerja')}
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 lg:px-6 py-3 text-sm font-bold transition-all duration-300 hover:-translate-y-1.5 w-full sm:w-auto"
-                style={{ background: 'var(--color-surface-card)', color: 'var(--color-slate-text)', border: '1px solid rgba(148,163,184,0.2)', backdropFilter: 'blur(12px)' }}
-              >
-                Lihat Cara Kerja
-              </button>
               <Link
                 to="/demo"
-                className="group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 lg:px-6 py-3 text-sm font-bold transition-all duration-300 hover:-translate-y-1.5 w-full sm:w-auto animate-glow-pulse"
-                style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--color-accent-green)', border: '1px solid rgba(16,185,129,0.35)', backdropFilter: 'blur(12px)' }}
+                className="group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 lg:px-6 py-3 text-sm font-bold transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
+                style={{ background: 'var(--color-surface-card)', color: 'var(--color-slate-text)', border: '1px solid var(--color-border-soft)' }}
               >
-                <PlayCircle size={18} className="transition-transform duration-300 group-hover:scale-125" />
+                <PlayCircle size={18} className="transition-transform duration-300 group-hover:scale-110" />
                 Lihat Demo
               </Link>
-            </div>
-          </div>
+            </motion.div>
+
+            {/* Micro-line + social proof */}
+            <motion.div
+              variants={HERO_ITEM}
+              className="mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-sm"
+              style={{ color: 'var(--color-slate-muted)' }}
+            >
+              <span className="inline-flex items-center gap-2">
+                <CheckCircle size={15} style={{ color: 'var(--color-accent-emerald)' }} /> Gratis selamanya
+              </span>
+              <span className="hidden h-4 w-px sm:block" style={{ background: 'var(--color-border-soft)' }} />
+              <span className="inline-flex items-center gap-2">
+                <CheckCircle size={15} style={{ color: 'var(--color-accent-emerald)' }} /> Tanpa kartu kredit
+              </span>
+              <span className="hidden h-4 w-px sm:block" style={{ background: 'var(--color-border-soft)' }} />
+              <span className="inline-flex items-center gap-2 font-semibold" style={{ color: 'var(--color-slate-text)' }}>
+                <span className="inline-flex" style={{ color: '#D97706' }}>
+                  {[0, 1, 2, 3, 4].map((i) => <Star key={i} size={14} className="fill-current" />)}
+                </span>
+                4,9/5 · 120+ UMKM
+              </span>
+            </motion.div>
+          </motion.div>
 
           {/* Right column - product mockup */}
-          <div className={`relative w-full transition-all duration-1000 delay-500 ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-            <div className="pointer-events-none absolute -inset-6 rounded-[2.5rem] blur-3xl opacity-40" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.35), transparent 70%)' }} />
+          <motion.div
+            className="relative w-full"
+            variants={HERO_SLIDER}
+            initial="hidden"
+            animate={heroVisible ? 'show' : 'hidden'}
+          >
+            <div className="pointer-events-none absolute -inset-6 rounded-[2.5rem] blur-3xl" style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.16), transparent 70%)' }} />
 
-            <div className="relative overflow-hidden rounded-[1.75rem] text-left" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.15)', backdropFilter: 'blur(20px)', boxShadow: '0 40px 120px rgba(0,0,0,0.55)' }}>
+            <div className="landing-hero-mock relative overflow-hidden rounded-[1.75rem] text-left" style={{ background: 'var(--color-surface-card)', border: '1px solid var(--color-border-subtle)', backdropFilter: 'blur(20px)', boxShadow: '0 32px 90px -40px rgba(15,23,42,0.45)' }}>
               {/* Window bar */}
-              <div className="flex items-center gap-2 px-5 py-3.5" style={{ borderBottom: '1px solid rgba(148,163,184,0.12)', background: 'var(--color-surface-faint)' }}>
+              <div className="landing-hero-mock__bar flex items-center gap-2 px-5 py-3.5" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-surface-faint)' }}>
                 <div className="h-3 w-3 rounded-full" style={{ background: '#FCA5A5' }} />
                 <div className="h-3 w-3 rounded-full" style={{ background: '#FCD34D' }} />
                 <div className="h-3 w-3 rounded-full" style={{ background: '#6EE7B7' }} />
-                <div className="ml-4 h-6 flex-1 max-w-xs rounded-lg" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.1)' }} />
+                <div className="landing-hero-mock__url ml-4 h-6 flex-1 max-w-xs rounded-lg" style={{ background: 'var(--color-surface-card)', border: '1px solid var(--color-border-subtle)' }} />
               </div>
 
               {/* Mock dashboard body */}
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-5 md:p-6">
                 {/* Stat tiles */}
                 <div className="md:col-span-3 grid grid-cols-2 gap-4">
-                  <div className="rounded-2xl p-4" style={{ background: 'var(--color-surface-faint)', border: '1px solid rgba(59,130,246,0.25)' }}>
+                  <div className="landing-hero-mock__tile landing-hero-mock__tile--highlight rounded-2xl p-4" style={{ background: 'var(--color-surface-faint)', border: '1px solid rgba(37,99,235,0.2)' }}>
                     <div className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-accent-blue)' }}>Pendapatan</div>
                     <div className="text-2xl font-[900]" style={{ color: 'var(--color-slate-heading)' }}>Rp 48,2 jt</div>
-                    <div className="inline-flex items-center gap-1 mt-1 text-xs font-bold" style={{ color: 'var(--color-accent-emerald)' }}>
+                    <div className="inline-flex items-center gap-1 mt-1 text-xs font-bold rounded-full px-2 py-0.5" style={{ color: 'var(--color-accent-emerald)', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}>
                       <TrendingUp size={12} /> +18,4%
                     </div>
                   </div>
-                  <div className="rounded-2xl p-4" style={{ background: 'var(--color-surface-faint)', border: '1px solid rgba(148,163,184,0.12)' }}>
-                    <div className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-slate-body)' }}>Laba Bersih</div>
+                  <div className="landing-hero-mock__tile rounded-2xl p-4" style={{ background: 'var(--color-surface-faint)', border: '1px solid var(--color-border-subtle)' }}>
+                    <div className="landing-hero-mock__label text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-slate-body)' }}>Laba Bersih</div>
                     <div className="text-2xl font-[900]" style={{ color: 'var(--color-slate-heading)' }}>Rp 9,6 jt</div>
-                    <div className="inline-flex items-center gap-1 mt-1 text-xs font-bold" style={{ color: 'var(--color-accent-blue)' }}>SAK EMKM</div>
+                    <div className="inline-flex items-center gap-1 mt-1 text-xs font-bold rounded-full px-2 py-0.5" style={{ color: 'var(--color-accent-blue)', background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.2)' }}>SAK EMKM</div>
                   </div>
-                  <div className="rounded-2xl p-4" style={{ background: 'var(--color-surface-faint)', border: '1px solid rgba(148,163,184,0.12)' }}>
-                    <div className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-slate-body)' }}>Transaksi</div>
+                  <div className="landing-hero-mock__tile rounded-2xl p-4" style={{ background: 'var(--color-surface-faint)', border: '1px solid var(--color-border-subtle)' }}>
+                    <div className="landing-hero-mock__label text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-slate-body)' }}>Transaksi</div>
                     <div className="text-2xl font-[900]" style={{ color: 'var(--color-slate-heading)' }}>1.284</div>
-                    <div className="inline-flex items-center gap-1 mt-1 text-xs font-bold" style={{ color: 'var(--color-accent-amber)' }}><Zap size={12} /> Otomatis</div>
+                    <div className="inline-flex items-center gap-1 mt-1 text-xs font-bold rounded-full px-2 py-0.5" style={{ color: 'var(--color-accent-amber)', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.22)' }}><Zap size={12} /> Otomatis</div>
                   </div>
-                  <div className="rounded-2xl p-4" style={{ background: 'var(--color-surface-faint)', border: '1px solid rgba(148,163,184,0.12)' }}>
-                    <div className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-slate-body)' }}>Pajak</div>
+                  <div className="landing-hero-mock__tile rounded-2xl p-4" style={{ background: 'var(--color-surface-faint)', border: '1px solid var(--color-border-subtle)' }}>
+                    <div className="landing-hero-mock__label text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-slate-body)' }}>Pajak</div>
                     <div className="text-2xl font-[900]" style={{ color: 'var(--color-slate-heading)' }}>PPh 0,5%</div>
-                    <div className="inline-flex items-center gap-1 mt-1 text-xs font-bold" style={{ color: 'var(--color-accent-emerald)' }}><Shield size={12} /> Sesuai aturan</div>
+                    <div className="inline-flex items-center gap-1 mt-1 text-xs font-bold rounded-full px-2 py-0.5" style={{ color: 'var(--color-accent-emerald)', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}><Shield size={12} /> Sesuai aturan</div>
                   </div>
                   {/* Chart placeholder */}
-                  <div className="col-span-2 rounded-2xl p-4 flex items-end gap-2 h-36" style={{ background: 'var(--color-surface-faint)', border: '1px solid rgba(148,163,184,0.1)' }}>
+                  <div className="landing-hero-mock__tile col-span-2 rounded-2xl p-4 flex items-end gap-2 h-36" style={{ background: 'var(--color-surface-faint)', border: '1px solid var(--color-border-subtle)' }}>
                     {[45, 62, 38, 74, 52, 88, 66, 95].map((h, i) => (
-                      <div key={i} className="flex-1 rounded-t-lg" style={{ height: `${h}%`, background: 'linear-gradient(180deg, #7DB4FF, rgba(60,130,246,0.2))', opacity: 0.7 + (i * 0.04) }} />
+                      <div key={i} className="landing-hero-mock__bar-item flex-1 rounded-t-lg" style={{ height: `${h}%`, background: 'linear-gradient(180deg, #93C5FD 0%, #3B82F6 60%, rgba(37,99,235,0.35) 100%)', opacity: 0.85 + (i * 0.02), boxShadow: '0 0 10px -4px rgba(59,130,246,0.5)' }} />
                     ))}
                   </div>
                 </div>
 
                 {/* AI chatbot preview */}
-                <div className="md:col-span-2 flex flex-col rounded-2xl overflow-hidden" style={{ background: 'var(--color-glass-bg)', border: '1px solid rgba(59,130,246,0.28)', boxShadow: '0 20px 50px rgba(37,99,235,0.18)' }}>
+                <div className="landing-hero-mock__chat md:col-span-2 flex flex-col rounded-2xl overflow-hidden" style={{ background: 'var(--color-glass-bg)', border: '1px solid rgba(37,99,235,0.22)', boxShadow: '0 20px 50px -24px rgba(37,99,235,0.35)' }}>
                   {/* Chat header */}
-                  <div className="flex items-center gap-2.5 px-4 py-3" style={{ borderBottom: '1px solid rgba(148,163,184,0.12)', background: 'var(--color-surface-faint)' }}>
+                  <div className="landing-hero-mock__chat-header flex items-center gap-2.5 px-4 py-3" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-surface-faint)' }}>
                     <div className="relative">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #2563EB, #7DB4FF)', boxShadow: '0 4px 14px rgba(59,130,246,0.4)' }}>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #2563EB, #60A5FA)' }}>
                         <Bot size={16} className="text-white" />
                       </div>
-                      <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2" style={{ background: '#10B981', borderColor: 'var(--color-surface-2)' }} />
+                      <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2" style={{ background: '#059669', borderColor: 'var(--color-surface-2)' }} />
                     </div>
                     <div>
                       <div className="text-sm font-bold leading-tight" style={{ color: 'var(--color-slate-heading)' }}>Asisten Finora</div>
                       <div className="text-[10px] flex items-center gap-1" style={{ color: 'var(--color-accent-emerald)' }}>
-                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#10B981' }} /> Online
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#059669' }} /> Online
                       </div>
                     </div>
                   </div>
 
                   {/* Chat body */}
-                  <div className="flex-1 flex flex-col gap-3 px-4 py-4">
+                  <div className="landing-hero-mock__chat-body flex-1 flex flex-col gap-3 px-4 py-4">
                     {/* User question (right, gradient) */}
                     <div className="flex justify-end">
-                      <div className="max-w-[85%] rounded-2xl rounded-br-md px-3.5 py-2 text-xs text-white" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px rgba(37,99,235,0.35)' }}>
+                      <div className="max-w-[85%] rounded-2xl rounded-br-md px-3.5 py-2 text-xs text-white" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)' }}>
                         Estimasi pajak bulan ini?
                       </div>
                     </div>
                     {/* Assistant answer (left, with avatar) */}
                     <div className="flex items-start gap-2">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg mt-0.5" style={{ background: 'linear-gradient(135deg, #2563EB, #7DB4FF)' }}>
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg mt-0.5" style={{ background: 'linear-gradient(135deg, #2563EB, #60A5FA)' }}>
                         <Bot size={13} className="text-white" />
                       </div>
-                      <div className="max-w-[85%] rounded-2xl rounded-bl-md px-3.5 py-2 text-xs leading-relaxed" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.14)', color: 'var(--color-slate-text)', boxShadow: '0 4px 14px rgba(0,0,0,0.18)' }}>
+                      <div className="landing-hero-mock__chat-bubble max-w-[85%] rounded-2xl rounded-bl-md px-3.5 py-2 text-xs leading-relaxed" style={{ background: 'var(--color-surface-card)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-slate-text)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}>
                         PPh Final <b>0,5%</b> dari omzet <b>Rp 48 jt</b> ≈ <b style={{ color: 'var(--color-accent-blue)' }}>Rp 241.000</b>.
-                        <div className="mt-1.5 text-[10px] px-1.5 py-0.5 inline-flex rounded-md" style={{ background: 'rgba(59,130,246,0.12)', color: 'var(--color-accent-blue)' }}>
+                        <div className="landing-hero-mock__badge mt-1.5 text-[10px] px-1.5 py-0.5 inline-flex rounded-md" style={{ background: 'rgba(37,99,235,0.12)', color: 'var(--color-accent-blue)' }}>
                           ✓ Sesuai aturan UMKM
                         </div>
                       </div>
@@ -528,22 +580,27 @@ export default function LandingPage() {
                   </div>
 
                   {/* Chat input */}
-                  <div className="mx-3 mb-3 flex items-center gap-2 rounded-xl p-1.5 pl-3" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.14)' }}>
+                  <div className="landing-hero-mock__chat-input mx-3 mb-3 flex items-center gap-2 rounded-xl p-1.5 pl-3" style={{ background: 'var(--color-surface-card)', border: '1px solid var(--color-border-subtle)' }}>
                     <span className="flex-1 text-[11px] truncate" style={{ color: 'var(--color-slate-muted)' }}>Tanya apa saja...</span>
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)' }}>
                       <MessageSquare size={13} className="text-white" />
                     </div>
                   </div>
                 </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
 
           {/* Hero stats + avatars - full width */}
-          <div className={`lg:col-span-2 flex flex-col items-center gap-8 transition-all duration-700 delay-400 mt-16 lg:mt-20 ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <motion.div
+            className="lg:col-span-2 flex flex-col items-center gap-8 mt-16 lg:mt-20"
+            variants={HERO_ITEM}
+            initial="hidden"
+            animate={heroVisible ? 'show' : 'hidden'}
+          >
             <div className="flex items-center gap-3">
               <div className="flex -space-x-3">
-                {['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'].map((c, i) => (
+                {['#2563EB', '#059669', '#D97706', '#7C3AED'].map((c, i) => (
                   <div key={i} className="h-10 w-10 rounded-full ring-2 ring-[var(--color-surface-0)] flex items-center justify-center text-xs font-bold text-white" style={{ background: `linear-gradient(135deg, ${c}, ${c}bb)` }}>
                     {['N', 'H', 'D', 'S'][i]}
                   </div>
@@ -554,22 +611,28 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            <div
+              className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 rounded-2xl px-6 py-4"
+              style={{ background: 'var(--color-surface-card)', border: '1px solid var(--color-border-subtle)', boxShadow: '0 10px 34px -20px rgba(15,23,42,0.28)' }}
+            >
               {STATS.map((stat, i) => (
-                <div key={i} className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.15)' }}>
-                    <stat.icon size={16} style={{ color: 'var(--color-brand-soft)' }} />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xl font-[900] leading-none" style={{ color: 'var(--color-slate-heading)' }}>
-                      <AnimatedCounter target={stat.value} suffix={stat.suffix} decimals={stat.decimals || 0} />
+                <React.Fragment key={i}>
+                  {i > 0 && <span className="hidden h-9 w-px md:block" style={{ background: 'var(--color-border-subtle)' }} />}
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.15)' }}>
+                      <stat.icon size={16} style={{ color: 'var(--color-brand-soft)' }} />
                     </div>
-                    <div className="text-xs font-medium mt-1" style={{ color: 'var(--color-slate-muted)' }}>{stat.label}</div>
+                    <div className="text-left">
+                      <div className="text-xl font-[900] leading-none" style={{ color: 'var(--color-slate-heading)' }}>
+                        <AnimatedCounter target={stat.value} suffix={stat.suffix} decimals={stat.decimals || 0} />
+                      </div>
+                      <div className="text-xs font-medium mt-1" style={{ color: 'var(--color-slate-muted)' }}>{stat.label}</div>
+                    </div>
                   </div>
-                </div>
+                </React.Fragment>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -582,7 +645,7 @@ export default function LandingPage() {
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
             {['SAK EMKM', 'PPh Final 0,5%', 'PNBP', 'RAG AI', 'LLM', 'CSV & PDF'].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-sm font-bold tracking-wide" style={{ color: 'var(--color-slate-muted)' }}>
-                <div className="h-1.5 w-1.5 rounded-full" style={{ background: '#3B82F6' }} />
+                <div className="h-1.5 w-1.5 rounded-full" style={{ background: '#2563EB' }} />
                 {item}
               </div>
             ))}
@@ -604,10 +667,10 @@ export default function LandingPage() {
                   border: '1px solid rgba(148,163,184,0.12)',
                   backdropFilter: 'blur(12px)',
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 12px 40px rgba(59,130,246,0.15)'; e.currentTarget.style.borderColor = 'rgba(59,130,246,0.25)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 12px 40px rgba(37,99,235,0.15)'; e.currentTarget.style.borderColor = 'rgba(37,99,235,0.25)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(148,163,184,0.12)' }}
               >
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ background: 'rgba(59,130,246,0.12)' }}>
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ background: 'rgba(37,99,235,0.12)' }}>
                   <stat.icon size={22} style={{ color: 'var(--color-brand-soft)' }} />
                 </div>
                 <div className="text-3xl lg:text-4xl font-[900] gradient-text">
@@ -626,7 +689,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold mb-5 transition-all duration-700 ${featuresVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-              style={{ background: 'rgba(59,130,246,0.1)', color: 'var(--color-accent-blue)', border: '1px solid rgba(59,130,246,0.2)' }}
+              style={{ background: 'rgba(37,99,235,0.1)', color: 'var(--color-accent-blue)', border: '1px solid rgba(37,99,235,0.2)' }}
             >
               <Zap size={14} />
               Fitur Unggulan
@@ -651,11 +714,11 @@ export default function LandingPage() {
             <div
               className={`group relative md:col-span-2 md:row-span-2 rounded-3xl p-8 transition-all duration-700 hover:-translate-y-1 ${featuresVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
               style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.12)', backdropFilter: 'blur(16px)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 24px 60px rgba(59,130,246,0.15)'; e.currentTarget.style.borderColor = 'rgba(59,130,246,0.25)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 24px 60px rgba(37,99,235,0.15)'; e.currentTarget.style.borderColor = 'rgba(37,99,235,0.25)' }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(148,163,184,0.12)' }}
             >
-              <div className="absolute top-0 right-0 h-64 w-64 rounded-bl-[120px] opacity-[0.06] group-hover:opacity-[0.12] transition-opacity duration-500" style={{ background: 'linear-gradient(135deg, #3B82F6, transparent)' }} />
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-6 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #2563EB, #7DB4FF)', boxShadow: '0 8px 32px rgba(59,130,246,0.4)' }}>
+              <div className="absolute top-0 right-0 h-64 w-64 rounded-bl-[120px] opacity-[0.06] group-hover:opacity-[0.12] transition-opacity duration-500" style={{ background: 'linear-gradient(135deg, #2563EB, transparent)' }} />
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-6 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #2563EB, #60A5FA)', boxShadow: '0 8px 32px rgba(15,23,42,0.12)' }}>
                 <Bot size={28} className="text-white" />
               </div>
               <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--color-slate-heading)' }}>AI Chatbot Akuntansi</h3>
@@ -665,8 +728,8 @@ export default function LandingPage() {
               {/* Mini chat preview */}
               <div className="rounded-2xl p-4" style={{ background: 'var(--color-surface-faint)', border: '1px solid rgba(148,163,184,0.15)' }}>
                 <div className="flex gap-3 mb-3">
-                  <div className="h-7 w-7 rounded-lg flex-shrink-0" style={{ background: 'linear-gradient(135deg, #2563EB, #7DB4FF)' }} />
-                  <div className="rounded-xl rounded-tl-none px-3.5 py-2 text-xs" style={{ background: 'rgba(59,130,246,0.15)', color: 'var(--color-slate-text)', border: '1px solid rgba(59,130,246,0.15)' }}>
+                  <div className="h-7 w-7 rounded-lg flex-shrink-0" style={{ background: 'linear-gradient(135deg, #2563EB, #60A5FA)' }} />
+                  <div className="rounded-xl rounded-tl-none px-3.5 py-2 text-xs" style={{ background: 'rgba(37,99,235,0.15)', color: 'var(--color-slate-text)', border: '1px solid rgba(37,99,235,0.15)' }}>
                     Bagaimana cara menghitung PPh Final UMKM?
                   </div>
                 </div>
@@ -674,7 +737,7 @@ export default function LandingPage() {
                   <div className="rounded-xl rounded-tr-none px-3.5 py-2 text-xs" style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', color: 'white' }}>
                     PPh Final UMKM dikenakan tarif 0,5% dari omzet...
                   </div>
-                  <div className="h-7 w-7 rounded-lg flex-shrink-0" style={{ background: 'linear-gradient(135deg, #10B981, #34D399)' }} />
+                  <div className="h-7 w-7 rounded-lg flex-shrink-0" style={{ background: 'linear-gradient(135deg, #059669, #10B981)' }} />
                 </div>
               </div>
             </div>
@@ -683,10 +746,10 @@ export default function LandingPage() {
             <div
               className={`group rounded-3xl p-6 transition-all duration-700 hover:-translate-y-1 ${featuresVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
               style={{ animationDelay: '100ms', background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.12)', backdropFilter: 'blur(16px)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(16,185,129,0.12)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.25)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(5,150,105,0.12)'; e.currentTarget.style.borderColor = 'rgba(5,150,105,0.25)' }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(148,163,184,0.12)' }}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #10B981, #34D399)', boxShadow: '0 8px 24px rgba(16,185,129,0.3)' }}>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #059669, #10B981)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}>
                 <BookOpen size={24} className="text-white" />
               </div>
               <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--color-slate-heading)' }}>Pembukuan Otomatis</h3>
@@ -697,10 +760,10 @@ export default function LandingPage() {
             <div
               className={`group rounded-3xl p-6 transition-all duration-700 hover:-translate-y-1 ${featuresVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
               style={{ animationDelay: '200ms', background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.12)', backdropFilter: 'blur(16px)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(245,158,11,0.12)'; e.currentTarget.style.borderColor = 'rgba(245,158,11,0.25)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(217,119,6,0.12)'; e.currentTarget.style.borderColor = 'rgba(217,119,6,0.25)' }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(148,163,184,0.12)' }}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #F59E0B, #FBBF24)', boxShadow: '0 8px 24px rgba(245,158,11,0.3)' }}>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #D97706, #F59E0B)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}>
                 <BarChart3 size={24} className="text-white" />
               </div>
               <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--color-slate-heading)' }}>Laporan Keuangan</h3>
@@ -711,10 +774,10 @@ export default function LandingPage() {
             <div
               className={`group rounded-3xl p-6 transition-all duration-700 hover:-translate-y-1 ${featuresVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
               style={{ animationDelay: '300ms', background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.12)', backdropFilter: 'blur(16px)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(239,68,68,0.12)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.25)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(220,38,38,0.12)'; e.currentTarget.style.borderColor = 'rgba(220,38,38,0.25)' }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(148,163,184,0.12)' }}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #EF4444, #F87171)', boxShadow: '0 8px 24px rgba(239,68,68,0.3)' }}>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #DC2626, #F87171)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}>
                 <Calculator size={24} className="text-white" />
               </div>
               <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--color-slate-heading)' }}>Kalkulator Pajak</h3>
@@ -728,7 +791,7 @@ export default function LandingPage() {
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(6,182,212,0.12)'; e.currentTarget.style.borderColor = 'rgba(6,182,212,0.25)' }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(148,163,184,0.12)' }}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #06B6D4, #22D3EE)', boxShadow: '0 8px 24px rgba(6,182,212,0.3)' }}>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #0891B2, #22D3EE)', boxShadow: '0 8px 24px rgba(6,182,212,0.3)' }}>
                 <Upload size={24} className="text-white" />
               </div>
               <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--color-slate-heading)' }}>Upload & Knowledge Base</h3>
@@ -739,10 +802,10 @@ export default function LandingPage() {
             <div
               className={`group rounded-3xl p-6 transition-all duration-700 hover:-translate-y-1 ${featuresVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
               style={{ animationDelay: '500ms', background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.12)', backdropFilter: 'blur(16px)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(139,92,246,0.12)'; e.currentTarget.style.borderColor = 'rgba(139,92,246,0.25)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(124,58,237,0.12)'; e.currentTarget.style.borderColor = 'rgba(124,58,237,0.25)' }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(148,163,184,0.12)' }}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #8B5CF6, #A78BFA)', boxShadow: '0 8px 24px rgba(139,92,246,0.3)' }}>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}>
                 <FileText size={24} className="text-white" />
               </div>
               <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--color-slate-heading)' }}>SPT Tahunan</h3>
@@ -753,11 +816,11 @@ export default function LandingPage() {
             <div
               className={`group md:col-span-3 rounded-3xl p-6 transition-all duration-700 hover:-translate-y-1 ${featuresVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
               style={{ animationDelay: '600ms', background: 'var(--color-surface-card)', border: '1px solid rgba(148,163,184,0.12)', backdropFilter: 'blur(16px)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(59,130,246,0.12)'; e.currentTarget.style.borderColor = 'rgba(59,130,246,0.25)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 16px 48px rgba(37,99,235,0.12)'; e.currentTarget.style.borderColor = 'rgba(37,99,235,0.25)' }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(148,163,184,0.12)' }}
             >
               <div className="flex items-start gap-5">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #2563EB, #7DB4FF)', boxShadow: '0 8px 24px rgba(59,130,246,0.3)' }}>
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #2563EB, #60A5FA)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}>
                   <LayoutDashboard size={24} className="text-white" />
                 </div>
                 <div>
@@ -772,13 +835,13 @@ export default function LandingPage() {
 
       <section id="cara-kerja" ref={stepsRef} className="relative px-6 py-24 lg:px-12">
         {/* Subtle bg */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(59,130,246,0.04) 50%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(37,99,235,0.04) 50%, transparent 100%)' }} />
 
         <div className="relative mx-auto max-w-5xl">
           <div className="text-center mb-16">
             <div
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold mb-5 transition-all duration-700 ${stepsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-              style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--color-accent-emerald)', border: '1px solid rgba(16,185,129,0.2)' }}
+              style={{ background: 'rgba(5,150,105,0.1)', color: 'var(--color-accent-emerald)', border: '1px solid rgba(5,150,105,0.2)' }}
             >
               <Shield size={14} />
               Mudah Digunakan
@@ -796,7 +859,7 @@ export default function LandingPage() {
 
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Connection line */}
-            <div className="hidden md:block absolute top-10 left-[20%] right-[20%] h-[2px]" style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.2), rgba(59,130,246,0.4), rgba(59,130,246,0.2))' }} />
+            <div className="hidden md:block absolute top-10 left-[20%] right-[20%] h-[2px]" style={{ background: 'linear-gradient(90deg, rgba(37,99,235,0.2), rgba(37,99,235,0.4), rgba(37,99,235,0.2))' }} />
 
             {STEPS.map((s, i) => (
               <div
@@ -809,14 +872,14 @@ export default function LandingPage() {
                     className="flex h-20 w-20 items-center justify-center rounded-[22px] text-white transition-transform duration-500 hover:scale-110"
                     style={{
                       background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)',
-                      boxShadow: '0 12px 32px rgba(59,130,246,0.4)',
+                      boxShadow: '0 12px 32px rgba(15,23,42,0.12)',
                     }}
                   >
                     <s.icon size={28} />
                   </div>
                   <div
                     className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full text-xs font-[900] text-white"
-                    style={{ background: 'linear-gradient(135deg, #10B981, #34D399)', boxShadow: '0 4px 12px rgba(16,185,129,0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #059669, #10B981)', boxShadow: '0 4px 12px rgba(15,23,42,0.12)' }}
                   >
                     {s.num}
                   </div>
@@ -835,7 +898,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold mb-5 transition-all duration-700 ${testimonialsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-              style={{ background: 'rgba(245,158,11,0.1)', color: 'var(--color-accent-amber)', border: '1px solid rgba(245,158,11,0.2)' }}
+              style={{ background: 'rgba(217,119,6,0.1)', color: 'var(--color-accent-amber)', border: '1px solid rgba(217,119,6,0.2)' }}
             >
               <Star size={14} />
               Testimoni
@@ -869,7 +932,7 @@ export default function LandingPage() {
                 {/* Stars */}
                 <div className="flex gap-1 mb-5">
                   {[...Array(5)].map((_, j) => (
-                    <Star key={j} size={16} className="fill-current" style={{ color: '#FBBF24' }} />
+                    <Star key={j} size={16} className="fill-current" style={{ color: '#F59E0B' }} />
                   ))}
                 </div>
 
@@ -906,7 +969,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold mb-5 transition-all duration-700 ${faqVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-              style={{ background: 'rgba(59,130,246,0.1)', color: 'var(--color-accent-blue)', border: '1px solid rgba(59,130,246,0.2)' }}
+              style={{ background: 'rgba(37,99,235,0.1)', color: 'var(--color-accent-blue)', border: '1px solid rgba(37,99,235,0.2)' }}
             >
               <HelpCircle size={14} />
               FAQ
@@ -933,9 +996,9 @@ export default function LandingPage() {
                   className="w-full flex items-center justify-between gap-4 rounded-2xl px-6 py-5 text-left transition-all duration-300"
                   style={{
                     background: openFaq === i ? 'var(--color-surface-card)' : 'var(--color-surface-faint)',
-                    border: openFaq === i ? '1px solid rgba(59,130,246,0.3)' : '1px solid rgba(148,163,184,0.12)',
+                    border: openFaq === i ? '1px solid rgba(37,99,235,0.3)' : '1px solid rgba(148,163,184,0.12)',
                     backdropFilter: 'blur(12px)',
-                    boxShadow: openFaq === i ? '0 8px 32px rgba(59,130,246,0.1)' : 'none',
+                    boxShadow: openFaq === i ? '0 8px 32px rgba(37,99,235,0.1)' : 'none',
                   }}
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 >
@@ -943,7 +1006,7 @@ export default function LandingPage() {
                   <div
                     className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl transition-transform duration-300"
                     style={{
-                      background: openFaq === i ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-card)',
+                      background: openFaq === i ? 'rgba(37,99,235,0.15)' : 'var(--color-surface-card)',
                       transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0deg)',
                     }}
                   >
@@ -966,13 +1029,13 @@ export default function LandingPage() {
 
       {/* ============ DOWNLOAD ============ */}
       <section id="download" ref={downloadRef} className="relative px-6 py-24 lg:px-12">
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(16,185,129,0.04) 50%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(5,150,105,0.04) 50%, transparent 100%)' }} />
 
         <div className="relative mx-auto max-w-5xl">
           <div className="text-center mb-16">
             <div
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold mb-5 transition-all duration-700 ${downloadVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-              style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--color-accent-emerald)', border: '1px solid rgba(16,185,129,0.2)' }}
+              style={{ background: 'rgba(5,150,105,0.1)', color: 'var(--color-accent-emerald)', border: '1px solid rgba(5,150,105,0.2)' }}
             >
               <Download size={14} />
               Aplikasi Desktop
@@ -1010,17 +1073,17 @@ export default function LandingPage() {
                   rel="noreferrer"
                   className={`group flex flex-col items-center rounded-3xl p-8 text-center transition-all duration-700 hover:-translate-y-2 ${downloadVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                   style={cardStyle}
-                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 20px 60px rgba(16,185,129,0.12)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.3)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 20px 60px rgba(5,150,105,0.12)'; e.currentTarget.style.borderColor = 'rgba(5,150,105,0.3)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(148,163,184,0.12)' }}
                 >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-5 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 8px 24px rgba(59,130,246,0.35)' }}>
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-5 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}>
                     <p.icon size={28} className="text-white" />
                   </div>
                   <h3 className="text-xl font-bold mb-1.5" style={{ color: 'var(--color-slate-heading)' }}>{p.os}</h3>
                   <p className="text-sm mb-6" style={{ color: 'var(--color-slate-body)' }}>{p.note}</p>
                   <div
                     className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white transition-all duration-300 group-hover:-translate-y-0.5"
-                    style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', boxShadow: '0 8px 24px rgba(16,185,129,0.35)' }}
+                    style={{ background: 'linear-gradient(135deg, #059669 0%, #059669 100%)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}
                   >
                     <Download size={15} />
                     Unduh {p.os}
@@ -1032,7 +1095,7 @@ export default function LandingPage() {
                   className={`flex flex-col items-center rounded-3xl p-8 text-center transition-all duration-700 hover:-translate-y-2 ${downloadVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                   style={cardStyle}
                 >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-5 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 8px 24px rgba(59,130,246,0.35)' }}>
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-5 transition-transform duration-500 group-hover:scale-110" style={{ background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}>
                     <p.icon size={28} className="text-white" />
                   </div>
                   <h3 className="text-xl font-bold mb-1.5" style={{ color: 'var(--color-slate-heading)' }}>{p.os}</h3>
@@ -1040,7 +1103,7 @@ export default function LandingPage() {
                   <Link
                     to="/register"
                     className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white transition-all duration-300 group-hover:-translate-y-0.5"
-                    style={{ background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)', boxShadow: '0 8px 24px rgba(37,99,235,0.35)' }}
+                    style={{ background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}
                   >
                     <PlayCircle size={15} />
                     Gunakan di Browser
@@ -1061,13 +1124,11 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl">
           <div
             className={`relative overflow-hidden rounded-[2rem] px-8 py-16 text-center transition-all duration-1000 lg:px-16 lg:py-20 ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-            style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 45%, #3B82F6 75%, #7DB4FF 100%)', boxShadow: '0 32px 80px rgba(37,99,235,0.4)' }}
+            style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 45%, #2563EB 75%, #60A5FA 100%)', boxShadow: '0 32px 80px rgba(15,23,42,0.12)' }}
           >
             {/* Decorative */}
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute top-0 left-0 h-full w-full" style={{ background: 'radial-gradient(ellipse at 30% 20%, var(--color-surface-card), transparent 60%)' }} />
-              <div className="absolute -top-20 -right-20 h-80 w-80 rounded-full blur-3xl animate-blob" style={{ background: 'var(--color-surface-card)' }} />
-              <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full blur-3xl animate-blob" style={{ background: 'rgba(255,255,255,0.07)', animationDelay: '3s' }} />
             </div>
 
             <div className="relative">
@@ -1109,7 +1170,7 @@ export default function LandingPage() {
               <div className="flex items-center gap-3 mb-5">
                 <div
                   className="flex h-10 w-10 items-center justify-center overflow-hidden"
-                  style={{ borderRadius: '0.75rem', boxShadow: '0 4px 16px rgba(59,130,246,0.4)' }}
+                  style={{ borderRadius: '0.75rem', boxShadow: '0 4px 16px rgba(15,23,42,0.12)' }}
                 >
                   <img src="/finora_logo.jpeg" alt="Finora" className="h-full w-full object-cover" />
                 </div>
@@ -1123,7 +1184,7 @@ export default function LandingPage() {
                   <div
                     key={social}
                     className="flex h-9 w-9 items-center justify-center rounded-xl cursor-pointer transition-all duration-300 hover:-translate-y-0.5"
-                    style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.15)' }}
+                    style={{ background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.15)' }}
                   >
                     <div className="h-4 w-4 rounded" style={{ background: 'rgba(96,165,250,0.4)' }} />
                   </div>
@@ -1164,7 +1225,7 @@ export default function LandingPage() {
               &copy; {new Date().getFullYear()} Finora. Hak cipta dilindungi.
             </p>
             <div className="flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: '#34D399' }} />
+              <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: '#10B981' }} />
               <span className="text-xs font-medium" style={{ color: 'var(--color-accent-emerald)' }}>Semua sistem berjalan normal</span>
             </div>
           </div>

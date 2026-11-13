@@ -2,7 +2,9 @@
 
 import asyncio
 import json
+import re
 from datetime import date
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -10,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.accounting.jurnal_umum import JurnalDetailInputDTO, JurnalError
 from app.accounting.jurnal_umum import buat_jurnal as service_buat_jurnal
+from app.accounting import tax_engine
 from app.config.logging import get_logger
 from app.config.settings import settings
 from app.database.database import (
@@ -26,6 +29,10 @@ from app.rag.rag_pipeline import ask
 from app.schemas.chatbot_schema import (
     ChatRequest,
     ChatResponse,
+    TaxChatRequest,
+    TaxChatResponse,
+    TaxConsultRequest,
+    TaxConsultResponse,
     CreateDatasetRequest,
     CreateDatasetResponse,
     DatasetItem,
@@ -99,6 +106,17 @@ async def ask_chatbot(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> ChatResponse:
+    tax_params = _extract_tax_params_locally(payload.message)
+    if tax_params:
+        pph, ppn = _hitung_dari_params(tax_params)
+        if pph or ppn:
+            return ChatResponse(
+                session_id=payload.session_id or f"local-{uuid4().hex}",
+                answer=_format_tax_answer(pph, ppn),
+                sources=[],
+                has_financial_data=True,
+            )
+
     try:
         # Hitung financial context sekali saja (termasuk upload_id jika ada)
         financial_context = get_financial_context(
@@ -136,10 +154,7 @@ async def ask_chatbot(
             ) from exc
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=(
-                "Layanan LLM (Ollama) sedang tidak bisa diakses. Pastikan server "
-                f"Ollama berjalan. Detail: {exc}"
-            ),
+            detail=_llm_unavailable_detail(exc),
         ) from exc
 
     return ChatResponse(
@@ -157,7 +172,473 @@ async def ask_chatbot(
         has_financial_data=has_financial_data,
     )
 
+TAX_PARAM_EXTRACTION_PROMPT = """\
+Kamu adalah ekstraktor data untuk kalkulator pajak UMKM Indonesia.
+Baca pesan user lalu kembalikan HANYA JSON valid tanpa markdown atau teks lain.
 
+Format JSON:
+{
+  "butuh_hitung": true,
+  "wp_orang_pribadi": true,
+  "omzet_bulan_ini": 25000000,
+  "omzet_kumulatif_sebelum_bulan_ini": 0,
+  "include_ppn": false,
+  "nilai_transaksi": null,
+  "sudah_termasuk_ppn": false,
+  "barang_mewah": false
+}
+
+Aturan:
+- butuh_hitung=true hanya jika user meminta hitung pajak/PPH/PPN atau menyebut omzet/nilai transaksi yang jelas.
+- omzet_bulan_ini = omzet bulan ini dalam rupiah; null jika tidak disebut.
+- omzet_kumulatif_sebelum_bulan_ini = omzet kumulatif sebelum bulan ini; null jika tidak disebut.
+- wp_orang_pribadi=false jika user menyebut badan/PT/CV; selain itu true.
+- include_ppn=true jika user ingin menghitung PPN dari nilai transaksi.
+- nilai_transaksi = nilai transaksi untuk PPN; null jika tidak ada.
+- sudah_termasuk_ppn=true jika user menyebut harga sudah termasuk PPN.
+- barang_mewah=true jika user menyebut barang mewah/PPnBM.
+- Konversi: ribu=1.000, juta=1.000.000, miliar=1.000.000.000.
+- Jika informasi tidak ada, gunakan null/false. Jangan mengarang angka.
+"""
+
+
+def _coerce_amount(value) -> float | None:
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    if not isinstance(value, str):
+        return None
+
+    text = value.lower().replace("rp", "").replace(" ", "").strip()
+    multiplier = 1.0
+    if "miliar" in text or "milyar" in text:
+        multiplier = 1_000_000_000
+    elif "juta" in text:
+        multiplier = 1_000_000
+    elif "ribu" in text:
+        multiplier = 1_000
+
+    text = re.sub(r"(miliar|milyar|juta|ribu|jt|rb)", "", text)
+    if "." in text and "," in text:
+        text = text.replace(",", "") if text.rfind(".") > text.rfind(",") else text.replace(".", "").replace(",", ".")
+    elif re.fullmatch(r"\d{1,3}(\.\d{3})+", text):
+        text = text.replace(".", "")
+    elif re.fullmatch(r"\d{1,3}(,\d{3})+", text):
+        text = text.replace(",", "")
+    else:
+        text = text.replace(",", ".")
+
+    try:
+        return float(text) * multiplier
+    except ValueError:
+        return None
+
+
+def _as_bool(value, default: bool = False) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "1", "ya", "yes", "y"}
+    if isinstance(value, (int, float)):
+        return bool(value)
+    return default
+
+
+def _extract_tax_params(message: str) -> dict | None:
+    raw = chat_completion(
+        [
+            {"role": "system", "content": TAX_PARAM_EXTRACTION_PROMPT},
+            {"role": "user", "content": message},
+        ],
+        temperature=0.0,
+    )
+    match = re.search(r"\{[^{}]*\}", raw, re.S)
+    if not match:
+        return None
+    try:
+        data = json.loads(match.group(0))
+    except json.JSONDecodeError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _hitung_dari_params(params: dict):
+    if not _as_bool(params.get("butuh_hitung")):
+        return None, None
+
+    omzet = _coerce_amount(params.get("omzet_bulan_ini"))
+    kumulatif = _coerce_amount(params.get("omzet_kumulatif_sebelum_bulan_ini"))
+    if kumulatif is None:
+        kumulatif = 0.0
+
+    pph = None
+    if omzet is not None:
+        pph = tax_engine.hitung_pph_final_umkm(
+            omzet_bulan_ini=omzet,
+            omzet_kumulatif_sebelum_bulan_ini=kumulatif,
+            wp_orang_pribadi=_as_bool(params.get("wp_orang_pribadi"), True),
+        )
+
+    ppn = None
+    if _as_bool(params.get("include_ppn")):
+        nilai = _coerce_amount(params.get("nilai_transaksi"))
+        if nilai is not None:
+            if _as_bool(params.get("sudah_termasuk_ppn")):
+                ppn = tax_engine.hitung_ppn_dari_harga_termasuk_pajak(
+                    nilai,
+                    _as_bool(params.get("barang_mewah")),
+                )
+            else:
+                ppn = tax_engine.hitung_ppn(nilai, _as_bool(params.get("barang_mewah")))
+
+    return pph, ppn
+
+
+def _format_tax_context(pph, ppn, wp_orang_pribadi: bool, kumulatif: float) -> str:
+    lines: list[str] = []
+    if pph:
+        lines.extend([
+            "Jenis wajib pajak: " + ("Orang Pribadi" if wp_orang_pribadi else "Badan"),
+            f"Omzet bulan ini: Rp{pph.omzet_bulan_ini:,.0f}",
+            f"Omzet kumulatif sebelum bulan ini: Rp{kumulatif:,.0f}",
+            f"Omzet kumulatif tahun berjalan: Rp{pph.omzet_kumulatif_tahun_berjalan:,.0f}",
+            f"Omzet kena pajak: Rp{pph.omzet_kena_pajak:,.0f}",
+            f"PPh Final UMKM terutang: Rp{pph.pph_final_terutang:,.0f}",
+            f"Catatan PPh: {pph.catatan}",
+        ])
+    if ppn:
+        if lines:
+            lines.append("")
+        lines.extend([
+            "Perhitungan PPN:",
+            f"DPP: Rp{ppn.dasar_pengenaan_pajak:,.0f}",
+            f"Tarif: {ppn.tarif_digunakan * 100:.0f}%",
+            f"PPN: Rp{ppn.ppn:,.0f}",
+            f"Harga termasuk PPN: Rp{ppn.harga_termasuk_ppn:,.0f}",
+            f"Catatan PPN: {ppn.catatan}",
+        ])
+    return "\n".join(lines)
+
+
+_AMOUNT_PATTERN = re.compile(
+    r"(?:rp\.?\s*)?(\d[\d.,]*)\s*(juta|jt|miliar|milyar|ribu|rb)?",
+    re.IGNORECASE,
+)
+
+
+def _find_amount_near(text: str, keywords: tuple[str, ...]) -> float | None:
+    """Ambil nominal pertama setelah salah satu keyword (fallback tanpa LLM)."""
+    lower = text.lower()
+    for keyword in keywords:
+        start = lower.find(keyword)
+        if start == -1:
+            continue
+        snippet = lower[start:start + 100]
+        for match in _AMOUNT_PATTERN.finditer(snippet):
+            raw = match.group(0).strip()
+            has_currency = "rp" in raw
+            has_unit = match.group(2) is not None
+            digits = re.sub(r"\D", "", raw)
+            if not has_currency and not has_unit and len(digits) < 5:
+                continue
+            amount = _coerce_amount(raw)
+            if amount is not None and amount > 0:
+                return amount
+    return None
+
+
+def _extract_tax_params_locally(message: str) -> dict | None:
+    """Ekstraksi sederhana sebagai fallback kalau LLM tidak tersedia."""
+    lower = message.lower()
+    if not re.search(
+        r"\b(pph|ppn|pajak|umkm|omzet|peredaran|penjualan|penghasilan|transaksi)\b",
+        lower,
+    ):
+        return None
+
+    omzet = _find_amount_near(
+        message,
+        ("omzet", "peredaran", "penjualan", "penghasilan"),
+    )
+    kumulatif = _find_amount_near(
+        message,
+        ("kumulatif", "sebelum bulan ini"),
+    )
+    nilai_transaksi = _find_amount_near(
+        message,
+        ("nilai transaksi", "transaksi", "harga", "dpp", "penyerahan"),
+    )
+
+    include_ppn = bool(re.search(r"\b(ppn|ppnbm)\b", lower))
+    if include_ppn and nilai_transaksi is None:
+        nilai_transaksi = omzet
+
+    if omzet is None and nilai_transaksi is None:
+        return {"butuh_hitung": False}
+
+    return {
+        "butuh_hitung": True,
+        "wp_orang_pribadi": not bool(
+            re.search(r"\b(pt|cv|badan|perseroan|firma)\b", lower)
+        ),
+        "omzet_bulan_ini": omzet,
+        "omzet_kumulatif_sebelum_bulan_ini": kumulatif,
+        "include_ppn": include_ppn,
+        "nilai_transaksi": nilai_transaksi,
+        "sudah_termasuk_ppn": bool(
+            re.search(r"(sudah|termasuk)\s+ppn|harga\s+termasuk", lower)
+        ),
+        "barang_mewah": bool(re.search(r"barang\s+mewah|ppnbm", lower)),
+    }
+
+
+def _merge_tax_params(params: dict | None, local_params: dict | None) -> dict | None:
+    if not local_params:
+        return params
+    if not params:
+        return local_params
+    if _as_bool(local_params.get("butuh_hitung")) and not _as_bool(
+        params.get("butuh_hitung")
+    ):
+        return local_params
+    for key in (
+        "omzet_bulan_ini",
+        "omzet_kumulatif_sebelum_bulan_ini",
+        "nilai_transaksi",
+    ):
+        if params.get(key) is None and local_params.get(key) is not None:
+            params[key] = local_params[key]
+    return params
+
+
+def _build_tax_calculation(pph, ppn) -> dict | None:
+    if not (pph or ppn):
+        return None
+    return {
+        "pph": pph.__dict__ if pph else None,
+        "ppn": ppn.__dict__ if ppn else None,
+    }
+
+
+def _format_tax_answer(pph, ppn) -> str:
+    lines = ["Berikut hasil perhitungan pajak Anda:"]
+    if pph:
+        lines.extend([
+            f"- Omzet bulan ini: Rp{pph.omzet_bulan_ini:,.0f}",
+            f"- Omzet kena pajak: Rp{pph.omzet_kena_pajak:,.0f}",
+            f"- PPh Final UMKM: Rp{pph.pph_final_terutang:,.0f}",
+            f"- Catatan: {pph.catatan}",
+        ])
+    if ppn:
+        lines.extend([
+            f"- DPP: Rp{ppn.dasar_pengenaan_pajak:,.0f}",
+            f"- Tarif PPN: {ppn.tarif_digunakan * 100:.0f}%",
+            f"- PPN: Rp{ppn.ppn:,.0f}",
+            f"- Harga termasuk PPN: Rp{ppn.harga_termasuk_ppn:,.0f}",
+            f"- Catatan: {ppn.catatan}",
+        ])
+    lines.append("")
+    lines.append(
+        "Hasil ini dihitung otomatis oleh kalkulator pajak. Tarif/aturan dapat "
+        "berubah, jadi verifikasi ke pajak.go.id atau konsultan pajak untuk "
+        "keputusan resmi."
+    )
+    return "\n".join(lines)
+
+
+def _is_refusal_answer(answer: str) -> bool:
+    lower = (answer or "").lower()
+    return any(
+        marker in lower
+        for marker in (
+            "tidak bisa membantu",
+            "tidak dapat membantu",
+            "tidak bisa menjawab",
+            "di luar topik",
+            "maaf, saya hanya bisa",
+        )
+    )
+
+
+def _llm_unavailable_detail(exc: OllamaError) -> str:
+    if getattr(exc, "quota_exceeded", False):
+        return (
+            "Kuota layanan AI sedang habis dan layanan cadangan tidak tersedia. "
+            "Silakan coba lagi nanti atau hubungi admin."
+        )
+    return "Layanan AI sedang tidak tersedia. Silakan coba lagi nanti."
+
+
+@router.post("/tax-chat", response_model=TaxChatResponse)
+async def tax_chat(
+    payload: TaxChatRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_active_user),
+) -> TaxChatResponse:
+    """Konsultasi pajak bebas: ekstrak data, hitung deterministik, lalu jelaskan."""
+    pph = None
+    ppn = None
+    tax_context = None
+    local_params = _extract_tax_params_locally(payload.message)
+    params = local_params
+
+    if not (params and _as_bool(params.get("butuh_hitung"))):
+        try:
+            params = await asyncio.to_thread(_extract_tax_params, payload.message)
+        except (OllamaError, ValueError):
+            # Ekstraksi gagal bukan alasan menolak pertanyaan; pakai parser lokal.
+            params = None
+        params = _merge_tax_params(params, local_params)
+
+    if params:
+        pph, ppn = _hitung_dari_params(params)
+        if pph or ppn:
+            kumulatif = _coerce_amount(params.get("omzet_kumulatif_sebelum_bulan_ini")) or 0.0
+            tax_context = _format_tax_context(
+                pph,
+                ppn,
+                _as_bool(params.get("wp_orang_pribadi"), True),
+                kumulatif,
+            )
+
+    calculation = _build_tax_calculation(pph, ppn)
+    if calculation:
+        return TaxChatResponse(
+            session_id=payload.session_id or f"local-{uuid4().hex}",
+            answer=_format_tax_answer(pph, ppn),
+            calculation=calculation,
+            sources=[],
+        )
+
+    try:
+        hasil = await asyncio.wait_for(
+            asyncio.to_thread(
+                ask,
+                db,
+                current_user.id,
+                payload.session_id,
+                payload.message,
+                tax_context,
+                payload.page,
+                "## Data Perhitungan Pajak Pengguna:\n\n" if tax_context else None,
+            ),
+            timeout=CHATBOT_TIMEOUT_SECONDS,
+        )
+    except asyncio.TimeoutError as exc:
+        raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="Konsultasi pajak terlalu lama merespons.") from exc
+    except OllamaError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=_llm_unavailable_detail(exc),
+        ) from exc
+
+    return TaxChatResponse(
+        session_id=hasil.session_id,
+        answer=hasil.answer,
+        calculation=calculation,
+        sources=[
+            RetrievedSource(
+                chunk_id=s.qdrant_point_id,
+                content_snippet=s.content[:200],
+                score=s.score,
+                source_filename=s.source_filename,
+            )
+            for s in hasil.sources
+        ],
+    )
+
+
+@router.post("/tax-consult", response_model=TaxConsultResponse)
+async def tax_consult(
+    payload: TaxConsultRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_active_user),
+) -> TaxConsultResponse:
+    """Hitung pajak secara deterministik lalu jelaskan hasilnya melalui RAG."""
+    try:
+        pph = tax_engine.hitung_pph_final_umkm(
+            omzet_bulan_ini=payload.omzet_bulan_ini,
+            omzet_kumulatif_sebelum_bulan_ini=payload.omzet_kumulatif_sebelum_bulan_ini,
+            wp_orang_pribadi=payload.wp_orang_pribadi,
+        )
+        ppn = None
+        if payload.include_ppn:
+            if payload.nilai_transaksi is None:
+                raise ValueError("Nilai transaksi diperlukan untuk menghitung PPN.")
+            if payload.sudah_termasuk_ppn:
+                ppn = tax_engine.hitung_ppn_dari_harga_termasuk_pajak(
+                    payload.nilai_transaksi,
+                    payload.barang_mewah,
+                )
+            else:
+                ppn = tax_engine.hitung_ppn(payload.nilai_transaksi, payload.barang_mewah)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    tax_context = _format_tax_context(
+        pph,
+        ppn,
+        payload.wp_orang_pribadi,
+        payload.omzet_kumulatif_sebelum_bulan_ini,
+    )
+
+    if not payload.pertanyaan:
+        return TaxConsultResponse(
+            session_id=payload.session_id or f"local-{uuid4().hex}",
+            answer=_format_tax_answer(pph, ppn),
+            pph=pph.__dict__,
+            ppn=ppn.__dict__ if ppn else None,
+            sources=[],
+        )
+
+    try:
+        hasil = await asyncio.wait_for(
+            asyncio.to_thread(
+                ask,
+                db,
+                current_user.id,
+                payload.session_id,
+                payload.pertanyaan,
+                tax_context,
+                payload.page,
+                "## Data Perhitungan Pajak Pengguna:\n\n",
+            ),
+            timeout=CHATBOT_TIMEOUT_SECONDS,
+        )
+    except (asyncio.TimeoutError, OllamaError):
+        return TaxConsultResponse(
+            session_id=payload.session_id or f"local-{uuid4().hex}",
+            answer=_format_tax_answer(pph, ppn),
+            pph=pph.__dict__,
+            ppn=ppn.__dict__ if ppn else None,
+            sources=[],
+        )
+
+    answer = (
+        _format_tax_answer(pph, ppn)
+        if _is_refusal_answer(hasil.answer)
+        else hasil.answer
+    )
+
+    return TaxConsultResponse(
+        session_id=hasil.session_id,
+        answer=answer,
+        pph=pph.__dict__,
+        ppn=ppn.__dict__ if ppn else None,
+        sources=[
+            RetrievedSource(
+                chunk_id=s.qdrant_point_id,
+                content_snippet=s.content[:200],
+                score=s.score,
+                source_filename=s.source_filename,
+            )
+            for s in hasil.sources
+        ],
+    )
+
+# ---------------------------------------------------------------------------
+# Chat-to-Journal: parse transaksi dari pesan natural language
 # ---------------------------------------------------------------------------
 # Chat-to-Journal: parse transaksi dari pesan natural language
 # ---------------------------------------------------------------------------
@@ -277,12 +758,12 @@ async def parse_transaction(
     except asyncio.TimeoutError:
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="LLM terlalu lama merespons. Coba lagi.",
+            detail="Layanan AI terlalu lama merespons. Coba lagi.",
         )
     except OllamaError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Layanan LLM tidak tersedia: {exc}",
+            detail=_llm_unavailable_detail(exc),
         ) from exc
 
     # Parse JSON from LLM response
@@ -458,12 +939,12 @@ async def parse_dataset(
     except asyncio.TimeoutError:
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="LLM terlalu lama merespons. Coba lagi.",
+            detail="Layanan AI terlalu lama merespons. Coba lagi.",
         )
     except OllamaError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Layanan LLM tidak tersedia: {exc}",
+            detail=_llm_unavailable_detail(exc),
         ) from exc
 
     # Parse JSON
@@ -758,12 +1239,12 @@ async def update_transaction(
     except asyncio.TimeoutError:
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="LLM terlalu lama merespons. Coba lagi.",
+            detail="Layanan AI terlalu lama merespons. Coba lagi.",
         )
     except OllamaError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Layanan LLM tidak tersedia: {exc}",
+            detail=_llm_unavailable_detail(exc),
         ) from exc
 
     # Parse JSON from LLM response

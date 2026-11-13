@@ -320,6 +320,85 @@ class TestDashboardOverview:
         assert body["piutang_utang"]["piutang_usaha"] == 0.0
         assert body["piutang_utang"]["utang_usaha"] == 0.0
 
+    def test_overview_can_filter_by_committed_upload(self, auth_client, db):
+        from app.database.models import (
+            Akun,
+            JenisJurnal,
+            JurnalDetail,
+            JurnalUmum,
+            KategoriAkun,
+            SaldoNormal,
+            StatusUpload,
+            UploadedFile,
+        )
+
+        user_id = _get_user_id(db)
+        kas = Akun(
+            kode_akun="1-1000",
+            nama_akun="Kas",
+            kategori=KategoriAkun.ASET,
+            saldo_normal=SaldoNormal.DEBIT,
+            is_active=True,
+        )
+        pendapatan = Akun(
+            kode_akun="4-1000",
+            nama_akun="Pendapatan Usaha",
+            kategori=KategoriAkun.PENDAPATAN,
+            saldo_normal=SaldoNormal.KREDIT,
+            is_active=True,
+        )
+        db.add_all([kas, pendapatan])
+        db.flush()
+
+        upload_a = UploadedFile(
+            original_filename="penjualan-januari.csv",
+            stored_path="",
+            file_type="csv",
+            file_size_bytes=10,
+            uploaded_by_id=user_id,
+            status=StatusUpload.POSTED,
+        )
+        upload_b = UploadedFile(
+            original_filename="penjualan-februari.csv",
+            stored_path="",
+            file_type="csv",
+            file_size_bytes=10,
+            uploaded_by_id=user_id,
+            status=StatusUpload.POSTED,
+        )
+        db.add_all([upload_a, upload_b])
+        db.flush()
+
+        for no_bukti, upload, amount in (
+            ("UPLOAD-A", upload_a, 1_000_000),
+            ("UPLOAD-B", upload_b, 2_000_000),
+        ):
+            jurnal = JurnalUmum(
+                no_bukti=no_bukti,
+                tanggal=date.today(),
+                deskripsi="Penjualan upload",
+                jenis=JenisJurnal.UMUM,
+                sumber_upload_id=upload.id,
+                created_by_id=user_id,
+            )
+            jurnal.detail.append(JurnalDetail(akun=kas, urutan=1, debit=amount, kredit=0))
+            jurnal.detail.append(JurnalDetail(akun=pendapatan, urutan=2, debit=0, kredit=amount))
+            db.add(jurnal)
+        db.commit()
+
+        filtered = auth_client.get("/dashboard/overview", params={"upload_id": upload_a.id})
+        assert filtered.status_code == 200
+        filtered_body = filtered.json()
+        assert filtered_body["summary"]["total_pendapatan_tahun_berjalan"] == 1_000_000.0
+        assert filtered_body["summary"]["jumlah_transaksi_bulan_ini"] == 1
+
+        combined = auth_client.get("/dashboard/overview")
+        assert combined.status_code == 200
+        assert combined.json()["summary"]["total_pendapatan_tahun_berjalan"] == 3_000_000.0
+
+        invalid = auth_client.get("/dashboard/overview", params={"upload_id": "not-owned"})
+        assert invalid.status_code == 404
+
     def test_overview_matches_individual_endpoints(self, auth_client):
         """/overview harus konsisten dengan endpoint terpisah yang sudah ada."""
         overview = auth_client.get("/dashboard/overview").json()

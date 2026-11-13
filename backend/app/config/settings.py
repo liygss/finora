@@ -85,9 +85,25 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = "llama3.2:3b"
     OLLAMA_TIMEOUT: int = 300
 
+    # Fallback lokal: dipakai otomatis kalau provider utama gagal (mis. kuota
+    # Ollama Cloud habis). Default aman untuk desktop karena model lokal tidak
+    # butuh kredit/API key. Set OLLAMA_FALLBACK_ENABLED=false untuk mematikan.
+    OLLAMA_FALLBACK_ENABLED: bool = True
+    OLLAMA_FALLBACK_BASE_URL: AnyHttpUrl = "http://localhost:11434"
+    OLLAMA_FALLBACK_MODEL: str = "llama3.2:3b"
+    OLLAMA_FALLBACK_TIMEOUT: int = 120
+
     @property
     def ollama_is_cloud(self) -> bool:
         return bool(self.OLLAMA_API_KEY)
+
+    @property
+    def ollama_fallback_available(self) -> bool:
+        if not self.OLLAMA_FALLBACK_ENABLED:
+            return False
+        primary = str(self.OLLAMA_BASE_URL).rstrip("/")
+        fallback = str(self.OLLAMA_FALLBACK_BASE_URL).rstrip("/")
+        return primary != fallback
 
     # ---------- Embedding (RAG) ----------
     # fastembed (default): lokal, gratis, tanpa API key — cocok desktop app.
@@ -155,7 +171,7 @@ class Settings(BaseSettings):
     # bawah plafon itu supaya penolakan terjadi di level aplikasi dengan pesan
     # yang jelas. Batas ini hanya berlaku di serverless; desktop tidak punya
     # plafon tersebut.
-    MAX_UPLOAD_SIZE_MB: int = 4
+    MAX_UPLOAD_SIZE_MB: int = 25
 
     # Ambang peringatan ukuran database (MB) untuk /api/chatbot/health. Plan
     # gratis database biasanya punya kuota sekitar 500MB; project di-suspend

@@ -19,6 +19,11 @@ def normalize_text(text: str) -> str:
     return text.strip()
 
 
+def unescape_markdown(text: str) -> str:
+    """Kembalikan karakter markdown yang tidak sengaja di-escape."""
+    return re.sub(r"\\([#*_`\[\]~-])", r"\1", text)
+
+
 def normalize_column_names(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df.columns = [str(c).strip().lower().replace(" ", "_") for c in df.columns]

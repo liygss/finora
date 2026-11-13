@@ -65,6 +65,11 @@ def test_detect_domain_pajak():
     assert detect_domain("Isi SPT 1770 apa saja?") == "tax"
     assert detect_domain("Berapa tarif PPN 12%?") == "tax"
     assert detect_domain("cara buat id billing") == "tax"
+    assert detect_domain("berapa pajak penjualan Rp 100 juta?") == "tax"
+
+
+def test_detect_domain_laporan_tidak_salah_jadi_pajak():
+    assert detect_domain("tampilkan laporan penjualan bulan ini") != "tax"
 
 
 def test_detect_domain_akuntansi():

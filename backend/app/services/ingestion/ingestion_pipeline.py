@@ -31,7 +31,7 @@ from app.services.ingestion.embedding import embed_chunks
 from app.services.ingestion.file_loader import load_file
 from app.services.ingestion.markdown_generator import generate_markdown
 from app.services.ingestion.metadata_generator import build_chunk_metadata
-from app.services.ingestion.normalizer import normalize_document
+from app.services.ingestion.normalizer import normalize_document, unescape_markdown
 from app.services.ingestion.pdf_transactions import extract_transaction_dataframe
 
 logger = get_logger(__name__)
@@ -98,7 +98,7 @@ def _ingest_markdown_text(
     Vektor bisa dibuat di backend (embed_chunks) atau oleh Qdrant Cloud
     Inference, tergantung EMBEDDING_PROVIDER.
     """
-    chunks = chunk_markdown(markdown_text)
+    chunks = chunk_markdown(unescape_markdown(markdown_text))
     if not chunks:
         raise IngestionError("Tidak ada konten yang bisa diekstrak dari file ini")
 

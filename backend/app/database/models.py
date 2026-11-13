@@ -292,6 +292,7 @@ class UploadedFile(Base):
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     processed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    context: Mapped[str | None] = mapped_column(String(20), nullable=True)  # 'setup' | 'chat'
 
     jurnal_entries: Mapped[list["JurnalUmum"]] = relationship(back_populates="sumber_upload")
     chunks: Mapped[list["DocumentChunk"]] = relationship(back_populates="source_file")

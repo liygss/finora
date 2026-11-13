@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1050" viewBox="0 0 1600 1050">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,3 L0,6 Z" fill="#334155"/></marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#64748b" flood-opacity=".2"/></filter>
+    <style>
+      .title{font:700 30px Arial;fill:#0f172a}.subtitle{font:400 15px Arial;fill:#475569}.section{font:700 19px Arial;fill:#fff}.head{font:700 16px Arial;fill:#0f172a}.text{font:400 13px Arial;fill:#334155}.small{font:400 12px Arial;fill:#64748b}.label{font:600 12px Arial;fill:#334155}
+    </style>
+  </defs>
+  <rect width="1600" height="1050" fill="#f8fafc"/>
+  <text x="800" y="46" text-anchor="middle" class="title">Arsitektur REST API dan FastAPI Finora</text>
+  <text x="800" y="73" text-anchor="middle" class="subtitle">Alur request dari client menuju router, service bisnis, database, dan layanan AI</text>
+
+  <rect x="55" y="105" width="220" height="820" rx="16" fill="#eff6ff" stroke="#60a5fa" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="55" y="105" width="220" height="52" rx="16" fill="#2563eb"/><rect x="55" y="140" width="220" height="17" fill="#2563eb"/>
+  <text x="165" y="137" text-anchor="middle" class="section">CLIENT</text>
+  <rect x="80" y="195" width="170" height="105" rx="10" fill="#fff" stroke="#93c5fd" stroke-width="2"/>
+  <text x="165" y="226" text-anchor="middle" class="head">React + Vite</text><text x="165" y="251" text-anchor="middle" class="text">Browser / Electron</text><text x="165" y="275" text-anchor="middle" class="small">Axios REST client</text>
+  <rect x="80" y="345" width="170" height="150" rx="10" fill="#fff" stroke="#93c5fd" stroke-width="2"/>
+  <text x="165" y="376" text-anchor="middle" class="head">HTTP Request</text><text x="165" y="404" text-anchor="middle" class="text">GET / POST</text><text x="165" y="428" text-anchor="middle" class="text">PUT / DELETE</text><text x="165" y="460" text-anchor="middle" class="small">JSON, FormData, Cookie</text>
+  <rect x="80" y="540" width="170" height="125" rx="10" fill="#dbeafe" stroke="#93c5fd" stroke-width="2"/>
+  <text x="165" y="573" text-anchor="middle" class="head">API Response</text><text x="165" y="601" text-anchor="middle" class="text">JSON / File / PDF</text><text x="165" y="628" text-anchor="middle" class="small">Status code dan error</text>
+  <rect x="80" y="725" width="170" height="125" rx="10" fill="#dbeafe" stroke="#93c5fd" stroke-width="2"/>
+  <text x="165" y="758" text-anchor="middle" class="head">Authorization</text><text x="165" y="786" text-anchor="middle" class="text">HttpOnly Cookie</text><text x="165" y="813" text-anchor="middle" class="small">access_token JWT</text>
+
+  <rect x="320" y="105" width="330" height="820" rx="16" fill="#f0fdf4" stroke="#4ade80" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="320" y="105" width="330" height="52" rx="16" fill="#16a34a"/><rect x="320" y="140" width="330" height="17" fill="#16a34a"/>
+  <text x="485" y="137" text-anchor="middle" class="section">FASTAPI APPLICATION</text>
+  <rect x="345" y="190" width="280" height="98" rx="10" fill="#fff" stroke="#86efac" stroke-width="2"/>
+  <text x="485" y="221" text-anchor="middle" class="head">app/main.py</text><text x="485" y="247" text-anchor="middle" class="text">FastAPI instance + lifespan</text><text x="485" y="271" text-anchor="middle" class="small">Startup, health check, router registration</text>
+  <rect x="345" y="330" width="280" height="115" rx="10" fill="#fff" stroke="#86efac" stroke-width="2"/>
+  <text x="485" y="361" text-anchor="middle" class="head">Middleware</text><text x="485" y="388" text-anchor="middle" class="text">CORS + /api prefix</text><text x="485" y="414" text-anchor="middle" class="text">Rate limiting + error handling</text>
+  <rect x="345" y="487" width="280" height="205" rx="10" fill="#fff" stroke="#86efac" stroke-width="2"/>
+  <text x="485" y="518" text-anchor="middle" class="head">REST API Routers</text><text x="485" y="548" text-anchor="middle" class="text">authentication · accounting</text><text x="485" y="574" text-anchor="middle" class="text">dashboard · upload · SPT</text><text x="485" y="600" text-anchor="middle" class="text">chatbot · admin · setup</text><text x="485" y="626" text-anchor="middle" class="text">feedback · notifications</text><text x="485" y="656" text-anchor="middle" class="small">HTTP methods, path, dependency injection</text>
+  <rect x="345" y="738" width="280" height="112" rx="10" fill="#dcfce7" stroke="#86efac" stroke-width="2"/>
+  <text x="485" y="769" text-anchor="middle" class="head">Pydantic Schemas</text><text x="485" y="797" text-anchor="middle" class="text">Request validation</text><text x="485" y="823" text-anchor="middle" class="text">Response serialization</text>
+
+  <rect x="700" y="105" width="360" height="820" rx="16" fill="#fff7ed" stroke="#fb923c" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="700" y="105" width="360" height="52" rx="16" fill="#ea580c"/><rect x="700" y="140" width="360" height="17" fill="#ea580c"/>
+  <text x="880" y="137" text-anchor="middle" class="section">BUSINESS LAYER</text>
+  <rect x="725" y="190" width="310" height="120" rx="10" fill="#fff" stroke="#fdba74" stroke-width="2"/>
+  <text x="880" y="222" text-anchor="middle" class="head">Authentication &amp; Authorization</text><text x="880" y="250" text-anchor="middle" class="text">JWT, bcrypt, active user</text><text x="880" y="276" text-anchor="middle" class="small">get_current_user · require_admin</text>
+  <rect x="725" y="350" width="310" height="165" rx="10" fill="#fff" stroke="#fdba74" stroke-width="2"/>
+  <text x="880" y="382" text-anchor="middle" class="head">Accounting Services</text><text x="880" y="410" text-anchor="middle" class="text">Jurnal dan transaksi</text><text x="880" y="436" text-anchor="middle" class="text">Buku besar dan neraca saldo</text><text x="880" y="462" text-anchor="middle" class="text">Laporan keuangan dan pajak</text><text x="880" y="489" text-anchor="middle" class="small">SQLAlchemy ORM + business rules</text>
+  <rect x="725" y="555" width="310" height="140" rx="10" fill="#fff" stroke="#fdba74" stroke-width="2"/>
+  <text x="880" y="587" text-anchor="middle" class="head">File &amp; SPT Services</text><text x="880" y="615" text-anchor="middle" class="text">CSV, Excel, PDF ingestion</text><text x="880" y="641" text-anchor="middle" class="text">SPT 1770 / 1770S</text><text x="880" y="668" text-anchor="middle" class="small">Validasi, staging, commit, export</text>
+  <rect x="725" y="735" width="310" height="115" rx="10" fill="#ffedd5" stroke="#fdba74" stroke-width="2"/>
+  <text x="880" y="767" text-anchor="middle" class="head">Dependency Injection</text><text x="880" y="795" text-anchor="middle" class="text">Database session</text><text x="880" y="821" text-anchor="middle" class="text">Current user dan settings</text>
+
+  <rect x="1110" y="105" width="435" height="820" rx="16" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="1110" y="105" width="435" height="52" rx="16" fill="#7c3aed"/><rect x="1110" y="140" width="435" height="17" fill="#7c3aed"/>
+  <text x="1327" y="137" text-anchor="middle" class="section">DATA &amp; EXTERNAL SERVICES</text>
+  <rect x="1135" y="190" width="185" height="150" rx="10" fill="#fff" stroke="#a78bfa" stroke-width="2"/>
+  <text x="1227" y="222" text-anchor="middle" class="head">SQL Database</text><text x="1227" y="251" text-anchor="middle" class="text">SQLite</text><text x="1227" y="276" text-anchor="middle" class="text">PostgreSQL</text><text x="1227" y="307" text-anchor="middle" class="small">Users, jurnal, SPT</text>
+  <rect x="1350" y="190" width="170" height="150" rx="10" fill="#fff" stroke="#a78bfa" stroke-width="2"/>
+  <text x="1435" y="222" text-anchor="middle" class="head">Qdrant</text><text x="1435" y="251" text-anchor="middle" class="text">Vector store</text><text x="1435" y="278" text-anchor="middle" class="text">Document chunks</text><text x="1435" y="307" text-anchor="middle" class="small">Semantic retrieval</text>
+  <rect x="1135" y="390" width="385" height="135" rx="10" fill="#fff" stroke="#a78bfa" stroke-width="2"/>
+  <text x="1327" y="422" text-anchor="middle" class="head">Chatbot / RAG Pipeline</text><text x="1327" y="450" text-anchor="middle" class="text">Retrieval · reranking · context builder</text><text x="1327" y="477" text-anchor="middle" class="text">FastEmbed + Ollama LLM</text><text x="1327" y="503" text-anchor="middle" class="small">Jawaban dengan sumber dokumen</text>
+  <rect x="1135" y="575" width="185" height="135" rx="10" fill="#fff" stroke="#a78bfa" stroke-width="2"/>
+  <text x="1227" y="607" text-anchor="middle" class="head">Storage</text><text x="1227" y="635" text-anchor="middle" class="text">Upload files</text><text x="1227" y="661" text-anchor="middle" class="text">Knowledge base</text><text x="1227" y="688" text-anchor="middle" class="small">PDF, CSV, Excel</text>
+  <rect x="1350" y="575" width="170" height="135" rx="10" fill="#fff" stroke="#a78bfa" stroke-width="2"/>
+  <text x="1435" y="607" text-anchor="middle" class="head">Health &amp; Ops</text><text x="1435" y="635" text-anchor="middle" class="text">/health</text><text x="1435" y="661" text-anchor="middle" class="text">Logging</text><text x="1435" y="688" text-anchor="middle" class="small">Seed status</text>
+  <rect x="1135" y="760" width="385" height="90" rx="10" fill="#ede9fe" stroke="#a78bfa" stroke-width="2"/>
+  <text x="1327" y="793" text-anchor="middle" class="head">API Documentation</text><text x="1327" y="821" text-anchor="middle" class="text">OpenAPI · Swagger UI · ReDoc</text>
+
+  <path d="M275 397 L320 397" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/><text x="286" y="383" class="label">HTTP</text>
+  <path d="M650 590 L700 590" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/><text x="660" y="575" class="label">validated</text>
+  <path d="M1060 265 L1110 265" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/><text x="1070" y="250" class="label">ORM</text>
+  <path d="M1060 460 L1110 460" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/><text x="1064" y="445" class="label">RAG</text>
+  <path d="M1060 625 L1110 625" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/><text x="1062" y="610" class="label">files</text>
+  <path d="M485 288 L485 330" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M485 445 L485 487" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M880 310 L880 350" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M880 515 L880 555" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M1327 340 L1327 390" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M1227 525 L1227 575" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)"/>
+</svg>

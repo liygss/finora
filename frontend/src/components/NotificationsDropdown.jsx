@@ -10,8 +10,8 @@ const ICON_BY_TYPE = {
   SYSTEM: Info,
 }
 const COLOR_BY_TYPE = {
-  ADMIN: { bg: 'rgba(59,130,246,0.14)', fg: 'var(--color-accent-blue)', ring: 'rgba(96,165,250,0.28)' },
-  MONTHLY: { bg: 'rgba(16,185,129,0.12)', fg: '#6EE7B7', ring: 'rgba(16,185,129,0.25)' },
+  ADMIN: { bg: 'rgba(37,99,235,0.14)', fg: 'var(--color-accent-blue)', ring: 'rgba(96,165,250,0.28)' },
+  MONTHLY: { bg: 'rgba(5,150,105,0.12)', fg: '#6EE7B7', ring: 'rgba(5,150,105,0.25)' },
   SYSTEM: { bg: 'rgba(148,163,184,0.12)', fg: 'var(--color-slate-text)', ring: 'rgba(148,163,184,0.25)' },
 }
 
@@ -113,7 +113,7 @@ export default function NotificationsDropdown() {
         {unread > 0 && (
           <span
             className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-            style={{ background: '#EF4444', boxShadow: '0 0 0 2px var(--color-surface-0)' }}
+            style={{ background: '#DC2626', boxShadow: '0 0 0 2px var(--color-surface-0)' }}
           >
             {unread > 9 ? '9+' : unread}
           </span>
@@ -126,8 +126,9 @@ export default function NotificationsDropdown() {
           style={{
             background: 'var(--color-surface-deep)',
             border: '1px solid var(--color-border-soft)',
-            boxShadow: '0 20px 40px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(59,130,246,0.08)',
+            boxShadow: '0 20px 40px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(15,23,42,0.12)',
             maxHeight: '70vh',
+            zIndex: 10000,
           }}
         >
           {/* Header */}
@@ -140,7 +141,7 @@ export default function NotificationsDropdown() {
               {unread > 0 && (
                 <span
                   className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
-                  style={{ background: 'rgba(239,68,68,0.15)', color: '#FCA5A5' }}
+                  style={{ background: 'rgba(220,38,38,0.15)', color: '#FCA5A5' }}
                 >
                   {unread} baru
                 </span>
@@ -186,7 +187,7 @@ export default function NotificationsDropdown() {
                   className="w-full text-left px-4 py-3 flex gap-3 transition-all hover:bg-white/[0.03]"
                   style={{
                     borderBottom: '1px solid rgba(148,163,184,0.08)',
-                    background: n.is_read ? 'transparent' : 'rgba(59,130,246,0.04)',
+                    background: n.is_read ? 'transparent' : 'rgba(37,99,235,0.04)',
                   }}
                 >
                   <div
@@ -204,7 +205,7 @@ export default function NotificationsDropdown() {
                       {!n.is_read && (
                         <span
                           className="shrink-0 h-2 w-2 rounded-full"
-                          style={{ background: '#3B82F6', boxShadow: '0 0 6px rgba(59,130,246,0.8)' }}
+                          style={{ background: '#2563EB', boxShadow: '0 0 6px rgba(15,23,42,0.12)' }}
                         />
                       )}
                       <span

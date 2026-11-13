@@ -5,7 +5,7 @@ import client from '../api/client'
 import { formatRupiah } from '../utils/formatters'
 import { fadeUp, staggerContainer, itemStagger, EASE_GENTLE } from '../utils/motionPresets'
 
-const CATEGORY_COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+const CATEGORY_COLORS = ['#2563EB', '#059669', '#D97706', '#DC2626', '#7C3AED']
 
 const TOP_N = 5
 
@@ -45,8 +45,8 @@ function KategoriPengeluaran({ debouncedDate, items: externalItems }) {
     <motion.div variants={fadeUp} whileHover={{ y: -4, transition: EASE_GENTLE }} className="card flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="rounded-xl p-2" style={{ background: 'rgba(245, 158, 11, 0.12)' }}>
-            <PieIcon size={16} style={{ color: '#FBBF24' }} />
+          <div className="rounded-xl p-2" style={{ background: 'rgba(217, 119, 6, 0.12)' }}>
+            <PieIcon size={16} style={{ color: '#F59E0B' }} />
           </div>
           <div>
             <h3 className="text-sm font-bold" style={{ color: 'var(--color-slate-heading)' }}>Kategori Pengeluaran Terbesar</h3>
@@ -80,12 +80,12 @@ function KategoriPengeluaran({ debouncedDate, items: externalItems }) {
             return (
               <motion.div key={row.name} variants={itemStagger} className="rounded-xl px-3 py-2.5 transition-all duration-200 hover:bg-white/[0.03]"
                 style={{ background: 'rgba(148, 163, 184, 0.05)', border: '1px solid rgba(148, 163, 184, 0.1)' }}>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-2 text-xs font-semibold truncate" style={{ color: 'var(--color-slate-text)' }}>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="flex items-center gap-2 text-xs font-semibold truncate min-w-0 flex-1" style={{ color: 'var(--color-slate-text)' }}>
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
                     <span className="truncate">{row.name}</span>
                   </span>
-                  <span className="flex items-center gap-2 shrink-0">
+                  <span className="flex items-center gap-1.5 shrink-0">
                     <span className="text-xs font-extrabold" style={{ color: 'var(--color-slate-heading)' }}>{formatRupiah(row.nilai)}</span>
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: `${color}1f`, color }}>{pct.toFixed(0)}%</span>
                   </span>

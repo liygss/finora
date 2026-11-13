@@ -8,8 +8,9 @@ import { extractError } from '../api/extractError'
 import {
   User, Wallet, Receipt, Home, Users, FileCheck, Calculator,
   Save, Printer, Trash2, Plus, FileSpreadsheet, History, Landmark, Info,
-  Sparkles, X,
+  Sparkles, X, MessageCircle,
 } from 'lucide-react'
+import { openTaxConsultation } from '../utils/chatbotEvents'
 
 const STATUS_KAWIN = [
   { value: 'KK', label: 'Kawin — Kewajiban Pajak Gabung (KK)' },
@@ -121,7 +122,7 @@ function Field({ label, children, className, contoh }) {
         <p className="mt-1 text-[11px] flex items-center gap-1.5">
           <Sparkles size={11} style={{ color: 'var(--color-accent-blue)' }} />
           <span style={{ color: 'var(--color-slate-muted)' }}>Contoh:</span>
-          <code className="font-mono rounded px-1.5 py-0.5 text-[10px]" style={{ background: 'rgba(59,130,246,0.1)', color: 'var(--color-accent-blue)' }}>{contoh}</code>
+          <code className="font-mono rounded px-1.5 py-0.5 text-[10px]" style={{ background: 'rgba(37,99,235,0.1)', color: 'var(--color-accent-blue)' }}>{contoh}</code>
         </p>
       )}
     </div>
@@ -238,7 +239,7 @@ function PenyesuaianEditor({ title, values, onChange }) {
       <button type="button" onClick={() => onChange({ ...values, [`${title} ${entries.length + 1}`]: 0 })} className="btn-secondary text-xs mt-2">
         <Plus size={14} /> Tambah {title}
       </button>
-      <div className="mt-2 text-xs font-semibold flex items-center justify-between rounded-xl px-3 py-2" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)' }}>
+      <div className="mt-2 text-xs font-semibold flex items-center justify-between rounded-xl px-3 py-2" style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)' }}>
         <span style={{ color: 'var(--color-slate-body)' }}>Jumlah {title}</span>
         <span className="font-mono" style={{ color: 'var(--color-accent-blue)' }}>{formatRupiah(total)}</span>
       </div>
@@ -250,7 +251,7 @@ function SectionCard({ title, icon: Icon, desc, children }) {
   return (
     <div className="card">
       <div className="flex items-center gap-3 mb-4">
-        <div className="rounded-2xl p-3" style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)' }}>
+        <div className="rounded-2xl p-3" style={{ background: 'rgba(37,99,235,0.12)', border: '1px solid rgba(37,99,235,0.25)' }}>
           <Icon size={18} style={{ color: 'var(--color-accent-blue)' }} />
         </div>
         <div>
@@ -483,12 +484,17 @@ export default function SptPage() {
         <h1 className="text-3xl font-extrabold">
           <span className="gradient-text">SPT Tahunan PPh OP</span>
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--color-slate-body)' }}>
-          Isi formulir 1770 / 1770S — hitung otomatis, simpan draft, dan cetak ke PDF.
-        </p>
+        <div className="flex flex-wrap items-center gap-3 mt-1">
+          <p className="text-sm" style={{ color: 'var(--color-slate-body)' }}>
+            Isi formulir 1770 / 1770S — hitung otomatis, simpan draft, dan cetak ke PDF.
+          </p>
+          <button type="button" onClick={openTaxConsultation} className="btn-ghost !py-2 !px-3 text-xs">
+            <MessageCircle size={14} /> Tanya Asisten Pajak
+          </button>
+        </div>
       </div>
 
-      <div className="rounded-2xl p-4 flex items-start gap-3" style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)' }}>
+      <div className="rounded-2xl p-4 flex items-start gap-3" style={{ background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.2)' }}>
         <Info size={16} style={{ color: 'var(--color-accent-amber)' }} className="shrink-0 mt-0.5" />
         <p className="text-xs" style={{ color: 'var(--color-accent-amber)' }}>
           Alat bantu isian & hitung SPT — BUKAN pengganti e-Form/e-Filing resmi DJP. Validasi ke konsultan pajak sebelum pelaporan.
@@ -514,7 +520,7 @@ export default function SptPage() {
                     className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-300 ${
                       active ? 'font-semibold text-[var(--color-accent-blue)]' : 'text-[var(--color-slate-body)] hover:bg-white/5 hover:text-[var(--color-slate-text)]'
                     }`}
-                    style={active ? { background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)' } : undefined}
+                    style={active ? { background: 'rgba(37,99,235,0.12)', border: '1px solid rgba(37,99,235,0.25)' } : undefined}
                   >
                     <s.icon size={16} className={active ? 'text-[var(--color-brand-soft)]' : ''} />
                     <span className="text-left">{s.label}</span>
@@ -635,7 +641,7 @@ function IdentitasSection({ formType, data, up, onChangeFormType }) {
           onClick={() => onChangeFormType('1770')}
           className="rounded-2xl p-5 text-left transition-all duration-300"
           style={formType === '1770'
-            ? { background: 'rgba(59,130,246,0.12)', border: '2px solid #3B82F6' }
+            ? { background: 'rgba(37,99,235,0.12)', border: '2px solid #2563EB' }
             : { background: 'var(--color-surface-faint)', border: '1px solid var(--color-border-subtle)' }}
         >
           <div className="flex items-center justify-between">
@@ -649,7 +655,7 @@ function IdentitasSection({ formType, data, up, onChangeFormType }) {
           onClick={() => onChangeFormType('1770S')}
           className="rounded-2xl p-5 text-left transition-all duration-300"
           style={formType === '1770S'
-            ? { background: 'rgba(59,130,246,0.12)', border: '2px solid #3B82F6' }
+            ? { background: 'rgba(37,99,235,0.12)', border: '2px solid #2563EB' }
             : { background: 'var(--color-surface-faint)', border: '1px solid var(--color-border-subtle)' }}
         >
           <div className="flex items-center justify-between">
@@ -1012,7 +1018,7 @@ function HasilSection({ formType, data, calc, previewRows, loading, saving, hitu
       ) : (
         <div className="space-y-6">
           <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--color-border-subtle)' }}>
-            <div className="px-5 py-3 flex items-center justify-between" style={{ background: 'rgba(59,130,246,0.08)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+            <div className="px-5 py-3 flex items-center justify-between" style={{ background: 'rgba(37,99,235,0.08)', borderBottom: '1px solid var(--color-border-subtle)' }}>
               <span className="text-sm font-bold" style={{ color: 'var(--color-slate-heading)' }}>Ringkasan Formulir Induk {formType} — {data.identitas.tahun_pajak}</span>
               <span className="badge !text-[10px]">PPh {formType === '1770S' ? '1770S' : '1770'}</span>
             </div>
@@ -1076,7 +1082,7 @@ function HasilSection({ formType, data, calc, previewRows, loading, saving, hitu
           {(calc.catatan || []).length > 0 && (
             <div className="space-y-2">
               {(calc.catatan || []).map((c, i) => (
-                <div key={i} className="rounded-xl px-4 py-2.5 text-sm" style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)', color: 'var(--color-accent-amber)' }}>
+                <div key={i} className="rounded-xl px-4 py-2.5 text-sm" style={{ background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.2)', color: 'var(--color-accent-amber)' }}>
                   {c}
                 </div>
               ))}

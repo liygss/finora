@@ -38,6 +38,7 @@ export default function Sidebar({ open, onClose }) {
       items: [
         { to: '/pajak', label: 'Kalkulator Pajak', icon: Calculator },
         { to: '/spt', label: 'SPT Tahunan (1770/1770S)', icon: FileSpreadsheet },
+        { action: 'open-tax-consult', label: 'Tanya Pajak', icon: ShieldCheck },
       ]
     },
     {
@@ -93,7 +94,7 @@ export default function Sidebar({ open, onClose }) {
           <div className={`flex h-18 items-center gap-3 ${collapsed ? 'justify-center px-2' : 'px-6'}`} style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.12)' }}>
             <div
               className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden"
-              style={{ borderRadius: '0.75rem', boxShadow: '0 4px 18px rgba(59, 130, 246, 0.45)' }}
+              style={{ borderRadius: '0.75rem', boxShadow: '0 4px 18px rgba(15,23,42,0.12)' }}
             >
               <img src="/finora_logo.jpeg" alt="Finora" className="h-full w-full object-cover" />
             </div>
@@ -122,7 +123,14 @@ export default function Sidebar({ open, onClose }) {
                     item.action ? (
                       <button
                         key={item.action}
-                        onClick={() => { window.dispatchEvent(new Event(item.action)); onClose() }}
+                        onClick={() => {
+                          if (item.action === 'open-tax-consult') {
+                            window.dispatchEvent(new CustomEvent('open-chatbot', { detail: { taxConsult: true } }))
+                          } else {
+                            window.dispatchEvent(new Event(item.action))
+                          }
+                          onClose()
+                        }}
                         title={collapsed ? item.label : undefined}
                         className={`relative flex items-center gap-3 rounded-xl transition-all duration-300 w-full text-left ${
                           collapsed ? 'justify-center px-2 py-3' : 'px-4 py-3'
@@ -152,10 +160,10 @@ export default function Sidebar({ open, onClose }) {
                             {isActive && (
                               <span
                                 className="absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full"
-                                style={{ background: 'linear-gradient(180deg, #3B82F6, #7DB4FF)', boxShadow: '0 0 12px rgba(59, 130, 246, 0.8)' }}
+                                style={{ background: 'linear-gradient(180deg, #2563EB, #60A5FA)', boxShadow: '0 0 12px rgba(15,23,42,0.12)' }}
                               />
                             )}
-                            <item.icon size={18} className={`shrink-0 transition-colors duration-300 ${isActive ? 'text-[var(--color-brand-soft)] drop-shadow-[0_0_6px_rgba(125,180,255,0.6)]' : ''}`} />
+                            <item.icon size={18} className={`shrink-0 transition-colors duration-300 ${isActive ? 'text-[var(--color-brand-soft)]' : ''}`} />
                             {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
                           </>
                         )}
@@ -185,13 +193,13 @@ export default function Sidebar({ open, onClose }) {
                 <div
                   className="flex h-10 w-10 items-center justify-center rounded-2xl text-xs font-bold text-white"
                   style={{
-                    background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%)',
-                    boxShadow: '0 4px 14px rgba(59, 130, 246, 0.4)',
+                    background: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #2563EB 100%)',
+                    boxShadow: '0 4px 14px rgba(15,23,42,0.12)',
                   }}
                 >
                   {user?.full_name?.charAt(0)?.toUpperCase()}
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full" style={{ background: '#10B981', border: '2px solid var(--color-surface-1)' }} />
+                <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full" style={{ background: '#059669', border: '2px solid var(--color-surface-1)' }} />
               </div>
               {!collapsed && (
                 <div className="min-w-0 flex-1 animate-fade-in">

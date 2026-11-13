@@ -168,7 +168,7 @@ export default function BuddyFormTips({ hints, open, onDone, step }) {
                   height: rect.height + 12,
                   borderRadius: 18,
                   border: '2px solid rgba(96, 165, 250, 0.8)',
-                  boxShadow: '0 0 0 6px rgba(59, 130, 246, 0.12), 0 0 30px rgba(59, 130, 246, 0.3)',
+                  boxShadow: '0 0 0 6px rgba(15,23,42,0.12), 0 0 30px rgba(15,23,42,0.12)',
                   zIndex: 1,
                   pointerEvents: 'none',
                 }}
@@ -188,7 +188,7 @@ export default function BuddyFormTips({ hints, open, onDone, step }) {
                 width: rect.width + 32,
                 height: rect.height + 32,
                 borderRadius: 24,
-                background: 'rgba(59, 130, 246, 0.08)',
+                background: 'rgba(37, 99, 235, 0.08)',
                 filter: 'blur(16px)',
                 zIndex: 0,
                 pointerEvents: 'none',
@@ -213,7 +213,7 @@ export default function BuddyFormTips({ hints, open, onDone, step }) {
               zIndex: 3,
               background: 'var(--color-tooltip-bg)',
               border: '1px solid var(--color-tooltip-border)',
-              boxShadow: '0 20px 56px var(--color-shadow), 0 0 0 1px rgba(59, 130, 246, 0.1)',
+              boxShadow: '0 20px 56px var(--color-shadow), 0 0 0 1px rgba(15,23,42,0.12)',
             }}
           >
             {/* Arrow */}
@@ -256,7 +256,7 @@ export default function BuddyFormTips({ hints, open, onDone, step }) {
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 18, delay: 0.15 }}
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg overflow-hidden"
-                style={{ background: 'rgba(59, 130, 246, 0.15)' }}
+                style={{ background: 'rgba(37, 99, 235, 0.15)' }}
               >
                 <img src={`/assets/buddy/${tip.emotion || 'buddy-happy'}.png`} alt="Buddy" className="h-full w-full object-contain" />
               </motion.div>
@@ -285,7 +285,7 @@ export default function BuddyFormTips({ hints, open, onDone, step }) {
                     animate={{ width: i === tipIndex ? 16 : 6 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     className="h-1.5 rounded-full"
-                    style={{ background: i === tipIndex ? 'var(--color-brand-soft)' : i < tipIndex ? 'rgba(59, 130, 246, 0.4)' : 'var(--color-border-subtle)' }}
+                    style={{ background: i === tipIndex ? 'var(--color-brand-soft)' : i < tipIndex ? 'rgba(37, 99, 235, 0.4)' : 'var(--color-border-subtle)' }}
                   />
                 ))}
               </div>
@@ -312,7 +312,7 @@ export default function BuddyFormTips({ hints, open, onDone, step }) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="inline-flex items-center gap-1 rounded-lg px-3 py-1 text-[11px] font-bold text-white"
-                  style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)' }}
+                  style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 12px rgba(15,23,42,0.12)' }}
                 >
                   {isLast ? 'Selesai' : 'Berikutnya'} {isLast ? <Check size={12} /> : <ChevronRight size={12} />}
                 </motion.button>
@@ -350,7 +350,7 @@ export function BuddyHintChip({ step, onOpen }) {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       className="fixed bottom-6 right-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full"
-      style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 6px 24px rgba(59, 130, 246, 0.4)' }}
+      style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 6px 24px rgba(15,23,42,0.12)' }}
       aria-label="Tampilkan petunjuk Buddy"
     >
       <Sparkles size={18} className="text-white" />

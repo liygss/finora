@@ -9,6 +9,7 @@ let state = {
   barAnimDone: false,
   isAuto: true,
   selectedMonth: '',
+  uploadId: '',
 }
 
 const insightCache = new Map()
@@ -34,7 +35,7 @@ export function setInsight(key, insight) {
 // baik karena dashboard terpasang ataupun tidak, cache harus dibuang supaya
 // saat balik ke dashboard datanya di-refetch sekali saja.
 export function clearDashboard() {
-  state = { key: null, data: null, barAnimDone: false, isAuto: true, selectedMonth: '' }
+  state = { key: null, data: null, barAnimDone: false, isAuto: true, selectedMonth: '', uploadId: '' }
   insightCache.clear()
 }
 

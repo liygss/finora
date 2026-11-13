@@ -4,9 +4,9 @@ import { BellRing, ShieldAlert, AlertTriangle, Info, CheckCircle2 } from 'lucide
 import { fadeUp, EASE_GENTLE } from '../utils/motionPresets'
 
 const LEVEL_META = {
-  danger: { icon: ShieldAlert, color: '#F87171', bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(239, 68, 68, 0.28)' },
-  warning: { icon: AlertTriangle, color: '#FBBF24', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.28)' },
-  info: { icon: Info, color: 'var(--color-brand-soft)', bg: 'rgba(59, 130, 246, 0.12)', border: 'rgba(59, 130, 246, 0.28)' },
+  danger: { icon: ShieldAlert, color: '#F87171', bg: 'rgba(220, 38, 38, 0.12)', border: 'rgba(220, 38, 38, 0.28)' },
+  warning: { icon: AlertTriangle, color: '#F59E0B', bg: 'rgba(217, 119, 6, 0.12)', border: 'rgba(217, 119, 6, 0.28)' },
+  info: { icon: Info, color: 'var(--color-brand-soft)', bg: 'rgba(37, 99, 235, 0.12)', border: 'rgba(37, 99, 235, 0.28)' },
 }
 
 function TemuanPenting({ alerts = [] }) {
@@ -16,7 +16,7 @@ function TemuanPenting({ alerts = [] }) {
         <div className="flex items-center gap-2.5">
           <div
             className="rounded-xl p-2 text-white"
-            style={{ background: 'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)', boxShadow: '0 8px 24px rgba(245, 158, 11, 0.3)' }}
+            style={{ background: 'linear-gradient(135deg, #D97706 0%, #DC2626 100%)', boxShadow: '0 8px 24px rgba(15,23,42,0.12)' }}
           >
             <BellRing size={16} />
           </div>
@@ -33,9 +33,9 @@ function TemuanPenting({ alerts = [] }) {
         <div className="flex flex-1 flex-col items-center justify-center gap-2.5 text-center py-6">
           <div
             className="rounded-full p-3"
-            style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}
+            style={{ background: 'rgba(5, 150, 105, 0.1)', border: '1px solid rgba(5, 150, 105, 0.2)' }}
           >
-            <CheckCircle2 size={22} style={{ color: '#34D399' }} />
+            <CheckCircle2 size={22} style={{ color: '#10B981' }} />
           </div>
           <p className="text-sm font-semibold" style={{ color: 'var(--color-slate-heading)' }}>Tidak ada temuan penting</p>
           <p className="text-xs" style={{ color: 'var(--color-slate-muted)' }}>Keuangan usaha Anda terlihat wajar bulan ini.</p>

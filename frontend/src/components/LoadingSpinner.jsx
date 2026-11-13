@@ -3,7 +3,7 @@ export default function LoadingSpinner({ size = 'md', className = '' }) {
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <div className="relative">
-        <div className={`${px} animate-spin rounded-full border-2`} style={{ borderColor: 'rgba(148, 163, 184, 0.18)', borderTopColor: '#3B82F6' }} />
+        <div className={`${px} animate-spin rounded-full border-2`} style={{ borderColor: 'rgba(148, 163, 184, 0.18)', borderTopColor: '#2563EB' }} />
         <div className={`absolute inset-0 ${px} animate-spin rounded-full border-2 border-transparent`} style={{ borderTopColor: 'var(--color-brand-soft)', opacity: 0.5, animationDuration: '1.5s' }} />
       </div>
     </div>

@@ -4,7 +4,7 @@ import { Package } from 'lucide-react'
 import { formatRupiah } from '../utils/formatters'
 import { fadeUp, staggerContainer, itemStagger, EASE_GENTLE } from '../utils/motionPresets'
 
-const PRODUCT_COLORS = ['#10B981', '#2563EB', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
+const PRODUCT_COLORS = ['#059669', '#2563EB', '#D97706', '#DC2626', '#7C3AED', '#0891B2']
 const TOP_N = 6
 
 function ProdukBarang({ items }) {
@@ -27,8 +27,8 @@ function ProdukBarang({ items }) {
     <motion.div variants={fadeUp} whileHover={{ y: -4, transition: EASE_GENTLE }} className="card flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="rounded-xl p-2" style={{ background: 'rgba(16, 185, 129, 0.12)' }}>
-            <Package size={16} style={{ color: '#34D399' }} />
+          <div className="rounded-xl p-2" style={{ background: 'rgba(5, 150, 105, 0.12)' }}>
+            <Package size={16} style={{ color: '#10B981' }} />
           </div>
           <div>
             <h3 className="text-sm font-bold" style={{ color: 'var(--color-slate-heading)' }}>Produk / Barang Terlaris</h3>
@@ -45,7 +45,7 @@ function ProdukBarang({ items }) {
               onClick={() => setMode(tab.key)}
               className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all duration-200"
               style={mode === tab.key
-                ? { color: '#0F172A', background: '#34D399' }
+                ? { color: '#0F172A', background: '#10B981' }
                 : { color: 'var(--color-slate-body)', background: 'transparent' }}
             >
               {tab.label}
@@ -67,12 +67,12 @@ function ProdukBarang({ items }) {
             return (
               <motion.div key={row.produk} variants={itemStagger} className="rounded-xl px-3 py-2.5 transition-all duration-200 hover:bg-white/[0.03]"
                 style={{ background: 'rgba(148, 163, 184, 0.05)', border: '1px solid rgba(148, 163, 184, 0.1)' }}>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-2 text-xs font-semibold truncate" style={{ color: 'var(--color-slate-text)' }}>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="flex items-center gap-2 text-xs font-semibold truncate min-w-0 flex-1" style={{ color: 'var(--color-slate-text)' }}>
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
                     <span className="truncate">{row.produk}</span>
                   </span>
-                  <span className="flex items-center gap-2 shrink-0">
+                  <span className="flex items-center gap-1.5 shrink-0">
                     <span className="text-xs font-extrabold" style={{ color: 'var(--color-slate-heading)' }}>
                       {mode === 'terbesar' ? formatRupiah(row.nilai) : `${row.jumlah} transaksi`}
                     </span>

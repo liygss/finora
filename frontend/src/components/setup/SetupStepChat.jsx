@@ -19,7 +19,7 @@ export default function SetupStepChat({ onNext, onBack }) {
   return (
     <div className="relative flex h-full flex-col overflow-hidden">
       {/* Ambient glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40" style={{ background: 'linear-gradient(180deg, rgba(59,130,246,0.16), transparent)' }} />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.16), transparent)' }} />
 
       {/* Wizard top bar */}
       <div className="relative z-30 mx-auto w-full max-w-5xl px-4 pt-4 pb-2">
@@ -39,8 +39,8 @@ export default function SetupStepChat({ onNext, onBack }) {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-[15px] font-bold" style={{ color: 'var(--color-slate-heading)' }}>Input via Chat</span>
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--color-accent-emerald)' }}>
-                <span className="h-1 w-1 rounded-full" style={{ background: '#10B981' }} />
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(5, 150, 105, 0.12)', color: 'var(--color-accent-emerald)' }}>
+                <span className="h-1 w-1 rounded-full" style={{ background: '#059669' }} />
                 Step 2
               </span>
             </div>
@@ -61,7 +61,7 @@ export default function SetupStepChat({ onNext, onBack }) {
             <button
               onClick={onNext}
               className="hidden sm:flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all duration-200 hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
+              style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
             >
               Lanjut ke Upload <ArrowRight size={14} />
             </button>
@@ -101,7 +101,7 @@ export default function SetupStepChat({ onNext, onBack }) {
         <button
           onClick={onNext}
           className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all duration-200"
-          style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
+          style={{ background: 'linear-gradient(135deg, #1D4ED8, #2563EB)', boxShadow: '0 4px 14px rgba(15,23,42,0.12)' }}
         >
           Lanjut ke Upload <ChevronRight size={12} />
         </button>

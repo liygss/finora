@@ -49,6 +49,7 @@ def get_dashboard_summary(
     tanggal_per: date | None = None,
     user_id: str | None = None,
     tanggal_mulai: date | None = None,
+    upload_id: str | None = None,
 ) -> DashboardSummary:
     tanggal_per = tanggal_per or date.today()
     if tanggal_mulai:
@@ -59,14 +60,16 @@ def get_dashboard_summary(
     akhir_bulan_lalu = awal_bulan - timedelta(days=1)
     akhir_tahun_lalu = awal_tahun - timedelta(days=1)
 
-    neraca_saldo_keseluruhan = get_neraca_saldo(db, tanggal_per, user_id=user_id)
+    neraca_saldo_keseluruhan = get_neraca_saldo(
+        db, tanggal_per, user_id=user_id, upload_id=upload_id,
+    )
 
     # Kumulatif s/d tanggal_per (sejak awal usaha)
-    laba_rugi_sekarang = get_laporan_laba_rugi(db, tanggal_per, user_id=user_id)
+    laba_rugi_sekarang = get_laporan_laba_rugi(db, tanggal_per, user_id=user_id, upload_id=upload_id)
     # Kumulatif s/d akhir bulan lalu (supaya tanggal 1 tetap masuk bulan ini)
-    laba_rugi_sebelum_bulan = get_laporan_laba_rugi(db, akhir_bulan_lalu, user_id=user_id)
+    laba_rugi_sebelum_bulan = get_laporan_laba_rugi(db, akhir_bulan_lalu, user_id=user_id, upload_id=upload_id)
     # Kumulatif s/d akhir tahun lalu (supaya tanggal 1 Jan tetap masuk tahun ini)
-    laba_rugi_sebelum_tahun = get_laporan_laba_rugi(db, akhir_tahun_lalu, user_id=user_id)
+    laba_rugi_sebelum_tahun = get_laporan_laba_rugi(db, akhir_tahun_lalu, user_id=user_id, upload_id=upload_id)
 
     # Bulan ini = kumulatif s/d sekarang - kumulatif s/d akhir bulan lalu
     pendapatan_bulan_ini = round(
@@ -94,6 +97,8 @@ def get_dashboard_summary(
     )
     if user_id:
         transaksi_query = transaksi_query.filter(JurnalUmum.created_by_id == user_id)
+    if upload_id:
+        transaksi_query = transaksi_query.filter(JurnalUmum.sumber_upload_id == upload_id)
     jumlah_transaksi_bulan_ini = transaksi_query.count()
 
     return DashboardSummary(
@@ -134,6 +139,7 @@ def get_pendapatan_beban_bulanan(
     user_id: str | None = None,
     jumlah_bulan: int = 6,
     tanggal_mulai: date | None = None,
+    upload_id: str | None = None,
 ) -> list[BarisPendapatanBebanBulanan]:
     """
     Pendapatan & beban per bulan untuk N bulan terakhir (default 6) sampai bulan
@@ -179,6 +185,8 @@ def get_pendapatan_beban_bulanan(
         query = query.filter(JurnalUmum.tanggal >= bulan_awal)
     if user_id:
         query = query.filter(JurnalUmum.created_by_id == user_id)
+    if upload_id:
+        query = query.filter(JurnalUmum.sumber_upload_id == upload_id)
     rows = query.group_by("bulan", Akun.kategori).all()
 
     per_bulan: dict[date, BarisPendapatanBebanBulanan] = {}
@@ -251,6 +259,7 @@ def get_statistik_produk(
     tanggal_per: date | None = None,
     user_id: str | None = None,
     limit: int = 10,
+    upload_id: str | None = None,
 ) -> list[StatistikProduk]:
     """
     Ranking produk/barang (diekstrak dari deskripsi transaksi) berdasarkan:
@@ -273,6 +282,8 @@ def get_statistik_produk(
     )
     if user_id:
         sub = sub.filter(JurnalUmum.created_by_id == user_id)
+    if upload_id:
+        sub = sub.filter(JurnalUmum.sumber_upload_id == upload_id)
     rows = sub.group_by(JurnalUmum.id).all()
 
     agregat: dict[str, dict] = {}

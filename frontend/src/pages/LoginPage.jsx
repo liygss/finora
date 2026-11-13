@@ -32,9 +32,6 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen overflow-hidden" style={{ background: 'var(--color-surface-0)' }}>
       {/* Aurora background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-[-15%] right-[-10%] h-[55vh] w-[55vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(37, 99, 235, 0.18)' }} />
-        <div className="absolute bottom-[-25%] left-[-10%] h-[55vh] w-[55vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(139, 92, 246, 0.1)', animationDelay: '5s' }} />
-        <div className="absolute top-[40%] left-[30%] h-[40vh] w-[40vw] rounded-full blur-3xl animate-blob" style={{ background: 'rgba(16, 185, 129, 0.06)', animationDelay: '9s' }} />
         <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(148,163,184,0.05) 1px, transparent 0)', backgroundSize: '36px 36px' }} />
       </div>
 
@@ -42,9 +39,6 @@ export default function LoginPage() {
         {/* Left decorative panel - Blue gradient */}
         <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0B1E50 0%, #1D4ED8 50%, #2563EB 100%)' }}>
           {/* Aurora blobs */}
-          <div className="absolute top-20 left-16 h-72 w-72 rounded-full blur-3xl animate-blob" style={{ background: 'rgba(255, 255, 255, 0.04)' }} />
-          <div className="absolute bottom-32 right-10 h-64 w-64 rounded-full blur-3xl animate-blob delay-300" style={{ background: 'rgba(96, 165, 250, 0.25)' }} />
-          <div className="absolute top-1/2 left-1/3 h-48 w-48 rounded-full blur-3xl animate-blob delay-500" style={{ background: 'rgba(255, 255, 255, 0.04)' }} />
           <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '28px 28px' }} />
 
           {/* Floating icons */}
@@ -113,7 +107,7 @@ export default function LoginPage() {
             <div className="lg:hidden flex items-center gap-3 mb-8">
               <div
                 className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl"
-                style={{ boxShadow: '0 4px 16px rgba(37, 99, 235, 0.3)' }}
+                style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.12)' }}
               >
                 <img src="/finora_logo.jpeg" alt="Finora" className="h-full w-full object-cover" />
               </div>
@@ -125,7 +119,7 @@ export default function LoginPage() {
               style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border-soft)', backdropFilter: 'blur(24px)', boxShadow: '0 24px 80px rgba(0, 0, 0, 0.2)' }}
             >
               <div className="mb-8">
-                <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold mb-4" style={{ background: 'rgba(59,130,246,0.14)', color: 'var(--color-accent-blue)', border: '1px solid rgba(96,165,250,0.28)' }}>
+                <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold mb-4" style={{ background: 'rgba(37,99,235,0.14)', color: 'var(--color-accent-blue)', border: '1px solid rgba(96,165,250,0.28)' }}>
                   <CheckCircle2 size={12} /> Selamat Datang Kembali
                 </div>
                 <h2 className="text-2xl font-[900] tracking-tight" style={{ color: 'var(--color-slate-heading)' }}>Masuk ke Akun</h2>

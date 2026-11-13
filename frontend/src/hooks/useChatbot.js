@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import client from '../api/client'
 import { notifyDataChanged } from '../utils/dashboardStore'
 import { useAuth } from '../context/AuthContext'
+import { formatRupiah } from '../utils/formatters'
 
 const PAGE_LABELS = {
   '/dashboard': 'Dashboard',
@@ -29,6 +30,11 @@ const TRANSACTION_KEYWORDS = [
   'tagihan', 'invoice', 'bon', 'kwitansi', 'retur',
 ]
 
+const TAX_INTENT_KEYWORDS = [
+  'pajak', 'pph', 'ppn', 'npwp', 'faktur pajak', 'spt', 'coretax',
+  'billing', 'djp', 'pajak umkm', 'konsultasi pajak',
+]
+
 // Pattern untuk mendeteksi nominal uang
 const AMOUNT_PATTERNS = [
   /rp[\s.]*[\d.,]+/i,
@@ -38,11 +44,16 @@ const AMOUNT_PATTERNS = [
   /\b\d{1,3}(?:\.\d{3})+(?:,\d+)?\b/,
 ]
 
+function isTaxIntent(text) {
+  const lower = text.toLowerCase()
+  return TAX_INTENT_KEYWORDS.some(keyword => lower.includes(keyword))
+}
+
 function looksLikeTransaction(text) {
   const lower = text.toLowerCase()
   const hasKeyword = TRANSACTION_KEYWORDS.some(kw => lower.includes(kw))
   const hasAmount = AMOUNT_PATTERNS.some(p => p.test(text))
-  return hasKeyword && hasAmount
+  return hasKeyword && hasAmount && !isTaxIntent(text)
 }
 
 function formatTime() {
@@ -103,6 +114,8 @@ export default function useChatbot() {
   const [lastUploadId, setLastUploadId] = useState(null)
   const [followUpSuggestions, setFollowUpSuggestions] = useState([])
   const [pendingFile, setPendingFile] = useState(null)
+  const [taxConsult, setTaxConsult] = useState(null)
+  const taxConsultRef = useRef(null)
   const sessionRef = useRef(null)
   const lastUploadIdRef = useRef(null)
   const pendingFileRef = useRef(null)
@@ -119,6 +132,10 @@ export default function useChatbot() {
   useEffect(() => {
     pendingFileRef.current = pendingFile
   }, [pendingFile])
+
+  useEffect(() => {
+    taxConsultRef.current = taxConsult
+  }, [taxConsult])
 
   // Keep latest conversations list in sync for stable callbacks.
   useEffect(() => {
@@ -159,11 +176,78 @@ export default function useChatbot() {
     return () => clearTimeout(t)
   }, [messages, ACTIVE_KEY])
 
+  const startTaxConsultation = useCallback(() => {
+    const next = { step: 'chat', data: {}, active: true }
+    setTaxConsult(next)
+    taxConsultRef.current = next
+    setFollowUpSuggestions([])
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: 'Mode konsultasi pajak aktif. Silakan tanya soal pajak.',
+      time: formatTime(),
+    }])
+  }, [])
+
+  const cancelTaxConsultation = useCallback(() => {
+    setTaxConsult(null)
+    taxConsultRef.current = null
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: 'Konsultasi pajak dibatalkan. Silakan tanyakan hal lain kapan saja.',
+      time: formatTime(),
+    }])
+  }, [])
+
+  const handleTaxConsultMessage = useCallback(async (message) => {
+    if (!taxConsultRef.current?.active) return false
+
+    setMessages(prev => [...prev, { role: 'user', content: message, time: formatTime() }])
+    setInput('')
+    setLoading(true)
+    try {
+      const { data } = await client.post('/chatbot/tax-chat', {
+        message,
+        session_id: sessionRef.current,
+        page: 'Kalkulator Pajak',
+      })
+      sessionRef.current = data.session_id
+      setSessionId(data.session_id)
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: data.answer,
+        sources: data.sources,
+        ...(data.calculation ? { taxResult: data.calculation } : {}),
+        time: formatTime(),
+      }])
+      if (data.calculation) {
+        setFollowUpSuggestions([
+          { text: 'Bagaimana cara lapor SPT?', icon: 'FileText' },
+          { text: 'Apa itu Coretax?', icon: 'HelpCircle' },
+          { text: 'Cara menghitung PPN?', icon: 'Calculator' },
+        ])
+      }
+    } catch (err) {
+      const detail = err?.response?.data?.detail
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: `Gagal menjawab konsultasi pajak${detail ? `: ${typeof detail === 'string' ? detail : JSON.stringify(detail)}` : '.'}`,
+        time: formatTime(),
+      }])
+    } finally {
+      setLoading(false)
+    }
+    return true
+  }, [])
+
   // --- Send text message (with smart transaction detection + pending file) ---
   const send = useCallback(async (text = input, overrideUploadId = null) => {
     const message = (text ?? '').trim()
     const file = pendingFileRef.current
     if ((!message && !file) || loading) return false
+
+    if (message && taxConsultRef.current?.active && !file) {
+      return handleTaxConsultMessage(message)
+    }
 
     // Upload pending file first if exists
     let activeUploadId = overrideUploadId || lastUploadIdRef.current
@@ -173,6 +257,7 @@ export default function useChatbot() {
       try {
         const fd = new FormData()
         fd.append('file', file)
+        fd.append('context', 'chat')
         // Jangan set Content-Type manual: browser harus menambahkan boundary.
         const { data: uploaded } = await client.post('/upload/file', fd)
         activeUploadId = uploaded.id
@@ -316,11 +401,40 @@ export default function useChatbot() {
       })
       sessionRef.current = data.session_id
       setSessionId(data.session_id)
+
+      // Cek apakah pertanyaan atau jawaban berkaitan dengan keuangan / ringkasan untuk memicu preview data otomatis
+      let summaryCard = null
+      const lowerMsg = message.toLowerCase()
+      const isFinancialQuery = lowerMsg.includes('saldo') || lowerMsg.includes('laba') || lowerMsg.includes('rugi') || lowerMsg.includes('pendapatan') || lowerMsg.includes('beban') || lowerMsg.includes('neraca') || lowerMsg.includes('ringkasan') || lowerMsg.includes('keuangan') || lowerMsg.includes('kas') || lowerMsg.includes('bank') || lowerMsg.includes('piutang') || lowerMsg.includes('utang') || data.has_financial_data
+
+      if (isFinancialQuery) {
+        try {
+          const ov = await client.get('/dashboard/overview')
+          const sum = ov.data?.summary
+          if (sum) {
+            summaryCard = {
+              title: '📊 Ringkasan Data Keuangan Anda',
+              metrics: [
+                { label: 'Saldo Kas', value: formatRupiah(sum.saldo_kas), color: '#38BDF8' },
+                { label: 'Saldo Bank', value: formatRupiah(sum.saldo_bank), color: sum.saldo_bank < 0 ? '#F87171' : '#2DD4BF' },
+                { label: `Pendapatan (${sum.tanggal_per ? sum.tanggal_per.slice(0, 7) : 'Bulan Ini'})`, value: formatRupiah(sum.pendapatan_bulan_ini), color: '#10B981' },
+                { label: 'Beban Bulan Ini', value: formatRupiah(sum.beban_bulan_ini), color: '#F87171' },
+                { label: 'Laba / Rugi Bersih', value: formatRupiah(sum.laba_rugi_bulan_ini), color: sum.laba_rugi_bulan_ini >= 0 ? '#10B981' : '#F87171' },
+                { label: 'Total Kas & Bank', value: formatRupiah(sum.total_kas_dan_bank), color: 'var(--color-brand-soft)' }
+              ]
+            }
+          }
+        } catch {
+          // ignore dashboard fetch error
+        }
+      }
+
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: data.answer,
         sources: data.sources,
         has_financial_data: data.has_financial_data,
+        summary: summaryCard,
         time: formatTime(),
       }])
     } catch (err) {
@@ -340,7 +454,7 @@ export default function useChatbot() {
       setLoading(false)
     }
     return true
-  }, [input, loading, location.pathname])
+  }, [input, loading, location.pathname, handleTaxConsultMessage])
 
   // --- Confirm and save a parsed transaction as journal ---
   const confirmTransaction = useCallback(async (transaction) => {
@@ -478,6 +592,7 @@ export default function useChatbot() {
     try {
       const fd = new FormData()
       fd.append('file', file)
+      fd.append('context', 'chat')
       // Jangan set Content-Type manual: browser harus menambahkan boundary.
       const { data: uploaded } = await client.post('/upload/file', fd)
 
@@ -621,6 +736,8 @@ export default function useChatbot() {
 
   const reset = useCallback(() => {
     saveCurrentToHistory()
+    setTaxConsult(null)
+    taxConsultRef.current = null
     activeConversationRef.current = null
     setMessages([])
     setSessionId(null)
@@ -715,6 +832,9 @@ export default function useChatbot() {
     removePendingFile,
     send,
     sendFollowUp,
+    taxConsult,
+    startTaxConsultation,
+    cancelTaxConsultation,
     uploadAndParse,
     parseTransaction,
     confirmTransaction,
