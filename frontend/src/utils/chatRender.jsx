@@ -192,6 +192,8 @@ export function TypingIndicator() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       className="flex gap-3"
+      aria-live="polite"
+      aria-label="Buddy sedang mengetik"
     >
       <div
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden"
@@ -199,10 +201,23 @@ export function TypingIndicator() {
           boxShadow: '0 4px 12px rgba(15,23,42,0.12)',
         }}
       >
-        <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-full w-full object-contain" />
+        <img
+          src="/assets/buddy/buddy-happy.png"
+          alt="Buddy sedang mengetik"
+          className="h-full w-full object-contain animate-buddy-talk"
+        />
       </div>
       <div className="rounded-2xl rounded-bl-md px-4 py-3" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(148, 163, 184, 0.14)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)' }}>
-        <Loader2 size={16} className="animate-spin" style={{ color: 'var(--color-brand-soft)' }} />
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5">
+            <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: 'var(--color-brand-soft)' }} />
+            <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: 'var(--color-brand-soft)' }} />
+            <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: 'var(--color-brand-soft)' }} />
+          </div>
+          <span className="text-[11px] font-medium" style={{ color: 'var(--color-slate-muted)' }}>
+            Buddy sedang mengetik…
+          </span>
+        </div>
       </div>
     </motion.div>
   )

@@ -43,6 +43,10 @@ def _to_results(points) -> list[dict]:
     return [{"id": p.id, "score": p.score, "payload": p.payload} for p in points]
 
 
+def _filter_by_score(results: list[dict]) -> list[dict]:
+    return [result for result in results if result.get("score", 0.0) >= settings.RAG_MIN_SCORE]
+
+
 def _ensure_payload_indexes(client) -> None:
     """Buat payload index supaya query/filter field payload cepat dan valid:
     'category' (filter kategori/mis. tax) dan 'source_file_id' (dipakai
@@ -116,7 +120,7 @@ def search(
         query_filter=_build_filter(category),
         with_payload=True,
     ).points
-    return _to_results(results)
+    return _filter_by_score(_to_results(results))
 
 
 def search_by_text(
@@ -139,7 +143,7 @@ def search_by_text(
         query_filter=_build_filter(category),
         with_payload=True,
     ).points
-    return _to_results(results)
+    return _filter_by_score(_to_results(results))
 
 
 def upsert_documents(

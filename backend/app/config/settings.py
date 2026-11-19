@@ -183,6 +183,7 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 800
     CHUNK_OVERLAP: int = 100
     TOP_K_RETRIEVAL: int = 5
+    RAG_MIN_SCORE: float = 0.35
 
     # ---------- Email Verification (SMTP) ----------
     SMTP_HOST: str = "smtp.gmail.com"

@@ -25,6 +25,7 @@ from app.database.models import Akun, User
 from app.llm.embedding_service import is_embedding_ready
 from app.llm.ollama_service import OllamaError, chat_completion
 from app.middleware.auth import require_active_user
+from app.rag.prompt_builder import INJECTION_ANSWER, is_prompt_injection, normalize_query
 from app.rag.rag_pipeline import ask
 from app.schemas.chatbot_schema import (
     ChatRequest,
@@ -106,7 +107,10 @@ async def ask_chatbot(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_active_user),
 ) -> ChatResponse:
-    tax_params = _extract_tax_params_locally(payload.message)
+    pesan = normalize_query(payload.message)
+    corrected_message = pesan if pesan != payload.message else None
+    injeksi = is_prompt_injection(pesan)
+    tax_params = None if injeksi else _extract_tax_params_locally(pesan)
     if tax_params:
         pph, ppn = _hitung_dari_params(tax_params)
         if pph or ppn:
@@ -115,12 +119,17 @@ async def ask_chatbot(
                 answer=_format_tax_answer(pph, ppn),
                 sources=[],
                 has_financial_data=True,
+                corrected_message=corrected_message,
             )
 
     try:
         # Hitung financial context sekali saja (termasuk upload_id jika ada)
-        financial_context = get_financial_context(
-            db, current_user.id, payload.message, upload_id=payload.upload_id,
+        financial_context = (
+            None
+            if injeksi
+            else get_financial_context(
+                db, current_user.id, pesan, upload_id=payload.upload_id,
+            )
         )
         has_financial_data = financial_context is not None
 
@@ -131,7 +140,7 @@ async def ask_chatbot(
                 db,
                 current_user.id,
                 payload.session_id,
-                payload.message,
+                pesan,
                 financial_context,
                 payload.page,
             ),
@@ -170,6 +179,7 @@ async def ask_chatbot(
             for s in hasil.sources
         ],
         has_financial_data=has_financial_data,
+        corrected_message=corrected_message,
     )
 
 TAX_PARAM_EXTRACTION_PROMPT = """\
@@ -477,15 +487,19 @@ async def tax_chat(
     current_user: User = Depends(require_active_user),
 ) -> TaxChatResponse:
     """Konsultasi pajak bebas: ekstrak data, hitung deterministik, lalu jelaskan."""
+    pesan = normalize_query(payload.message)
+    corrected_message = pesan if pesan != payload.message else None
+    injeksi = is_prompt_injection(pesan)
+
     pph = None
     ppn = None
     tax_context = None
-    local_params = _extract_tax_params_locally(payload.message)
+    local_params = None if injeksi else _extract_tax_params_locally(pesan)
     params = local_params
 
-    if not (params and _as_bool(params.get("butuh_hitung"))):
+    if not injeksi and not (params and _as_bool(params.get("butuh_hitung"))):
         try:
-            params = await asyncio.to_thread(_extract_tax_params, payload.message)
+            params = await asyncio.to_thread(_extract_tax_params, pesan)
         except (OllamaError, ValueError):
             # Ekstraksi gagal bukan alasan menolak pertanyaan; pakai parser lokal.
             params = None
@@ -509,6 +523,7 @@ async def tax_chat(
             answer=_format_tax_answer(pph, ppn),
             calculation=calculation,
             sources=[],
+            corrected_message=corrected_message,
         )
 
     try:
@@ -518,7 +533,7 @@ async def tax_chat(
                 db,
                 current_user.id,
                 payload.session_id,
-                payload.message,
+                pesan,
                 tax_context,
                 payload.page,
                 "## Data Perhitungan Pajak Pengguna:\n\n" if tax_context else None,
@@ -537,6 +552,7 @@ async def tax_chat(
         session_id=hasil.session_id,
         answer=hasil.answer,
         calculation=calculation,
+        corrected_message=corrected_message,
         sources=[
             RetrievedSource(
                 chunk_id=s.qdrant_point_id,
@@ -576,6 +592,20 @@ async def tax_consult(
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
+    pertanyaan = normalize_query(payload.pertanyaan) if payload.pertanyaan else None
+    corrected_message = (
+        pertanyaan if pertanyaan and pertanyaan != payload.pertanyaan else None
+    )
+    if pertanyaan and is_prompt_injection(pertanyaan):
+        return TaxConsultResponse(
+            session_id=payload.session_id or f"local-{uuid4().hex}",
+            answer=INJECTION_ANSWER,
+            pph=pph.__dict__,
+            ppn=ppn.__dict__ if ppn else None,
+            sources=[],
+            corrected_message=corrected_message,
+        )
+
     tax_context = _format_tax_context(
         pph,
         ppn,
@@ -583,13 +613,14 @@ async def tax_consult(
         payload.omzet_kumulatif_sebelum_bulan_ini,
     )
 
-    if not payload.pertanyaan:
+    if not pertanyaan:
         return TaxConsultResponse(
             session_id=payload.session_id or f"local-{uuid4().hex}",
             answer=_format_tax_answer(pph, ppn),
             pph=pph.__dict__,
             ppn=ppn.__dict__ if ppn else None,
             sources=[],
+            corrected_message=corrected_message,
         )
 
     try:
@@ -599,7 +630,7 @@ async def tax_consult(
                 db,
                 current_user.id,
                 payload.session_id,
-                payload.pertanyaan,
+                pertanyaan,
                 tax_context,
                 payload.page,
                 "## Data Perhitungan Pajak Pengguna:\n\n",
@@ -613,6 +644,7 @@ async def tax_consult(
             pph=pph.__dict__,
             ppn=ppn.__dict__ if ppn else None,
             sources=[],
+            corrected_message=corrected_message,
         )
 
     answer = (
@@ -626,6 +658,7 @@ async def tax_consult(
         answer=answer,
         pph=pph.__dict__,
         ppn=ppn.__dict__ if ppn else None,
+        corrected_message=corrected_message,
         sources=[
             RetrievedSource(
                 chunk_id=s.qdrant_point_id,

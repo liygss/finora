@@ -66,6 +66,12 @@ _INTENT_PATTERNS: dict[str, list[str]] = {
         "file yang diupload", "data yang diupload", "file upload",
         "csv", "xlsx", "data transaksi",
     ],
+    "anomali": [
+        "data anomali", "anomali data", "anomali transaksi", "transaksi anomali",
+        "yang anomali", "ada anomali", "transaksi tidak wajar", "nominal tidak wajar",
+        "transaksi kembar", "duplikat transaksi", "data duplikat",
+        "nominal mencolok", "data mencurigakan",
+    ],
 }
 
 
@@ -292,6 +298,34 @@ def _get_upload_summary_context(db: Session, user_id: str) -> str:
     return "\n".join(lines)
 
 
+def _get_anomali_context(db: Session, user_id: str, upload_id: str | None = None) -> str:
+    from app.accounting.anomaly_detection import (
+        detect_from_journals,
+        detect_from_staged_file,
+        render_anomaly_context,
+    )
+
+    if upload_id:
+        upload = (
+            db.query(UploadedFile)
+            .filter(UploadedFile.id == upload_id, UploadedFile.uploaded_by_id == user_id)
+            .first()
+        )
+        if upload:
+            temuan = detect_from_journals(db, user_id, upload_id=upload_id)
+            if temuan:
+                return render_anomaly_context(
+                    temuan, f"file {upload.original_filename} (jurnal yang sudah tersimpan)"
+                )
+            temuan = detect_from_staged_file(upload)
+            return render_anomaly_context(
+                temuan, f"file {upload.original_filename} (belum di-commit ke jurnal)"
+            )
+
+    temuan = detect_from_journals(db, user_id)
+    return render_anomaly_context(temuan, "jurnal tersimpan milik pengguna")
+
+
 def get_upload_analysis_context(db: Session, user_id: str, upload_id: str) -> str | None:
     """
     Analisis mendalam dari file upload tertentu.
@@ -452,6 +486,8 @@ def get_financial_context(
                 context_parts.append(_get_buku_besar_context(db, user_id, question))
             elif intent == "upload_summary":
                 context_parts.append(_get_upload_summary_context(db, user_id))
+            elif intent == "anomali":
+                context_parts.append(_get_anomali_context(db, user_id, upload_id))
         except Exception as exc:
             logger.warning("Gagal mengambil data untuk intent '%s': %s", intent, exc)
 

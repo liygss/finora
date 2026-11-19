@@ -26,6 +26,7 @@ class ChatResponse(BaseModel):
     answer: str
     sources: list[RetrievedSource] = []
     has_financial_data: bool = False  # True jika jawaban menggunakan data keuangan user
+    corrected_message: str | None = None
 
 class TaxConsultRequest(BaseModel):
     session_id: str | None = None
@@ -45,6 +46,7 @@ class TaxConsultResponse(BaseModel):
     pph: dict
     ppn: dict | None = None
     sources: list[RetrievedSource] = []
+    corrected_message: str | None = None
 
 class TaxChatRequest(BaseModel):
     session_id: str | None = None
@@ -56,6 +58,7 @@ class TaxChatResponse(BaseModel):
     answer: str
     calculation: dict | None = None
     sources: list[RetrievedSource] = []
+    corrected_message: str | None = None
 
 class ChatMessageResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

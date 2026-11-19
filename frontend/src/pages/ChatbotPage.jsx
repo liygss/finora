@@ -50,7 +50,11 @@ export default function ChatbotPage() {
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative shrink-0">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden" style={{ boxShadow: '0 4px 16px var(--color-brand-glow)' }}>
-                <img src="/assets/buddy/buddy-happy.png" alt="Buddy" className="h-full w-full object-contain" />
+                <img
+                  src="/assets/buddy/buddy-happy.png"
+                  alt="Buddy"
+                  className={`h-full w-full object-contain ${loading ? 'animate-buddy-talk' : ''}`}
+                />
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2" style={{ background: '#059669', borderColor: 'var(--color-surface-2)' }}>
                 <span className="absolute inset-0 rounded-full animate-ping" style={{ background: '#059669', opacity: 0.5 }} />
@@ -64,9 +68,25 @@ export default function ChatbotPage() {
                   AI
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] font-medium" style={{ color: 'var(--color-accent-emerald)' }}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#059669' }} />
-                Online · Siap membantu
+              <div
+                className="flex items-center gap-1.5 text-[10px] font-medium"
+                style={{ color: loading ? 'var(--color-brand-soft)' : 'var(--color-accent-emerald)' }}
+              >
+                {loading ? (
+                  <>
+                    <span className="flex items-center gap-0.5">
+                      <span className="typing-dot h-1 w-1 rounded-full" style={{ background: 'var(--color-brand-soft)' }} />
+                      <span className="typing-dot h-1 w-1 rounded-full" style={{ background: 'var(--color-brand-soft)' }} />
+                      <span className="typing-dot h-1 w-1 rounded-full" style={{ background: 'var(--color-brand-soft)' }} />
+                    </span>
+                    Buddy sedang mengetik…
+                  </>
+                ) : (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#059669' }} />
+                    Online · Siap membantu
+                  </>
+                )}
               </div>
             </div>
           </div>

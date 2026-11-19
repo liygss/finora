@@ -402,9 +402,16 @@ export default function useChatbot() {
       sessionRef.current = data.session_id
       setSessionId(data.session_id)
 
+      const correctedMessage = data.corrected_message
+      if (correctedMessage && correctedMessage !== message) {
+        setMessages(prev => prev.map(m =>
+          m === userMsg ? { ...m, content: correctedMessage } : m
+        ))
+      }
+
       // Cek apakah pertanyaan atau jawaban berkaitan dengan keuangan / ringkasan untuk memicu preview data otomatis
       let summaryCard = null
-      const lowerMsg = message.toLowerCase()
+      const lowerMsg = (correctedMessage || message).toLowerCase()
       const isFinancialQuery = lowerMsg.includes('saldo') || lowerMsg.includes('laba') || lowerMsg.includes('rugi') || lowerMsg.includes('pendapatan') || lowerMsg.includes('beban') || lowerMsg.includes('neraca') || lowerMsg.includes('ringkasan') || lowerMsg.includes('keuangan') || lowerMsg.includes('kas') || lowerMsg.includes('bank') || lowerMsg.includes('piutang') || lowerMsg.includes('utang') || data.has_financial_data
 
       if (isFinancialQuery) {
